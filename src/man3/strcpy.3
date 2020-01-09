@@ -1,0 +1,75 @@
+.\" Copyright (C) 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 18:06:49 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Fri Aug 25 23:17:51 1995 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Wed Dec 18 00:47:18 1996 by Andries Brouwer (aeb@cwi.nl)
+.TH STRCPY 3  "11 апреля 1993" "GNU" "Руководство программиста"
+.SH НАЗВАНИЕ
+strcpy, strncpy \- копирование строки
+.SH СИНТАКСИС
+.nf
+.B #include <string.h>
+.sp
+.BI "char *strcpy(char *" dest ", const char *" src );
+.sp
+.BI "char *strncpy(char *" dest ", const char *" src ", size_t " n );
+.fi
+.SH ОПИСАНИЕ
+Функция \fBstrcpy()\fP копирует строку, указанную как \fIsrc\fP
+(включая завершающий символ `\\0'), в массив, указанный как \fIdest\fP.
+Строки не могут перекрываться, и в целевой строке \fIdest\fP должно
+быть достаточно места для получения копии.
+.PP
+Функция \fBstrncpy\fP работает подобным образом, но
+копируются только первые \fIn\fP байт строки \fIsrc\fP.  Таким образом, если
+нулевой байт отсутствует в первых \fIn\fP байтах \fIsrc\fP, то
+результирующая строка не будет завершена символом `\\0'.
+.PP
+В случае, если длина
+.I src
+меньше, чем
+.IR n ,
+то остаток
+.I dest
+будет заполнен нулями.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функции \fBstrcpy()\fP и \fBstrncpy()\fP возвращают указатель на
+целевую строку \fIdest\fP.
+.SH ОШИБКИ РЕАЛИЗАЦИИ
+Если целевая строка \fBstrcpy\fP недостаточно велика (такое случается,
+если программист идиот/болван и не проверяет размер перед
+копированием), то может случится ужасное. Переполнение строк
+фиксированной длины является любимым методом крэкеров.
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+SVID 3, POSIX, BSD 4.3, ISO 9899
+.SH "СМОТРИ ТАКЖЕ"
+.BR bcopy "(3), " memccpy "(3), " memcpy "(3), " memmove (3)
+.SH ПЕРЕВОД
+.nf
+Перевод с английского (C) 2000 Дмитрий Морожников 
+    (dm@simplex.irkutsk.ru, 2:5070/141.3)
+.fi

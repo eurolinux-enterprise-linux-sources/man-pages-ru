@@ -1,0 +1,118 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Sat Jul 24 00:39:47 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Fri Jan 31 16:49:53 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.TH RMDIR 2 "$Date: 2000/06/24 13:41:19 $" "Linux 0.99.7" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+rmdir \- удаляет каталог
+.SH ИСПОЛЬЗОВАНИЕ
+.B #include <unistd.h>
+.sp
+.BI "int rmdir(const char *" pathname );
+.SH ОПИСАНИЕ
+.B rmdir
+удаляет каталог, который должен быть пустым.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP 0.8i
+.TP
+.B EPERM
+Файловая система, содержащая
+.IR pathname ,
+не поддерживает удаление каталогов.
+.TP
+.B EFAULT
+.I pathname
+указывает за пределы доступного адресного пространства.
+.TP
+.B EACCES
+Доступ на запись в каталоге, содержащем
+.I pathname,
+не разрешен для текущего эффективного идентификатора пользователя, или 
+же один из каталогов в
+.IR pathname
+не разрешает поиск (выполнение).
+.TP
+.B EPERM
+В правах доступа к каталогу, содержащему
+.I pathname,
+включен бит "липкости" 
+.RB ( S_ISVTX ),
+а эффективный идентификатор пользователя не совпадает ни с владельцем
+удаляемого файла, ни с владельцем каталога, который его содержит, или
+же 
+.I pathname
+является каталогом.
+.TP
+.B ENAMETOOLONG
+.I pathname
+слишком длинно.
+.TP
+.B ENOENT
+Одна из частей пути
+.I pathname
+не существует или является висячей символической ссылкой.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR pathname ,
+в действительности таковым не является.
+.TP
+.B ENOTEMPTY
+.I pathname
+содержит какие-либо еще, кроме
+.BR . " или " .. ", записи ."
+.TP
+.B EBUSY
+.I pathname
+является текущим рабочим или корневым каталогом какого-либо процесса.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B ELOOP
+.IR pathname
+является зацикленной символической ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, BSD 4.3
+.SH ОШИБКИ
+Погрешности в протоколе, на котором работает NFS, могут привести к
+неожиданному исчезновению каталогов, которые еще используются.
+.SH "СМОТРИ ТАКЖЕ"
+.BR rename "(2), " mkdir "(2), " chdir "(2), " unlink (2),
+.BR rmdir "(1), " rm (1)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

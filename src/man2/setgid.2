@@ -1,0 +1,89 @@
+.\" -*- nroff -*-
+.\" Copyright (C), 1994, Graeme W. Wilford. (Wilf.)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Fri Jul 29th 12:56:44 BST 1994  Wilf. <G.Wilford@ee.surrey.ac.uk> 
+.\" Modified Fri Jan 31 17:06:56 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.TH SETGID 2 "29 July 1994" "Linux 1.1.36" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+setgid \- установить группу процесса
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int setgid(gid_t " gid )
+.SH ОПИСАНИЕ
+.B setgid
+устанавливает фактический идентификатор группы текущего процесса.
+Если функция вызвана суперпользователем, то устанавливаются также
+действительный и сохраненный идентификаторы группы.
+
+Под Linux
+.B setgid
+реализован так же, как в стандарте POSIX с возможностью
+_POSIX_SAVED_IDS.  Это позволяет setgid-программам (не от имени
+суперпользователя) сбросить все свои групповые привилегии, сделать
+какую-нибудь непривилегированную работу и безопасно вернуть исходный
+фактический идентификатор группы.
+
+Если пользователь является root'ом или программа установлена как
+setgid root, то нужна особая осторожность.  Функция
+.B setgid
+проверяет фактический идентификатор группы вызвавшего процесса и, если 
+это суперпользователь, то все идентификаторы группы процесса
+устанавливаются в значение 
+.IR gid . 
+После этого программе никак не вернуть обратно привилегии
+суперпользователя.
+
+Таким образом, setgid-root программа, желающая временно сбросить
+привилегии суперпользователя, попасть в не-root группу, а потом
+восстановить привилегии суперпользователя, не может использовать
+.BR setgid .
+Желаемого результата можно добиться с помощью системного вызова 
+.BR setegid ,
+которого нет в стандарте POSIX, но есть в BSD.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP
+.B EPERM
+Пользователь не является суперпользователем, а 
+.I gid
+на совпадает с фактическим или сохраненным идентификаторами текущего
+процесса.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID.
+.SH "СМОТРИ ТАКЖЕ"
+.BR getgid (2),
+.BR setregid (2),
+.BR setegid (2)
+.SH ПЕРЕВОД
+Перевод Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000
+
+http://alexm.here.ru/manpages-ru/

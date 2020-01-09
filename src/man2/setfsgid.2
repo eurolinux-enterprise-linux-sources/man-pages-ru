@@ -1,0 +1,84 @@
+.\" -*- nroff -*-
+.\" Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Created   Sun Aug  6 1995      Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\" Modified  Sat Jul  1 2000      aeb
+.\"
+.TH SETFSGID 2 "6 August 1995" "Linux 1.3.15" "Руководство программиста Linux"
+.SH ИМЯ
+setfsgid \- установить идентификатор группы, использующейся при доступе к файловой системе
+.SH КРАТКАЯ СВОДКА
+.B #include <unistd.h>
+/* glibc использует <sys/fsuid.h> */
+.sp
+.BI "int setfsgid(gid_t " fsgid );
+.SH ОПИСАНИЕ
+.B setfsgid
+устанавливает идентификатор группы, который используется ядром
+Linux для доступа к файловой системе.  Обычно значение
+.I fsgid
+будет совпадать с фактическим идентификатором группы.  В самом
+деле, когда изменяется фактический идентификатор группы,
+.I fsgid
+устанавливается в то же самое значение.
+
+Явный вызов функции .B setfsgid обычно используется только программами
+типа NFS-сервера, которые хотят изменить идентификатор группы,
+используемый для доступа к файлам, без изменения действительного и
+фактического идентификаторов группы.  Установка обычных
+идентификаторов группы для программы типа NFS-сервера -- это дыра в
+безопасности, приводящая к возможности получения нежелательных
+сигналов от других групп.
+
+.B setfsgid
+выполняется успешно, только если она была вызвана суперпользователем
+или если
+.I fsgid
+совпадает с действительным, фактическим или сохраненным
+идентификатором группы, или же с текущим значением
+.IR fsgid .
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении возвращается предыдущее значение
+.IR fsgid .
+При ошибке возвращается текущее значение
+.IR fsgid .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.B setfsgid
+является специфичной для Linux и не должна использоваться в
+переносимых программах.
+.SH ОШИБКИ В РЕАЛИЗАЦИИ
+Вызвавшему процессу не возвращается никаких сообщений об ошибке.  По
+меньшей мере, должно возвращаться хотя бы значение
+.BR EPERM .
+.SH ЗАМЕЧАНИЕ
+Когда glibc определяет, что аргумент не является правильным
+идентификатором группы, то возвращает \-1 и устанавливает
+.I errno
+в значение EINVAL, не пытаясь совершить системный вызов.
+.SH "СМОТРИ ТАКЖЕ"
+.BR setfsgid (2)
+.SH ПЕРЕВОД
+Перевод Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000
+
+http://alexm.here.ru/manpages-ru/

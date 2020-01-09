@@ -1,0 +1,107 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Mon Mar 29 22:31:13 1993, David Metcalfe
+.\" Modified Sun Jun  6 23:27:50 1993, David Metcalfe
+.\" Modified Sat Jul 24 21:45:37 1993, Rik Faith (faith@cs.unc.edu)
+.\" Modified Sat Dec 16 15:02:59 2000, Joseph S. Myers
+.\"
+.\" Переведен на русский Fri 22 Sep 2000 11:26:59, Alexey V. Medvedev 2:5022/78.6
+.TH ABS 3  "17 декабря 2000" "GNU" "Руководство программиста Linux"
+.SH ИМЯ
+abs, labs, llabs, imaxabs \- вычисляет абсолютное значение (модуль) целого числа.
+.SH СИНТАКСИС
+.nf
+.B #include <stdlib.h>
+.sp
+.BI "int abs(int " j );
+.br
+.BI "long int labs(long int " j );
+.br
+.BI "long long int llabs(long long int " j );
+.sp
+.B #include <inttypes.h>
+.sp
+.BI "intmax_t imaxabs(intmax_t " j );
+.fi
+.SH ОПИСАНИЕ
+Функция \fBabs()\fP вычисляет абсолютное значение (модуль)
+целочисленного аргумента \fIj\fP.  Функции
+.BR labs() ,
+.BR llabs() ,
+и
+.BR imaxabs ()
+вычисляют абсолютное значение аргумента
+.IR j ,
+который имеет соответствующий целочисленный тип.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Возвращает модуль целочисленного аргумента. 
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVID 3, POSIX.1, BSD 4.3, ISO/IEC 9899.  POSIX.1 (редакция 1996)
+требует наличия только функции
+.BR abs() .
+ISO/IEC 9899:1990 (C89) включает в себя только функции
+.B abs()
+и
+.BR labs() ;
+функции
+.B llabs()
+и
+.B imaxabs()
+были добавлены в C99.
+.SH ЗАМЕЧАНИЯ
+Результат вычисления абсолютного значения наибольшего по модулю отрицательного целого
+числа не определен.
+.PP
+Функция
+.B llabs() включена в glibc начиная с версии 2.0, но не присутствует в
+libc5 или libc4.  Функция
+.B imaxabs()
+включена в glibc начиная с версии 2.1.1.
+.PP
+Для того, чтобы появилось объявление функции
+.BR llabs() ,
+может потребоваться объявить
+.B _ISOC99_SOURCE
+или
+.B _ISOC9X_SOURCE
+(зависит от версии glibc) до включения стандартных заголовочных
+файлов.
+.PP
+GCC обрабатывает
+.B abs()
+и
+.B labs()
+как встроенные функции.  GCC 3.0 точно так же обрабатывает еще и
+.B llabs()
+и
+.BR imaxabs() .
+.SH "СМОТРИ ТАКЖЕ"
+.BR ceil "(3), "
+.BR floor "(3), "
+.BR fabs "(3), "
+.BR labs "(3), "
+.BR rint (3)

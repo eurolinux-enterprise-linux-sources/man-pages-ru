@@ -1,0 +1,65 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 19:08:17 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Переведен на русский Fri 22 Sep 2000 11:26:59, Alexey V. Medvedev 2:5022/78.6
+.TH J0 3  "June 26, 1993" "" "Linux Programmer's Manual"
+.SH ИМЯ
+j0, j1, jn, y0, y1, yn \- вычисление функций Бесселя
+.SH СИНТАКСИС
+.nf
+.B #include <math.h>
+.sp
+.BI "double j0(double " x );
+.sp
+.BI "double j1(double " x );
+.sp
+.BI "double jn(int " n ", double " x );
+.sp
+.BI "double y0(double " x );
+.sp
+.BI "double y1(double " x );
+.sp
+.BI "double yn(int " n ", double " x );
+.fi
+.SH ОПИСАНИЕ
+Функции \fBj0()\fP и \fBj1()\fP возвращают для аргумента \fIx\fP значение 
+функций Бесселя первого рода порядков 0 и 1 соответственно.  
+Функция \fBjn()\fP возвращает для аргумента  \fIx\fP функцию Бесселя первого 
+рода порядка \fIn\fP.
+.PP
+Функции \fBy0()\fP и \fBy1()\fP возвращают для аргумента \fIx\fP функцию Бесселя
+второго рода порядков 0 и 1 соответственно. Функция \fByn()\fP возвращает
+функцию Бесселя второго рода порядка \fIn\fP.
+.PP
+Для функций \fBy0()\fP, \fBy1()\fP и \fByn()\fP, значение аргумента \fIx\fP
+должно быть положительным.  Для отрицательных \fIx\fP эти функции возвращают
+\-HUGE_VAL.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVID 3, BSD 4.3
+.SH "ОШИБКИ РЕАЛИЗАЦИИ"
+Значения, возвращаемые \fBj0()\fP, \fBj1()\fP и \fBjn()\fP, имеют погрешность до  
+2e\-16 для значений \fIx\fP от \-8 до 8.

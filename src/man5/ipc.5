@@ -1,0 +1,380 @@
+.\" Copyright 1993 Giorgio Ciucci (giorgio@crcc.it)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 08.03.2004
+.\" Перевод с английского выполнил Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\" Вычитано и скорректировано by alexm@hsys.msk.ru для проекта
+.\" http://alexm.here.ru/manpages-ru/ 
+.TH IPC 5 1993-11-01 "Linux 0.99.13" "Руководство программиста Linux" 
+.SH ИМЯ
+ipc \- механизмы межпроцессного взаимодействия System V
+.SH ОБЗОР
+.nf
+.B
+# include <sys/types.h>
+.B
+# include <sys/ipc.h>
+.B
+# include <sys/msg.h>
+.B
+# include <sys/sem.h>
+.B
+# include <sys/shm.h>
+.SH ОПИСАНИЕ
+Данная страница руководства описывает реализацию механизмов межпроцессного
+взаимодействия System V для Linux:
+очереди сообщений, списки семафоров и сегменты разделяемой памяти.
+Далее, слово
+.B ресурс
+означает сущность, созданную в результате работы одного из этих
+механизмов.
+.SS Права доступа к ресурсу
+Для каждого ресурса система использует обобщенную структуру типа
+.BR "struct ipc_perm"
+для хранения информации, которая необходима для определения прав
+на выполнение какой-либо операции ipc.
+Структура
+.B ipc_perm
+определяется в заголовочном файле
+.I <sys/ipc.h>
+и содержит следующие поля:
+.sp
+.B
+        ushort cuid;    
+/* идентификатор пользователя, создавшего ресурс */
+.br
+.B
+        ushort cgid;    
+/* идентификатор группы, создавшей ресурс */
+.br
+.B
+        ushort uid;
+/* идентификатор владельца */
+.br
+.B
+        ushort gid;
+/* идентификатор группы */
+.br
+.B
+        ushort mode;
+/* права на чтение/запись */
+.PP
+В поле
+.B mode
+структуры
+.B ipc_perm
+рабочими являются младшие 9 битов и представляют собой права доступа к
+ресурсу для процесса, сделавшего ipc вызов.
+Права интерпретируются так:
+.sp
+.nf
+        0400    Чтение для пользователя
+        0200    Запись для пользователя
+.sp .5
+        0040    Чтение для группы
+        0020    Запись для группы
+.sp .5
+        0004    Чтение для других
+        0002    Запись для других
+.fi
+.PP
+Биты 0100, 0010 и 0001 (биты выполнения) системой не используются.
+Кроме того
+"запись"
+для списка семафоров фактически означает
+"изменение".
+.PP
+В том же заголовочном файле также определяются следующие символьные
+константы:
+.TP 14
+.B IPC_CREAT
+Создать запись, если ключ не существует.
+.TP
+.B IPC_EXCL
+Ошибка, если ключ существует.
+.TP
+.B IPC_NOWAIT
+Ошибка, если запрос должен ждать.
+.TP
+.B IPC_PRIVATE
+Личный ключ.
+.TP
+.B IPC_RMID
+Удалить ресурс.
+.TP
+.B IPC_SET
+Установить опции ресурса.
+.TP
+.B IPC_STAT
+Получить опции ресурса.
+.PP
+Заметим, что
+.B IPC_PRIVATE
+имеет тип
+.BR key_t ,
+в то время как все остальные символьные константы являются полями-флагами,
+для которых может выполняться операция логического сложения в переменную типа
+.BR int.
+.SS Очереди Сообщений
+Очередь сообщений идентифицируется уникальным положительным целым числом
+.RI "(" msqid ),
+связанным со структурой данных типа
+.BR "struct msqid_ds" ,
+которая определяется в заголовочном файле
+.IR <sys/msg.h> ,
+и которая содержит следующие поля:
+.sp
+.B
+        struct ipc_perm msg_perm;
+.br
+.B
+        ushort msg_qnum;        
+/* количество сообщений в очереди */
+.br
+.B
+        ushort msg_qbytes;      
+/* максимальное количество байт в очереди */
+.br
+.B
+        ushort msg_lspid;       
+/* pid, идентификатор процесса, выполнившего последний вызов msgsnd */
+.br
+.B
+        ushort msg_lrpid;       
+/* pid, идентификатор процесса, выполнившего последний вызов msgrcv */
+.br
+.B
+        time_t msg_stime;       
+/* время последнего вызова msgsnd */
+.br
+.B
+        time_t msg_rtime;       
+/* время последнего вызова msgrcv */
+.br
+.B
+        time_t msg_ctime;       
+/* время последнего изменения */
+.TP 11
+.B msg_perm
+Структура
+.B ipc_perm
+задает права доступа к очереди сообщения.
+.TP
+.B msg_qnum
+Количество сообщений, которые в данный момент находятся в очереди.
+.TP
+.B msg_qbytes
+Максимальное количество байтов текста сообщения, которое допускается
+в очереди.
+.TP
+.B msg_lspid
+Идентификатор процесса, который выполнил последний
+системный вызов
+.BR msgsnd .
+.TP
+.B msg_lrpid
+Идентификатор процесса, который выполнил последний
+системный вызов
+.BR msgrcv .
+.TP
+.B msg_stime
+Время, когда был выполнен последний системный вызов
+.BR msgsnd .
+.TP
+.B msg_rtime
+Время, когда был выполнен последний системный вызов
+.BR msgcv .
+.TP
+.B msg_ctime
+Время, когда был выполнен последний системный вызов,
+который изменил в структуре поле
+.BR msqid_ds .
+.SS Списки семафоров
+Список семафоров идентифицируется уникальным положительным целым
+числом
+.RI "(" semid ),
+связанным со структурой данных типа
+.BR "struct semid_ds" ,
+которая определяется в заголовочном файле
+.I <sys/sem.h>
+и которая содержит следующие поля:
+.sp
+.B
+        struct ipc_perm sem_perm;
+.br
+.B
+        time_t sem_otime;       
+/* время последней операции */
+.br
+.B
+        time_t sem_ctime;       
+/* время последнего изменения */
+.br
+.B
+        ushort sem_nsems;       
+/* количество семафоров в списке */
+.TP 11
+.B sem_perm
+Структура
+.BR ipc_perm ,
+которая задает права доступа к списку семафоров.
+.TP
+.B sem_otime
+Время последнего системного вызова
+.BR semop .
+.TP
+.B sem_ctime
+Время последнего системного вызова
+.BR semctl ,
+который изменяет значение какого-либо из полей структуры или один
+из семафоров в списке.
+.TP
+.B sem_nsems
+Количество семафоров в списке.
+Семафоры в списке нумеруются положительными целыми числами от нуля до
+.BR sem_nsems\-1 .
+.PP
+Семафор -- это структура данных типа
+.BR "struct sem" ,
+которая содержит следующие поля:
+.sp
+.B
+        ushort semval;  
+/* значение семафора */
+.br
+.B
+        short sempid;   
+/* pid последней операции */
+.br
+.B
+        ushort semncnt; 
+/* Количество ожидающих увеличения semval */
+.br
+.B
+        ushort semzcnt; 
+/* Количество ожидающих установки semval в нуль */
+.TP 11
+.B semval
+Значение семафора: неотрицательное целое число.
+.TP
+.B sempid
+Идентификатор последнего процесса, который работал с данным семафором.
+.TP
+.B semncnt
+Количество процессов, приостановленных в ожидании увеличения
+.BR semval .
+.TP
+.B semznt
+Количество процессов, приостановленных в ожидании установки значения
+.B semval
+в нуль.
+.SS Сегменты Разделяемой Памяти
+Сегмент разделяемой памяти идентифицируется уникальным положительным
+целым числом
+.RI "(" shmid ),
+которое связано со структурой данных типа
+.BR "struct shmid_ds" ,
+которая определяется в заголовочном файле
+.IR <sys/shm.h>
+и которая содержит следующие поля:
+.sp
+.B
+        struct ipc_perm shm_perm;
+.br
+.B
+        int shm_segsz;  
+/* размер сегмента */
+.br
+.B
+        ushort shm_cpid;        
+/* pid создателя */
+.br
+.B
+        ushort shm_lpid;        
+/* pid последней операции */
+.br
+.B
+        short shm_nattch;       
+/* Количество подключенных в данный момент */
+.br
+.B
+        time_t shm_atime;       
+/* время последнего подключения */
+.br
+.B
+        time_t shm_dtime;       
+/* время последнего отключения */
+.br
+.B
+        time_t shm_ctime;       
+/* время последнего изменения */
+.TP 11
+.B shm_perm
+Структура
+.BR ipc_perm ,
+которая задает права доступа к разделяемому сегменту памяти.
+.TP
+.B shm_segsz
+Размер разделяемого сегмента памяти в байтах.
+.TP
+.B shm_cpid
+Идентификатор процесса, который создал разделяемый сегмент памяти.
+.TP
+.B shm_lpid
+Идентификатор последнего процесса, который делал системные вызовы
+.B shmat
+или
+.BR shmdt .
+.TP
+.B shm_nattch
+Количество процессов, которые в данный момент подключены к данному
+разделяемому сегменту памяти.
+.TP
+.B shm_atime
+Время последнего системного вызова
+.BR shmat .
+.TP
+.B shm_dtime
+Время последнего системного вызова
+.BR shmdt .
+.TP
+.B shm_ctime
+Время последнего системного вызова
+.BR shmctl ,
+который изменил
+.BR shmid_ds .
+.SH СМОТРИ ТАКЖЕ
+.BR ftok (3),
+.BR msgctl (2),
+.BR msgget (2),
+.BR msgrcv (2),
+.BR msgsnd (2),
+.BR semctl (2),
+.BR semget (2),
+.BR semop (2),
+.BR shmat (2),
+.BR shmctl (2),
+.BR shmget (2),
+.BR shmdt (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

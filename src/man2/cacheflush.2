@@ -1,0 +1,87 @@
+.\" Written by Ralf Baechle (ralf@waldorf-gmbh.de),
+.\" Copyright (c) 1994, 1995 Waldorf GMBH
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH CACHEFLUSH 2 1995-06-27 "Linux 2.0.32" "Руководство программиста Linux"
+.SH ИМЯ
+cacheflush \- выталкивает содержимое кэша инструкций и/или данных
+.SH ОБЗОР
+.nf
+.B #include <asm/cachectl.h>
+.sp
+.BI "int cacheflush(char *" addr ", int "nbytes ", int "cache );
+.fi
+.SH ОПИСАНИЕ
+.B cacheflush
+выталкивает (видимо имеется в виду запись кэша из памяти на диск, хотя
+на данной страничке явно об этом нигде не говориться -- прим.
+пер.) содержимое указанного кэша(ей) для пользовательских
+адресов в диапазоне от
+.I addr
+до (addr+nbytes-1). Параметр 
+.I cache
+может принимать одно из значений:
+.TP
+.B ICACHE
+Выталкивает кэш инструкций.
+.TP
+.B DCACHE
+Выталкивает кэш данных.
+.TP
+.B BCACHE
+Тоже что и
+.B (ICACHE|DCACHE).
+.PP
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.B cacheflush
+возвращает 0 в случае успеха и \-1 при ошибке. Если произошла ошибка,
+значение
+.I errno
+будет установлено соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+параметр 
+.I cache
+не является одним из ICACHE, DCACHE или BCACHE.
+.TP
+.B EFAULT
+Некоторые или все адреса диапазона от
+.I addr
+до (addr+nbytes-1) недоступны.
+.PP
+.SH ОШИБКИ
+Текущая реализация игнорирует параметры
+.I addr
+и
+.I nbytes .
+Таким образом, кэш всегда выталкивается полностью.
+.SH ЗАМЕЧАНИЕ
+Этот системный вызов доступен только на системах, основанных на MIPS
+(на MIPS платформе). Он не должен использоватьсяв программах,
+которые задумываются как переносимые.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

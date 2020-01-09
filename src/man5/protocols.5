@@ -1,0 +1,85 @@
+.\" Copyright (c) 1995 Martin Schulze <joey@infodrom.north.de>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Wed Oct 18 20:23:54 MET 1995  Martin Schulze  <joey@infodrom.north.de>
+.\"	* first released
+.\"
+.\" Дата последней коррекции перевода 13.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH PROTOCOLS 5 1995-10-18 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+protocols \- файл определений протоколов
+.SH ОПИСАНИЕ
+Данный файл является простым ASCII файлом, описывающим различные
+DARPA internet протоколы, которые доступны через подсистему TCP/IP.
+Вместо того, чтобы использовать номера протоколов в заголовочных
+(include) файлах ARPA или, ещё хуже, строить догадки относительно
+номеров протоколов, нужно консультироваться с данным файлом.
+Номера протоколов присутствуют во всех IP заголовках.
+
+Не изменяйте этот файл, так как изменения могут привести к
+некорректному формированию IP пакетов. Номера протоколов и их имена
+определяются Центром Сетевой Информации (DDN Network Information
+Center).
+
+Каждая строка файла имеет следующий формат:
+
+.RS
+.I protocol number aliases ...
+.RE
+
+где поля отделяются друг от друга пробелами или табуляциями.
+Пустые строки игнорируются. Если строка содержит символ решётки
+(#), то он сам и часть строки, которая следует за этим символом
+игнорируется.
+
+Вот описания вышеуказанных полей:
+
+.TP
+.I protocol
+имя протокола. Например, ip, tcp или udp.
+.TP
+.I number
+официальный номер этого протокола, который будет помещаться в
+IP заголовок.
+.TP
+.I aliases
+необязательные псевдонимы этого протокола.
+.LP
+
+Данный файл может распространяться через сеть, с помощью таких
+служб имен как Yellow Pages/NIS или BIND/Hesiod.
+
+.SH ФАЙЛЫ
+.TP
+.I /etc/protocols
+Файл определений протоколов.
+.SH "СМОТРИ ТАКЖЕ"
+.BR getprotoent (3)
+
+Руководство по службе Yellow Pages
+
+Руководство по службе BIND/Hesiod
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

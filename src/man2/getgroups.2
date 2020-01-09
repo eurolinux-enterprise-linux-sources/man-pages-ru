@@ -1,0 +1,142 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Thu Oct 31 12:04:29 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 03.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETGROUPS 2 1997-12-10 "Linux 2.0.32" "Руководство программста Linux"
+.SH ИМЯ
+getgroups, setgroups \- получить/установить список дополнительных
+идентификаторов (ID) групп
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int getgroups(int " size ", gid_t " list []);
+.sp
+.B #include <grp.h>
+.sp
+.BI "int setgroups(size_t " size ", const gid_t *" list );
+.SH ОПИСАНИЕ
+.TP
+.B getgroups
+Увеличивает список
+.IR list
+идентификаторов дополнительных групп (членами которых является текущий
+пользователь -- прим. пер.) до размера
+.I size 
+и возвращает этот список.
+Невозможно узнать будет ли включен в этот список эффективный идентификатор
+группы, вызывающего процесса. (Таким образом, приложение должно
+также вызвать
+.BR getegid (2)
+и добавить или удалить полученное значение.)
+Если размер
+.I size
+равен нулю, список
+.I list
+не изменяется, просто возвращается общее количество идентификаторов дополнительных
+групп для текущего процесса.
+.TP
+.B setgroups
+Устанавливает идентификаторы дополнительных групп для текущего процесса. Только
+суперпользователь может использовать эту функцию.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.TP
+В случае успеха
+.B getgroups
+возвращает количество идентификаторов дополнительных групп. При ошибке
+возвращается \-1 и значение
+.I errno
+устанавливается соответствующим образом.
+.TP
+В случае успеха
+.B setgroups
+возвращает ноль. При ошибке 
+возвращается \-1 и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EFAULT
+Список
+.I list
+имеет неправильный адрес.
+.TP
+.B EPERM
+Пользователь вызывавший
+.BR setgroups ,
+не является суперпользователем.
+.TP
+.B EINVAL
+Для
+.BR setgroups ,
+.I size
+больше, чем
+.B NGROUPS
+(32 для Linux 2.0.32).
+Для
+.BR getgroups ,
+.I size
+меньше, чем количество дополнительных идентификаторов групп, но не ноль.
+.SH ЗАМЕЧАНИЯ
+Процесс может иметь как минимум NGROUPS_MAX дополнительных идентификаторов
+групп в дополнении к эффективному идентификатору группы. Список дополнительных
+идентификаторов групп наследуется из родительского процесса и может быть
+изменён при использовании
+.BR setgroups .
+Максимальное количество дополнительных идентификаторов групп можно найти
+используя
+.BR sysconf (3):
+.nf
+    long ngroups_max;
+    ngroups_max = sysconf(_SC_NGROUPS_MAX);
+.fi
+Максимальное значение, возвращаемое
+.B getgroups
+не может быть больше чем на единицу значения полученного данным способом.
+.LP
+Прототип для
+.B setgroups
+доступен только если задан флаг
+.B _BSD_SOURCE
+(или явно или неявно, но задан флаг
+_POSIX_SOURCE или компиляция проводится с флагом -ansi).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID (только в 4-й редакции; данные вызовы отсутствуют в SVr3),
+X/OPEN, 4.3BSD.  Функция
+.B getgroups
+есть в POSIX.1.  С тех пор как
+.B setgroups
+требует превилений она не соответствует POSIX.1.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR initgroups (3),
+.BR getgid (2),
+.BR setgid (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

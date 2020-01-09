@@ -1,0 +1,111 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified Wed Jul 21 22:18:17 1993 by  Rik Faith <faith@cs.unc.edu>
+.\" Modified 21 Aug 1994 by Michael Chastain <mec@shell.portal.com>
+.\"   Fixed typoes.
+.\" Modified 13 Jun 1996 by aeb - Added a warning: . may be outside / tree.
+.\" Modified Wed Nov  6 03:50:45 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified by Joseph S. Myers <jsm28@cam.ac.uk>, 970821
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\"
+.TH CHROOT 2 1997-08-21 "Linux 2.0.30" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+chroot \- изменить корневой каталог
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int chroot(const char *" path );
+.SH ОПИСАНИЕ
+.B chroot
+изменяет корневой каталог на тот, что задан аргументом
+.IR path .
+Этот каталог будет использоваться для имен файлов, начинающихся со /.
+Корневой каталог наследуется всеми потомками текущего процесса.
+
+Только суперпользователь может изменять корневой каталог.
+
+Заметьте, что этот системный вызов не изменяет текущий рабочий
+каталог, поэтому . может находиться вне дерева каталогов,
+начинающегося со /.
+В частности, суперпользователь может выбраться из-под chroot jail с
+помощью mkdir foo; chroot foo; cd ...
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+В зависимости от файловой системы могут появляться другие ошибки.
+Стандартные ошибки таковы:
+
+.TP 0.8i
+.B EPERM
+Фактический UID не равен нулю.
+.TP
+.B EFAULT
+.I path
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENAMETOOLONG
+.I path
+слишком длинно.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR path ,
+в действительности таковым не является.
+.TP
+.B EACCES
+В одном из каталогов, находящихся по пути к
+.IR path ,
+запрещен поиск.
+.TP
+.B ELOOP
+.IR path
+является зацикленной символической ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.TP
+.B EIO
+Произошла ошибка ввода-вывода.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, 4.4BSD, X/OPEN.  Эта функция не входит в POSIX.1. SVr4
+документирует дополнительные коды ошибок EINTR, ENOLINK и EMULTIHOP.
+X/OPEN не документирует EIO, ENOMEM и EFAULT.  Этот интерфейс помечен
+как "устаревающий" в X/OPEN.
+.SH "СМОТРИ ТАКЖЕ"
+.BR chdir (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

@@ -1,0 +1,53 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Mon Mar 29 22:39:24 1993, David Metcalfe
+.\" Modified Sat Jul 24 21:39:22 1993, Rik Faith (faith@cs.unc.edu)
+.\" Переведен на русский Fri 22 Sep 2000 11:26:59, Alexey V. Medvedev 2:5022/78.6
+.TH ATOF 3  "March 29, 1993" "GNU" "Linux Programmer's Manual"
+.SH ИМЯ
+atof \- преобразование строки символов в число типа double.
+.SH СИНТАКСИС
+.nf
+.B #include <stdlib.h>
+.sp
+.BI "double atof(const char *" nptr );
+.fi
+.SH ОПИСАНИЕ
+Функция \fBatof()\fP преобразует начальную часть строки, на которую указывает
+\fInptr\fP, в число типа double.  Действие функции аналогично
+.sp
+.RS
+.B strtod(nptr, (char **)NULL);
+.RE
+.sp
+за исключением того, что \fBatof()\fP не распознает ошибки.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Преобразованное число.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVID 3, POSIX, BSD 4.3, ISO 9899
+.SH "СМОТРИ ТАКЖЕ"
+.BR atoi "(3), " atol "(3), " strtod "(3), " strtol "(3), " strtoul (3)

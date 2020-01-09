@@ -1,0 +1,77 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\" Copyright 1997 Andries E. Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 24.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH VM86 2 1997-07-17 "Linux 2.1.15" "Руководство программиста Linux"
+.SH ИМЯ
+vm86old, vm86 \- войти в виртуальный режим 8086
+.SH ОБЗОР
+.B #include <sys/vm86.h>
+.sp
+.BI "int vm86old(struct vm86_struct *" info );
+.sp
+.BI "int vm86(unsigned long " fn ", struct vm86plus_struct *" v86 );
+.SH ОПИСАНИЕ
+Системный вызов
+.B vm86
+был введён в Linux 0.97p2. В Linux 2.1.15 и 2.0.28 он был переименован в
+.BR vm86old ,
+и был введён новый
+.B vm86 .
+Описание структуры `struct vm86_struct' было изменено в 1.1.8 и 1.1.9.
+.LP
+Данные вызовы заставляют вызывающий процесс войти в режим VM86
+(виртуальный режим 8086 в литературе по Intel) и используются
+.BR dosemu .
+.PP
+Режим VM86 \- это эмуляция реального режима внутри задачи, которая
+работает в защищённом режиме.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. При ошибке возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EPERM
+Существует сохранённый стек ядра. (Это проверка ядра; сохранённый стек
+должен существовать только внутри самого режима vm86).
+.TP
+.B EFAULT
+Возвращённое значение является специфичным для i386 и указывает на
+проблему получения данных в пространстве пользователя.
+.TP
+.B ENOSYS
+Возвращённое значение указывает на вызов, который не реализован на
+данной архитектуре.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов является специфичным для Linux на процессорах Intel и
+не должен использоваться в программах, которые задумываются как переносимые
+на другие платформы.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

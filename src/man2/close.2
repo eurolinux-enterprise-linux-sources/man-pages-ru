@@ -1,0 +1,114 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Wed Jul 21 22:40:25 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sat Feb 18 15:27:48 1995 by Michael Haardt <michael@moria.de>
+.\" Modified Sun Apr 14 11:40:50 1996 by Andries Brouwer <aeb@cwi.nl>:
+.\"   corrected description of effect on locks (thanks to
+.\"   Tigran Aivazian <tigran@sco.com>).
+.\" Modified Fri Jan 31 16:21:46 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2000-07-22 by NicolАs Lichtmaier <nick@debian.org>
+.\"   added note about close(2) not guaranteeing that data is safe on close.
+.\"
+.\" Дата последней коррекции перевода 12.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH CLOSE 2 "14 2001-12-13 "" "Руководство программиста Linux"
+.SH ИМЯ
+close \- закрыть файловый дескриптор
+.SH ОБЗОР
+.nf
+.B #include <unistd.h>
+.sp
+.BI "int close(int " fd );
+.fi
+.SH ОПИСАНИЕ
+.B close
+закрывает файловый дескриптор, который после этого не ссылается ни на
+один и файл и может быть использован повторно.  Все блокировки,
+находящиеся на соответствующем файле, снимаются (независимо от того,
+был ли использован для установки блокировки именно этот файловый
+дескриптор).
+.PP
+Если
+.I fd
+является последней копией какого-либо файлового дескриптора, то
+ресурсы, связанные с ним, освобождаются;  если дескриптор был
+последней ссылкой на файл, удаленный с помощью
+.BR unlink (2),
+то файл окончательно удаляется.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.B close
+возвращает ноль при успешном завершении или \-1, если произошла
+ошибка.
+.SH ОШИБКИ
+.TP
+.B EBADF
+.I fd
+является неверным файловым дескриптором.
+.TP
+.B EINTR
+Системный вызов
+.BR close ()
+был прерван сигналом.
+.TP
+.B EIO
+Произошла ошибка ввода/вывода.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN, BSD 4.3.  SVr4 документирует дополнительный 
+код ошибки ENOLINK.
+.SH ЗАМЕЧАНИЯ
+Не проверять значение, возвращаемое функцией
+.B close
+\- обычная, но от этого не менее серьезная ошибка программирования.
+Вполне возможно, что ошибка в предыдущей операции
+.BR write (2)
+впервые даст о себе знать при выполнении
+.BR close .
+Отсутствие проверки возвращаемого значение при закрытии файла, может
+привести к потере данных. Особенно это касается таких аспектов как NFS
+и дисковые квоты.
+.PP
+Успешное выполнение
+.B close()
+не гарантирует, что данные успешно записаны на диск, потому что ядро
+откладывает запись.  Обычно файловые системы не сбрасывают буфера на
+диск при закрытии потока.  Если вам нужно удостовериться, что данные
+физически сохранены на диске, используйте 
+.BR fsync (2).
+(В этом случае всё будет зависить от железа и самого диска.)
+.SH "СМОТРИ ТАКЖЕ"
+.BR open (2),
+.BR fcntl (2),
+.BR shutdown (2),
+.BR unlink (2),
+.BR fclose (3),
+.BR fsync (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2000,
+Виктор Вислобоков <corochoone@perm.ru> 2003

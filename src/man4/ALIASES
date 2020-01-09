@@ -1,0 +1,7 @@
+mem	kmem
+mem	port
+
+null	zero
+
+random	urandom
+vcs	vcsa

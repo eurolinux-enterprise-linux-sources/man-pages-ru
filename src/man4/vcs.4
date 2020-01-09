@@ -1,0 +1,107 @@
+.\" Copyright (c) 1995 James R. Van Zandt <jrv@vanzandt.mv.com>
+.\" Sat Feb 18 09:11:07 EST 1995
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified, Sun Feb 26 15:08:05 1995, faith@cs.unc.edu
+.\"
+.\" Перевод на русский язык: Антон Лыков (last@last.ulsu.ru), 2000
+.TH VCS 4 "19 февраля 1995" "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+vcs, vcsa \- память виртуальной консоли
+.SH ОПИСАНИЕ
+\fB/dev/vcs0\fP - символьный файл со старшим номером 7 и младшим номером
+0, обычно с доступом 0644 и владельцем root.tty. Он ссылается на память
+в настоящий момент
+отображаемого терминала виртуальной консоли.
+.LP
+\fB/dev/vcs[1-63]\fP - символьные файлы для терминалов виртуальных
+консолей, они имеют старший номер 7 и младший номер от 1 до 63, обычно имеют
+доступ 0644 и владельца root.tty. \fB/dev/vcsa[0-63]\fP - такие же, но они
+содержат атрибуты, и дополнительные начальные 4 байта, содержащие размеры
+экрана и положение курсора: \fIlines\fP, \fIcolumns\fP, \fIx\fP, \fIy\fP.
+(\fIx\fP = \fIy\fP = 0 в верхнем левом углу экрана.)
+.PP
+Они замещают функции
+.BR ioctl
+снимка экрана для \fBconsole\fP(4), так что системный
+администратор может устанавливать доступ, используя права доступа к файлам.
+.PP
+Устройства для первых восьми виртуальных консолей могут быть созданы командами:
+
+.nf
+	for x in 0 1 2 3 4 5 6 7 8; do 
+		mknod -m 644 /dev/vcs$x c 7 $x;
+		mknod -m 644 /dev/vcsa$x c 7 $[$x+128];
+	done
+	chown root:tty /dev/vcs*
+.fi
+
+Запросы
+.I ioctl
+не поддерживаются.  
+.SH ПРИМЕРЫ
+Вы можете получить снимок экрана на vt3, переключившись на vt1 и введя 
+\fIcat /dev/vcs3 >foo\fP. Заметьте, что вывод не содержит
+символов новой строки, и может понадобиться некоторая его обработка, например
+\fIfold -w 81 /dev/vcs3 | lpr\fP или (ужас!)
+\fIsetterm -dump 3 -file /proc/self/fd/1\fP.
+.LP
+Устройство
+.I /dev/vcsa0
+используется для поддержки брайлевских терминалов.
+
+Эта программа отображает символ и атрибуты экрана в позиции
+курсора на второй виртуальной консоли, а затем меняет там цвет фона:
+
+.nf
+	#include <unistd.h>
+	#include <stdio.h>
+	#include <fcntl.h>
+
+	int main() {
+		int fd;
+		struct {char lines, cols, x, y;} scrn;
+		char ch, attrib;
+
+		fd = open("/dev/vcsa2", O_RDWR);
+		(void)read(fd, &scrn, 4);
+		(void)lseek(fd, 4 + 2*(scrn.y*scrn.cols + scrn.x), 0);
+		(void)read(fd, &ch, 1);
+		(void)read(fd, &attrib, 1);
+		printf("ch='%c' attrib=0x%02x\\n", ch, attrib);
+		attrib ^= 0x10;
+		(void)lseek(fd, -1, 1);
+		(void)write(fd, &attrib, 1);
+		return 0;
+	}
+.fi
+
+.SH ФАЙЛЫ
+/dev/vcs[0-63]
+.br
+/dev/vcsa[0-63]
+.SH АВТОР
+Andries Brouwer <aeb@cwi.nl>
+.SH ИСТОРИЯ
+Впервые появилось в версии ядра Linux 1.1.92.
+.SH "СМ. ТАКЖЕ"
+.BR console "(4), " tty "(4), " ttys "(4), " selection (1)

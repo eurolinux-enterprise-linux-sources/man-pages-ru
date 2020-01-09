@@ -1,0 +1,125 @@
+.\" Hey, Emacs! This is an -*- nroff -*- source file.
+.\" Copyright (c) 2000 Manoj Srivastava <srivasta@debian.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+.\" USA.
+.\"
+.\" Minor polishing, aeb
+.\" Modified, 2002-06-16, Mike Coleman
+.\" 
+.\" Дата последней коррекции перевода 08.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH HOSTS 5 2002-06-16 "Debian" "Руководство программста Linux"
+.SH ИМЯ
+hosts \- Статическая таблица для поиска имён узлов
+.SH ОБЗОР
+.B /etc/hosts
+.SH ОПИСАНИЕ
+Данная страница руководства описывает формат файла
+.I /etc/hosts .
+Это простой текстовый файл, который ассоциирует IP адреса с именами
+узлов, по одному IP адресу в строке. Для каждого узла в одной
+строке должна быть представлена запись со следующей информацией:
+.RS
+.PP
+IP_адрес каноническое_имя_узла псевдонимы
+.RE
+.PP
+Поля записи разредяются пробелами и/или символами табуляции. Текст,
+начинающийся с символа "#" до конца строки считается комментарием
+и игнорируется. Имена узлов могут содержать только букв, цифры
+знак минус ("-") и точку ("."). Они должны начинаться с буквы
+и заканчиваться буквой или цифрой. Псевдонимы предоставляются для
+возможности выбора более одного имени, альтернативного произношения,
+сокращения имени узла или для указания наиболее общего имени узла
+(например, 
+.IR localhost ).
+Формат файла описывается в RFC 952. 
+.PP
+DNS сервер Berkeley Internet Name Domain (BIND) реализует сервер
+службы имён для UNIX систем. Он расширяет или замещает файл
+.I /etc/hosts
+при операциях поиска имени узла, а также освобождает от необходимости
+поддерживать актуальность и полноту
+.I /etc/hosts . 
+.PP
+В современных системах, даже заданная в файле
+.I /etc/hosts
+информация, может быть перекрыта информацией из DNS, это широко
+используется для следущих случаев:
+.TP
+.B "начальная загрузка"
+Большинство систем имеют маленький размер файла
+.I /etc/hosts ,
+который обычно содержит имена и адреса наиболее важных узлов
+локальной сети. Это полезно, когда когда служба DNS не запущена,
+например во время загрузки системы.
+.TP
+.B NIS
+сайты, которые используют NIS, хранят таблицу узлов в базе данных
+узлов NIS. Но даже при работе с NIS остаётся возможность
+использовать DNS, большинство NIS сайтов также используют для
+целей резервного копирования и файл
+.I /etc/hosts ,
+где размещаются записи о всех локальных узлах.
+.TP 
+.B "изолированные узлы"
+Маленькие сайты, которые являются изолированными от сети, используют
+файл
+.I /etc/hosts
+вместо DNS. Если локальная информация меняется редко и сеть не
+подключена к Интернет, DNS не даёт ощутимых преимуществ.
+.SH ПРИМЕР
+.nf
+ 127.0.0.1       localhost
+ 192.168.1.10    foo.mydomain.org	foo
+ 192.168.1.13    bar.mydomain.org	bar
+ 216.234.231.5   master.debian.org      master
+ 205.230.163.103 www.opensource.org
+.fi
+.SH "ИСТОРИЧЕСКОЕ ЗАМЕЧАНИЕ"
+Перед появлением DNS, файл с таблицей узлов
+.I /etc/hosts
+был единственным способом определения имён узлов по IP адресам
+в развивающейся сети Интернетет. В самом деле, этот файл мог быть
+создан из официальной базы данных узлов, которая обслуживалась
+Центром управления сетевой информацией (Network Information Control
+Center (NIC)), и далее с помощью локальных изменений, которые часто
+требовались, чтобы поддержать актуальность данных и чтобы учитывать
+неофициальные псевдонимы и/или неизвестные узлы. NIC больше не
+поддерживает файлы hosts.txt (приблизительно с 2000 года), но на
+их WWW существуют исторические файлы hosts.txt. Я обнаружил три:
+от 92, 94 и 95 годов.
+.SH ФАЙЛЫ
+.I /etc/hosts
+.SH "СМОТРИ ТАКЖЕ"
+.BR hostname (1)
+.BR resolver (3),
+.BR resolver (5),
+.BR hostname (7),
+.BR named (8),
+Internet RFC 952
+.SH АВТОР
+Данную страницу руководства написал Manoj Srivastava <srivasta@debian.org>,
+для системы Debian GNU/Linux.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

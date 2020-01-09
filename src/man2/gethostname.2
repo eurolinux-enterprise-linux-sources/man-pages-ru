@@ -1,0 +1,104 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 22 July 1995 by Michael Chastain <mec@duracef.shout.net>:
+.\"   'gethostname' is real system call on Linux/Alpha.
+.\" Modified Fri Jan 31 16:30:53 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2000-06-04, 2001-12-15 by aeb
+.\"
+.\" Дата последней коррекции перевода 03.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETHOSTNAME 2 2001-12-15 "Linux 2.5.0" "Руководство программиста Linux"
+.SH ИМЯ
+gethostname, sethostname \- получить/установить имя машины
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int gethostname(char *" name ", size_t " len );
+.br
+.BI "int sethostname(const char *" name ", size_t " len );
+.SH ОПИСАНИЕ
+Эти функции используются для доступа к имени машины или для его
+изменения.
+Функция
+.B gethostname()
+возвращает имя машины (которое ранее было установлено вызовом
+.BR sethostname() )
+в виде строки \fIname\fP, которая имеет длину \fIlen\fP байт и
+завершается нулевым символом.
+Если завершающий нулевой символ не встретился в \fIlen\fP
+байтах, то ошибки не будет, но имя машины будет усечено. При
+этом не факт, что усечённое имя будет завершаться нулевым символом.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается 0. При ошибке возвращается \-1 и
+значение
+.I errno
+будет установлено соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+.I len
+имеет отрицательное значение или для
+.BR sethostname ,
+длина
+.I len
+больше, чем максимально допустимое значение,
+или для
+.BR gethostname
+на Linux/i386, длина
+.I len
+меньше, чем фактический размер.
+(В это случае glibc 2.1 использует ENAMETOOLONG.)
+.TP
+.B EPERM
+Вызвавший
+.BR sethostname ,
+не является суперпользователем.
+.TP
+.B EFAULT
+.I name
+является неправильным адресом.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD  (данная функция впервые появилась в 4.2BSD).
+POSIX 1003.1-2001 определяет
+.B gethostname
+но не
+.BR sethostname .
+.SH ОШИБКИ РЕАЛИЗАЦИИ
+Для многих комбинаций ядер Linux / libc
+функция
+.B gethostname
+будет возвращать ошибку вместо усечённого имени машины.
+.SH ЗАМЕЧАНИЯ
+SUSv2 гарантирует, что `Длина имени машины ограничивается 255-ми байтами'.
+POSIX 1003.1-2001 гарантирует, что `Длина имени машины (не включая
+завершающий нулевой символ) ограничивается HOST_NAME_MAX байтами'.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR getdomainname (2),
+.BR setdomainname (2),
+.BR uname (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

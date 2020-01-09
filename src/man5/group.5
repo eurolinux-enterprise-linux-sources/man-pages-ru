@@ -1,0 +1,63 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de), Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\" 
+.\" Modified Sat Jul 24 17:06:03 1993 by Rik Faith (faith@cs.unc.edu)
+.\" 
+.\" Дата последней коррекции перевода 07.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH GROUP 5 1992-12-29 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+group \- файл групп пользователей
+.SH ОПИСАНИЕ
+\fB/etc/group\fP это ASCII файл, который описывает группы, членами
+которых являются пользователи. В каждой строке файла содержится одна
+запись, следующего формата:
+.sp
+.RS
+group_name:password:GID:user_list
+.RE
+.sp
+Вот описания этих полей:
+.IP group_name
+это имя конкретной группы.
+.IP password
+(в зашифрованном виде) пароль группы.  Если это поле пустое, то
+никакой пароль не нужен.
+.IP GID
+цифровой идентификатор (ID) группы.
+.IP user_list
+разделённые запятыми имена всех пользователей, которые являются членами
+данной группы.
+.SH "ЗАМЕЧАНИЕ ПЕРЕВОДЧИКА"
+В \fIuser_list\fP не указываются те пользователи, для которых данная
+группа является первичной. Таким образом в \fIuser_list\fP указаны не
+все пользователи, которые являются членами данной группы.
+.SH ФАЙЛЫ
+/etc/group
+.SH "СМОТРИ ТАКЖЕ"
+.BR login (1),
+.BR newgrp (1),
+.BR passwd (5)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

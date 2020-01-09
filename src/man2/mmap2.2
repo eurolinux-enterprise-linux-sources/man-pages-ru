@@ -1,0 +1,84 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 2002, Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 31 Jan 2002, Michael Kerrisk <mtk16@ext.canterbury.ac.nz>
+.\"	Added description of mmap2
+.\"
+.\" Дата последней коррекции перевода 28.07.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH MMAP2 2 2002-01-31 "Linux 2.3.31" "Руководство программиста Linux"
+.SH ИМЯ
+mmap2 \- тображает файлы или устройства в память
+.SH ОБЗОР
+.B #include <sys/mman.h>
+.br
+.B #include <syscall.h>
+.sp
+.BI "_syscall6(void *, " start ", size_t, " length ", int, " prot ,
+.BI "int, " flags ", int, " fd ", off_t, " pgoffset );
+.sp
+.BI "void * mmap2(void *" start ", size_t " length ", int " prot ,
+.BI "int " flags ", int " fd ", off_t " pgoffset );
+.sp
+.B #endif
+.SH ОПИСАНИЕ
+Функция
+.B mmap2
+работает точно также как и
+.BR mmap (2),
+за исключением того, что последний аргумент задаёт смещение в
+файле в единицах размера системной страницы (вместо байт).
+Это позволяет приложениям использовать 32-бинтое значение
+off_t для отображения больших файлов (обычно размером больше чем
+2^44 байт).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, 
+.B mmap2
+возвращает указатель на область отображения. В случае ошибки,
+возвращается \-1 и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.SH EFAULT
+Проблема с получением данных из пространства пользователя.
+.SH ЗАМЕЧАНИЯ
+Функция
+.B mmap2
+доступна начиная с Linux 2.3.31.
+Она является специфичной для Linux и не должна использоваться в
+приложениях, которые планируются как переносимые на другие платформы.
+См. также функцию
+.IR mmap64() ,
+которая является частью LFS (Large File Summit).
+.SH "СМОТРИ ТАКЖЕ"
+.BR getpagesize (2),
+.BR mmap (2),
+.BR mremap (2),
+.BR msync (2),
+.BR shm_open (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

@@ -1,0 +1,71 @@
+.\" Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Created   Sat Aug 21 1995     Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" typo corrected, aeb, 950825
+.\" added layout change from joey, 960722
+.\" changed prototype, documented 0xffffffff, aeb, 030101
+.\"
+.\" Дата последней коррекции перевода 28.07.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH PERSONALITY 2 2003-01-01 "Linux 2.0" "Руководство программиста Linux"
+.SH ИМЯ
+personality \- установить домен выполнения процесса
+.SH ОБЗОР
+.BI "long personality(unsigned long " persona );
+.SH ОПИСАНИЕ
+Linux поддерживает различные домены выполнения или персоналии, для каждого
+процесса. Помимо прочего, домены выполнения говорят Linux как отображать
+номера сигналов в действия сигналов. Система доменов выполнения позволяет
+Linux предоставлять ограниченную поддержку бинарных файлов, скомпилированных
+для других операционных систем Unix.
+
+Данная функция будет возвращать текущую
+.BR персоналию ,
+когда значение
+.I persona
+равно 0xffffffff. В остальных случаях, она делает домен выполнения, на
+который указывает значение
+.IR persona ,
+новым доменом выполнения текущего процесса.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается предыдущее значение
+.IR persona .
+В случае ошибки, возвращается \-1 и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+Ядро не может изменить персоналию.
+.PP
+.SH ФАЙЛЫ
+.I /usr/include/linux/personality.h
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.B персоналия
+является понятием, специфичным для Linux и не должна использоваться в программах,
+задуманных как переносимые на другие платформы.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

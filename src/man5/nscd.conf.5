@@ -1,0 +1,137 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1999, 2000 SuSE GmbH Nuernberg, Germany
+.\" Author: Thorsten Kukuk <kukuk@suse.de>
+.\"
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of the
+.\" License, or (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this program; see the file COPYING.  If not,
+.\" write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+.\" Boston, MA 02111-1307, USA.
+.\"
+.\" Дата последней коррекции перевода 13.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH NSCD.CONF 5 1999-10 "Библиотека GNU C"
+.SH ИМЯ
+/etc/nscd.conf - файл с настройками демона кэша службы имён
+.SH ОПИСАНИЕ
+Файл
+.B /etc/nscd.conf
+читается демоном
+.BR nscd (8)
+при его запуске. Каждая строка задаёт или атрибут и значение, или
+атрибут, службу и значение. Поля разделяются или пробелами или
+символами табуляции. Символ `#' (решётка) говорит от начале
+комментария; следующие за ним до конца строки символы, не
+интерпретируются nscd.
+
+
+Допустимыми службами являются: passwd, group или hosts.
+
+.B logfile
+.I debug-file-name
+.RS
+Задаёт имя файла, в который будет записываться отладочная информация.
+.RE
+
+.B debug-level
+.I value
+.RS
+Устанавливает необходимый уровень отладки.
+.RE
+
+.B threads
+.I number
+.RS
+Здесь указывается число тредов (нитей) которые запускаются для
+ожидания запросов. Всегда создаются как минимум пять тредов.
+.RE
+
+.B server-user
+.I user
+.RS
+Если эта опция установлена, nscd будет запущен от указанного
+пользователя, а не от пользователя root. Если используются
+отдельные кэши для каждого пользователя (ключ -S), то
+данная опция игнорируется.
+.RE
+
+.B enable-cache
+.I service
+.I <yes|no>
+.RS
+Разрешает или запрещает кэш заданной службы
+.I service .
+.RE
+
+.B positive-time-to-live
+.I service
+.I value
+.RS
+Устанавливает время жизни (TTL) для положительных (успешные
+запросы) записей в заданном кэше для службы
+.I service .
+Значение
+.I Value
+задаётся в секундах. БОльшие значения увеличивают вероятность
+повторного использования запрошенных данных и уменьшают время
+ответа, но также увеличивают проблемы с достоверностью кэша.
+.RE
+
+.B negative-time-to-live
+.I service
+.I value
+.RS
+Устанавливает время жизни (TTL) для отрицательных (неуспешные
+запросы) записей в заданном кэше для службы
+.I service .
+Значение
+.I Value
+задаётся в секундах. Может значительно увеличить производительность,
+если существуют некоторые файлы, которыми владеет пользователь, у
+которого идентификатор пользователя (UID) не существует в системных
+базах данных (например распаковка tar'ом из под суперпользователя
+root исходных текстов ядра); должно бы быть небольшим, чтобы
+уменьшить проблемы достоверности кэша.
+.RE
+
+.B suggested-size
+.I service
+.I value
+.RS
+Задаёт размер внутренней хэш-таблицы, значение
+.I value
+для оптимальной эффективности должно бы быть простым числом.
+.RE
+
+.B check-files
+.I service
+.I <yes|no>
+.RS
+Разрешает или запрещает проверку изменений для файлов, принадлежащих
+к заданной службе
+.I service .
+Это файлы
+.IR /etc/passwd ,
+.IR /etc/group ,
+и
+.IR /etc/hosts .
+.RE
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR nscd (8)
+.SH АВТОР
+.B nscd
+написали Thorsten Kukuk и Ulrich Drepper.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

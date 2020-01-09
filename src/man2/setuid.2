@@ -1,0 +1,105 @@
+.\" -*- nroff -*-
+.\" Copyright (C), 1994, Graeme W. Wilford (Wilf).
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Fri Jul 29th 12:56:44 BST 1994  Wilf. <G.Wilford@ee.surrey.ac.uk> 
+.\" Changes inspired by patch from Richard Kettlewell
+.\"   <richard@greenend.org.uk>, aeb 970616.
+.\"
+.TH SETUID 2 "29 July 1994" "Linux 1.1.36" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+setuid \- установить идентификатор пользователя
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int setuid(uid_t " uid )
+.SH ОПИСАНИЕ
+.B setuid
+устанавливает фактический идентификатор владельца текущего процесса.
+Если фактический пользователь, вызвавший эту функцию -- root, то
+действительный и сохраненный идентификаторы также устанавливаются.
+.PP
+Под Linux
+.B setuid
+реализован как в стандарте POSIX с возможностью _POSIX_SAVED_IDS.  Это
+позволяет setuid-программам (не setuid-root) сбрасывать все
+привилегии, делать непривилегированную работу, а затем безопасно
+возвращать себе исходный фактический идентификатор пользователя.
+.PP
+Если пользователь -- root, или программа установлена как setuid root,
+нужна особенная осторожность.  Функция
+.B setuid
+проверяет фактический идентификатор вызвавшего пользователя и, если
+это суперпользователь, то все идентификаторы устанавливаются в
+.IR uid . 
+После этого программа уже никак не сможет вернуть обратно права
+пользователя root.
+.PP
+Таким образом, setuid-root программа, желающая временно сбросить права 
+root, на время сделаться другим пользователем, а затем восстановить
+права root, не может пользоваться
+.BR setuid .
+Требуемого результата можно достичь с помощью вызова
+.BR seteuid ,
+которого нет в POSIX, но есть в BSD.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP
+.B EPERM
+Пользователь не является суперпользователем, а
+.I uid
+не совпадает с фактическим или сохраненным идентификатором владельца
+текущего процесса.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX.1.  Этот системный вызов не совсем совместим с
+4.4BSD, который устанавливает действительный, сохраненный и
+фактический идентификаторы пользователя.  SVr4 документирует
+дополнительный код ошибки EINVAL.
+.SH "ЗАМЕЧАНИЯ ПО СПЕЦИФИКЕ LINUX"
+Linux поддерживает концепция идентификатора пользователя файловой
+системы, обычно совпадающего с фактическим идентификатором.  Системный 
+вызов
+.B setuid
+также устанавливает идентификатор пользователя файловой системы.
+Смотри
+.BR setfsuid (2).
+.PP
+Если 
+.I uid
+отличается от старого фактического идентификатора, то процессу нельзя
+будет создавать файлы дампа памяти (core).
+.SH "СМОТРИ ТАКЖЕ"
+.BR getuid (2),
+.BR setreuid (2),
+.BR seteuid (2),
+.BR setfsuid (2)
+.SH ПЕРЕВОД
+Перевод Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000
+
+http://alexm.here.ru/manpages-ru/

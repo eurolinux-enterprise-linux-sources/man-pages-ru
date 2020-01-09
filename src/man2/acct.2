@@ -1,0 +1,124 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1993 Michael Haardt
+.\" (michael@moria.de),
+.\" Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Thu Jul 22 14:00:08 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Aug 10 1993 by Alan Cox <iiitac@pyramid.swansea.ac.uk>
+.\" Modified Wed Nov 4  1998 by Tigran Aivazian <tigran@sco.com>
+.\"
+.\" Дата последней коррекции перевода 06.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ACCT 2 1998-11-04 "Linux 2.1.126" "Руководство программиста Linux"
+.SH ИМЯ
+acct \- включает или выключает учёт процессов
+.SH ОБЗОР
+.ad l
+.nf
+.B #include <unistd.h>
+.sp
+.BI "int acct(const char *" filename );
+.fi
+.ad b
+.SH ОПИСАНИЕ
+Когда при вызове, в качестве аргумента, указывается имя существующего файла,
+происходит включение учёта, при завершении процесса, в файл
+\fIfilename\fP
+добавляются записи для каждого завершившегося процесса.
+Если в качестве аргумента указан \fBNULL\fP, то учёт выключается.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. В случае ошибки возвращается \-1 и
+.I errno
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP
+.B EACCES
+Для указанного файла отсутствуют права на запись.
+.TP
+.B EACCES
+Аргумент
+.I filename
+не является обычным файлом.
+.TP
+.B EFAULT
+.I filename
+указывает за пределы доступного вам адресного пространства.
+.TP
+.B EIO
+Ошибка записи в файл
+.IR filename .
+.TP
+.B EISDIR
+.I filename 
+является каталогом.
+.TP
+.B ELOOP
+Во время определения
+.IR filename
+встретилось слишком много символьных ссылок (зацикливание по символьным
+сслыкам -- прим. пер.).
+.TP
+.B ENAMETOOLONG
+.I filename
+слишком длинно.
+.TP
+.B ENOENT
+Файл с указанным именем не существует.
+.TP
+.B ENOMEM
+Не хаватает памяти.
+.TP
+.B ENOSYS
+BSD учёт процессов не может быть разрешён, если эта возможность не
+была включена при компиляции ядра операционной системы.
+Этой возможностью управляет конфигурационный параметр ядра
+CONFIG_BSD_PROCESS_ACCT.
+.TP
+.B ENOTDIR
+Один из компонентов в пути
+.I filename 
+который указан как каталог, на самом деле не является каталогом.
+.TP
+.B EPERM
+Вызывающий процесс не имеет прав для того, чтобы разрешить учёт процессов.
+.TP 
+.B EROFS
+.I filename 
+указывает на файл в файловой системе, доступной только для чтения.
+.TP
+.B EUSERS
+Больше нет свободных файловых структур или произошло переполнение памяти.
+.SH "СОВМЕСТИМОСТЬ СО СТАНДАРТАМИ"
+SVr4 (но не POSIX).  SVr4 документирует условия ошибки EBUSY,
+но не ошибок EISDIR или ENOSYS. Также AIX и HPUX документируют ошибку EBUSY
+(попытку разрешить учёт, когда он уже разрешён), как в Solaris
+(попытка разрешить учёт, используя такое же имя файла, которое уже
+было использовано).
+.SH ЗАМЕЧАНИЕ
+Учёт не производится для программ, которые заканчиваются аварийно. В частности,
+незавершаемые процессы никогда не учитываются.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

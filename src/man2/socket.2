@@ -1,0 +1,322 @@
+'\" t
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: socket.2,v 1.4 1999/05/13 11:33:42 freitag Exp 
+.\"
+.\" Modified Sat Jul 24 10:36:46 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 22:10:43 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998,1999 by Andi Kleen <ak@muc.de>
+.\"
+.TH SOCKET 2 "24 Apr 1999" "Руководство по Linux" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+socket \- создать оконечную точку коммуникации
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int socket(int " domain ", int " type ", int " protocol );
+.SH ОПИСАНИЕ
+.B socket
+создает оконечную точку для коммуникации и возвращает её дескриптор.
+.PP
+Параметр
+.I domain
+задает "домен" коммуникации; выбирает набор протоколов, которые будут
+использоваться для коммуникации.  Такие наборы описаны в
+.BR <sys/socket.h> .
+В настоящее время понимаются такие форматы:
+.PP
+.TS
+tab(:);
+l l l.
+Название:Назначение:Страница
+T{
+.B PF_UNIX,PF_LOCAL
+T}:T{
+Локальная коммуникация
+T}:T{
+.BR unix (7)
+T}
+T{
+.B PF_INET
+T}:IPv4, протоколы Интернет:T{
+.BR ip (7)
+T}
+T{
+.B PF_INET6
+T}:IPv6, протоколы Интернет:
+T{
+.B PF_IPX
+T}:IPX \- протоколы Novell:
+T{
+.B PF_NETLINK
+T}:T{
+Устройство для общения пользователя с ядром
+T}:T{
+.BR netlink (7)
+T}
+T{
+.B PF_X25
+T}:Протокол ITU-T X.25 / ISO-8208:T{
+.BR x25 (7)
+T}
+T{
+.B PF_AX25
+T}:T{
+Протокол AX.25, любительское радио
+T}:
+T{
+.B PF_ATMPVC
+T}:ATM -- доступ к низкоуровневым PVC:
+T{
+.B PF_APPLETALK
+T}:Appletalk:T{
+.BR ddp (7)
+T}
+T{
+.B PF_PACKET
+T}:T{
+Низкоуровневый пакетный интерфейс
+T}:T{
+.BR packet (7)
+T}
+.TE
+.PP
+Сокет имеет указанный тип,
+.IR type ,
+задающий семантику коммуникации.  В настоящее время определены
+следующие типы:
+.TP
+.B SOCK_STREAM
+Обеспечивает надежные, двунаправленные последовательные потоки байтов, 
+с поддержкой соединений.  Может также поддерживаться механизм
+вне-поточных данных.
+.TP
+.B SOCK_DGRAM
+Обеспечивает датаграммы (ненадежные сообщения с ограниченной
+максимальной длиной, без поддержки соединения).
+.TP
+.B SOCK_SEQPACKET
+Обеспечивает последовательный двунаправленный канал передачи датаграмм 
+с поддержкой соединений; датаграммы имеют ограниченную максимальную
+длину; от получателя требуется за один раз прочитать целый пакет.
+.TP
+.B SOCK_RAW
+Обеспечивает доступ к низкоуровневому сетевому протоколу.
+.TP
+.B SOCK_RDM
+Обеспечивает надежную доставку датаграмм без гарантии их
+последовательности.
+.TP
+.B SOCK_PACKET
+Устарело и не должно использоваться в новых программах; см.
+.BR packet (7).
+.PP
+Некоторые типы сокетов могут не быть реализованными в некоторых
+наборах протоколов; например,
+.B SOCK_SEQPACKET
+не реализовано в наборе
+.BR AF_INET .
+.PP
+Параметр
+.I protocol
+задает конкретный протокол, который используется на сокете.  Обычно
+существует только один протокол, обеспечивающий конкретный тип сокета 
+в заданном наборе протоколов.  Однако, возможно существование
+нескольких таких протоколов -- тогда и используется этот параметр.
+Номер протокола зависит от используемого \*(lqдомена
+коммуникации\*(rq, см.\~
+.BR protocols (5).
+См.
+.BR getprotoent (3),
+где описано, как сопоставлять имена протоколов их номерам.
+.PP
+Сокеты типа
+.B SOCK_STREAM
+являются дуплексными потоками байт, похожими на трубы.  Они не
+сохраняют границы между записями.  Потоковый сокет должен быть в
+.I соединённом
+состоянии перед тем, как по нему можно отсылать и принимать данные.
+Соединение с другим сокетом создается с помощью системного вызова
+.BR connect (2).
+После соединения данные можно передавать, используя системные вызовы
+.BR read (2)
+и
+.BR write (2),
+или какой-то из вариантов системных вызовов
+.BR send (2)
+и
+.BR recv (2).
+Когда сессия закончена, выполняется
+.BR close (2). 
+Вне-поточные данные могут передаваться, как описано в
+.BR send (2),
+а приниматься, как описано в
+.BR recv (2).
+.PP
+Коммуникационные протоколы, которые реализуют
+.BR SOCK_STREAM ,
+следят, чтобы данные не были потеряны или продублированы.  Если у
+корреспондента имеется место в буфере, но очередная порция данных не
+может быть передана за разумное время, то соединение считается
+мертвым.
+Когда на сокете включен флаг
+.BR SO_KEEPALIVE ,
+протокол каким-либо способом проверяет, что другая сторона ещё жива.
+Сигнал
+.B SIGPIPE
+появляется, если процесс посылает или принимает данные, пользуясь
+разорванным потоком; это приводит к тому, что неопытные процессы, не
+обрабатывающие сигнал, завершаются.
+Сокеты
+.B SOCK_SEQPACKET
+используют те же самые системные вызовы, что и сокеты
+.BR SOCK_STREAM .
+Единственное отличие в том, что вызовы
+.BR read (2)
+вернут только запрошенное количество данных, а остаток прибывшего
+пакета будет отброшен.  Границы между сообщениями во входящих
+датаграммах сохраняются.
+.PP
+Сокеты
+.B SOCK_DGRAM
+и
+.B SOCK_RAW
+позволяют посылать датаграммы корреспондентам, заданным при вызове
+.BR send (2).
+Датаграммы обычно принимаются с помощью вызова
+.BR recvfrom (2),
+который возвращает следующую датаграмму с соответствующим обратным
+адресом.
+.PP
+.B SOCK_PACKET
+--- это устаревший тип сокета, позволявший получать необработанные
+пакеты прямо от драйвера устройства.  Используйте вместо него
+.BR packet (7).
+.PP
+Системный вызов
+.BR fcntl (2)
+с аргументом
+.B F_SETOWN 
+может использоваться, чтобы задать группу процессов, которая будет
+получать сигнал
+.BR SIGURG ,
+когда прибывают вне-поточные данные или сигнал
+.BR SIGPIPE ,
+когда соединение типа
+.B SOCK_STREAM 
+неожиданно обрывается. 
+Этот вызов также можно использовать, чтобы задать процесс или группу
+процессов, которые получают асинхронные уведомления о вводе-выводе с
+помощью
+.BR SIGIO. 
+Использование
+.B F_SETOWN
+эквивалентно использованию
+.BR ioctl (2)
+с аргументом SIOSETOWN.
+.PP
+Когда сеть сообщает протоколу об ошибке (в случае IP, например,
+используя ICMP-сообщение), то для сокета устанавливается флаг
+ожидающей ошибки.  Следующая операция с этим сокетом вернет код
+ожидающей ошибки.  Для некоторых протоколов можно разрешить для
+конкретного сокета очередь ошибок, чтобы получить детальную информацию 
+об ошибке; см.
+.B IP_RECVERR 
+в
+.BR ip (7) .
+.PP
+Операции сокетов контролируются их
+.IR параметрами .
+Эти параметры описаны в
+.BR <sys/socket.h> .
+.BR setsockopt (2)
+и
+.BR getsockopt (2)
+используются, чтобы установить и получить параметры, соответственно.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае ошибки возвращается \-1; в противном случае возвращается
+дескриптор, ссылающийся на сокет.
+.SH ОШИБКИ
+.TP 0.8i
+.B EPROTONOSUPPORT
+Тип протокола или указанный протокол не поддерживаются в этом домене.
+.TP
+.B ENFILE
+Ядру не хватило памяти, чтобы создать новый сокет.
+.TP
+.B EMFILE
+Переполнение таблицы файлов процесса.
+.TP
+.B EACCES
+Не разрешено создание сокета указанного типа и/или протокола.
+.TP
+.BR ENOBUFS " или " ENOMEM
+Недостаточно памяти.  Сокет не может быть создан, пока не освободится
+память.
+.TP
+.B EINVAL
+Неизвестный протокол, или недоступный набор протоколов.
+.PP
+Другие ошибки могут быть сгенерированы нижележащими модулями
+протоколов.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD (системный вызов
+.B socket
+появился в 4.2BSD).  Обычно переносимо с/на не-BSD системы,
+имеющие реализацию сокетов BSD (включая варианты System V).
+.SH ЗАМЕЧАНИЕ
+Для наборов протоколов под BSD 4.* используются константы PF_UNIX,
+PF_INET и т.\~д., тогда как AF_UNIX и т.\~п. используются для указания 
+семьи адресов.  Однако же, страница руководства из BSD обещает:
+"Вообще, набор протоколов совпадает с семьей адресов", и в последующих 
+стандартах везде используется AF_*.
+.SH "СМОТРИ ТАКЖЕ"
+.BR accept "(2), " bind "(2), " connect "(2), " getprotoent "(3), "
+.BR getsockname "(2), " getsockopt "(2), " ioctl "(2), " listen "(2), "
+.BR read "(2), " recv "(2), " select "(2), " send "(2), " shutdown "(2), "
+.BR socketpair "(2), " write (2)
+.PP
+\(lqВводное Руководство по межпроцессной коммуникации в 4.3 BSD\(rq
+(\(lqAn Introductory 4.3 BSD Interprocess Communication Tutorial\(rq)
+перепечатано в
+.IR "Дополнительные документы для программиста UNIX, Том\~1" , 
+.IR "" ( "UNIX Programmer's Supplementary Documents Volume\~1" ).
+.PP
+\(lqРуководство по межпроцессной коммуникации в BSD\(rq
+перепечатано в
+.IR "Дополнительные документы для программиста UNIX, Том\~1" ,
+.IR "" ( "UNIX Programmer's Supplementary Documents Volume\~1" ).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

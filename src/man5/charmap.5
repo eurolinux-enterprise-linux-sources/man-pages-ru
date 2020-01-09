@@ -1,0 +1,128 @@
+.\" Hey emacs, this is -*- nroff -*-
+.\"
+.\" This file is part of locale(1) which displays the settings of the 
+.\" current locale.
+.\" Copyright (C) 1994  Jochen Hein (Hein@Student.TU-Clausthal.de)
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111, USA.
+.\"
+.\" Дата последней коррекции перевода 07.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\" Вычитано и скорректировано by alexm@hsys.msk.ru для проекта
+.\" http://alexm.here.ru/manpages-ru/ 
+.TH charmap 5 1994-11-28 Поддержка национального языка" "Руководство пользователя Linux"
+.SH ИМЯ
+charmap \- набор символов для задания кодировки символов
+.SH ОПИСАНИЕ
+Описание набора символов (charmap) создает набор из доступных символов,
+а также их кодировки. Все поддерживаемые наборы символов должны иметь
+своим подмножеством
+.BR "переносимый набор символов" .
+.\" Not true anymore:
+.\" The portable character set is defined in the file
+.\" .I /usr/lib/nls/charmap/POSIX
+.\" .I /usr/share/i18n/charmap/POSIX
+.\" for reference purposes.
+.SH СИНТАКСИС
+Файл с набором символов начинается с заголовка, который может содержать
+следующие ключевые слова:
+.TP
+.IR <codeset> ,
+за которым следует имя кодировки.
+.TP
+.IR <mb_cur_max> ,
+за которым следует максимальное число байтов для многобайтного
+символа.  Многобайтные символы в данный момент не поддерживаются.  По
+умолчанию это число равно 1.
+.TP
+.IR <mb_cur_min> ,
+за которым следует минимальное число байтов на символ.  Данное
+значение может быть меньше или равно
+.B mb_cur_max.
+Если оно не задано, то по умолчанию принимается значение
+.B mb_cur_max.
+.TP
+.IR <escape_char> ,
+за которым следует символ, который должен использоваться как
+символ escape во всех нижеследующих строках, чтобы выделять символы,
+которые должны интерпретироваться специальным образом. По умолчанию
+таким символом является обратная косая черта (\fB\\\\\fR).
+.TP
+.IR <comment_char> ,
+за которым следует символ, который будет использоваться в качестве
+символа комментария во всех нижеследующих строках. По умолчанию
+таким символом является решетка (\fB#\fR).
+
+.PP
+Само определение набора символов начинается с ключевого слова
+.B CHARMAP
+в первом знакоместе.
+
+Последующие строки могут иметь два формата, предназначенных для
+задания кодировки символов:
+.TP
+.I <символьное-имя> <кодировка> <комментарии>
+Такая форма задает ровно один символ и его кодировку.
+
+.TP
+.I <символьное-имя>...<символьное-имя> <кодировка> <комментарии>
+Такая форма задает несколько символов. Она полезна только для многобайтных
+символов, которые в данный момент не реализованы.
+
+.PP
+Последняя строка в файле определения набора символов должна содержать
+.B END CHARMAP.
+.SH "СИМВОЛЬНЫЕ ИМЕНА"
+.B Символьное имя
+для символа содержит только символы из
+.B переносимого набора символов.
+Само имя заключается в угловые скобками. Символы, которые следуют за
+.BR <escape_char> ,
+теряют специальное значение и интерпретируются как сами эти символы;
+например, последовательность
+.B '<\\\\\\\\\\\\>>'
+представляет собой символьное имя
+.B '\\\\>'
+заключенное в угловые скобки.
+.SH "КОДИРОВКА СИМВОЛА"
+Кодировка может быть в любой из трех следующих форм:
+.TP
+.I <escape_char>d<число>
+с десятичным числом
+.TP
+.I <escape_char>x<число>
+с шестнадцатеричным числом
+.TP
+.I <escape_char><число>
+с восьмеричным числом
+
+.\" XXX - comments
+.\" XXX - char ... char
+
+.SH ФАЙЛЫ
+.I /usr/share/i18n/charmaps/* 
+.SH АВТОР
+Jochen Hein (jochen.hein@delphi.central.de)
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.2
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR locale (1),
+.BR localedef (1),
+.BR setlocale (3),
+.BR localeconv (3),
+.BR locale (5)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

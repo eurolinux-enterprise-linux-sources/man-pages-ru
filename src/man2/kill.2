@@ -1,0 +1,141 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt (michael@moria.de)
+.\" Modified by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\" Modified Fri Jul 23 21:51:36 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Jul 25 10:53:24 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Wed Nov 01 18:56:43 1995 by Michael Haardt
+.\"  (michael@cantor.informatik.rwth-aachen.de)
+.\" Modified Sun Apr 14 17:04:32 1996 by Andries Brouwer (aeb@cwi.nl)
+.\"  [added some polishing contributed by Mike Battersby (mib@deakin.edu.au)]
+.\" Modified Sun Jul 21 21:25:26 1996 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Fri Jan 17 23:49:46 1997 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Tue Dec 18 10:53:02 2001 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified, 24 Jul 2002, Michael Kerrisk <mtk16@ext.canterbury.ac.nz>
+.\"	Added note on historical rules enforced when an unprivileged process
+.\"	sends a signal.
+.\"
+.\"
+.\" Дата последней коррекции перевода 16.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH KILL 2 2001-12-18 "Linux 2.5.0" "Руководство программиста Linux"
+.SH ИМЯ
+kill \- посылает сигнал процессу
+.SH ОБЗОР
+.nf
+.B #include <sys/types.h>
+.br
+.B #include <signal.h>
+.sp
+.BI "int kill(pid_t " pid ", int " sig );
+.fi
+.SH ОПИСАНИЕ
+Системный вызов
+.B kill
+может быть использован для посылки какого-либо сигнала какому-либо процессу
+или группе процесса.
+.PP
+Если значение \fIpid\fP является положительным, сигнал \fIsig\fP посылается
+процессу с идентификатором \fIpid\fP.
+.PP
+Если \fIpid\fP равен 0, то \fIsig\fP посылается каждому процессу, который
+входит в группу текущего процесса.
+.PP
+Если \fIpid\fP равен \-1, то \fIsig\fP посылается каждому процессу, за
+исключением процесса с номером 1 (init), но есть нюансы, которые описываются
+ниже.
+.PP
+Если \fIpid\fP меньше чем \-1, то \fIsig\fP посылается каждому процессу,
+который входит в группу процесса \fI\-pid\fP.
+.PP
+Если \fIsig\fP равен 0, то никакой сигнал не посылается, а только выполняется
+проверка на ошибку.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. При ошибке, возвращается \-1 и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+Задан неправильный сигнал.
+.TP
+.B ESRCH
+Идентификатор процесса pid или группа процесса не существуют.
+Заметим, что существующий процесс может быть зомби - процессом,
+который уже находится в состоянии завершения, но пока в котором
+пока ещё не выполнился \fBwait()\fP.
+.TP
+.B EPERM
+Текущий процесс не имеет прав на посылку сигнала к любому из указанных
+процессов. Процессы, которые имеют права на посылку сигнала
+процессу с номером
+.I pid
+должны иметь привелегии суперпользователя или, реальный или
+эффективный идентификатор пользователя процесса, посылающего сигнал,
+должен быть таким же как реальный или эффективный идентификатор
+пользователя процесса, принимающего сигнал.
+В случае, когда посылающий и принимающий процессы относятся к одной
+сессии, становится доступным сигнал SIGCONT.
+.SH ЗАМЕЧАНИЯ
+Невозможно послать сигнал процессу с номером 1, т.е. процессу init,
+для которого не устанавливается обработчик сигналов. Так сделано,
+чтобы быть уверенным, что в случае какой-либо нештатной ситуации,
+рабата системы не будет завершена аварийно.
+.LP
+POSIX 1003.1-2001 требует, чтобы \fIkill(-1,sig)\fP посылал \fIsig\fP
+всем процессам, которым текущий процесс может послать сигналы,
+за исключением возможно нескольких, определяемых реализацией
+системы процессов. Linux разрешает любому процессу посылать сигнал
+себе, но в Linux системный вызов
+\fIkill(-1,sig)\fP не посылает сигнал текущему процессу.
+.SH "ИСТОРИЯ LINUX"
+В различных версиях ядра, Linux применяет разные правила, касающиеся
+прав доступа, которые требуются для непревилегированного процесса,
+чтобы посылать сигнал другому процессу.
+.\" In the 0.* kernels things chopped and changed quite
+.\" a bit - MTK, 24 Jul 02
+В ядрах с 1.0 по 1.2.2, сигнал может быть послан, если эффективный
+идентификатор пользователя, посылающего сигнал процесса совпадает
+с эффективным идентифкатором пользователя у процесса-получателя или реальный
+идентификатор пользователя, посылающего сигнал процесса совпадает
+с реальным идентифкатором пользователя у процесса-получателя.
+В ядрах с 1.2.3 по 1.3.77, сигнал может быть послан, если эффективный
+идентификатор пользвателя, посылающего сигнал процесса совпадает
+или с реальным или с эффективным идентифкатором пользователя у
+процесса-получателя. Текущие правила, которые соответствуют стандартам
+POSIX 1003.1-2001 были введены, начиная с ядра версии 1.3.78.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX.1, X/OPEN, BSD 4.3, POSIX 1003.1-2001
+.SH "СМОТРИ ТАКЖЕ"
+.BR _exit (2),
+.BR killpg (2),
+.BR signal (2),
+.BR tkill (2),
+.BR exit (3),
+.BR signal (7)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

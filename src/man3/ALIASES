@@ -1,0 +1,37 @@
+#
+# malloc and friends
+#
+malloc	calloc
+malloc	free
+malloc	realloc
+
+#
+# string family
+#
+index	rindex
+strspn	strcspn
+strcasecmp	strncasecmp
+strcat	strncat
+strcmp	strncmp
+strcpy	strncpy
+strchr	strrchr
+strtok	strtok_r
+
+#
+# numerical functions
+#
+abs	labs
+abs	llab
+abs	imaxabs
+atoi	atol
+atoi	atoll
+atoi	atoq
+erf	erfc
+exp	log
+exp	log10
+exp	pow
+j0	j1
+j0	jn
+j0	y0
+j0	y1
+j0	yn

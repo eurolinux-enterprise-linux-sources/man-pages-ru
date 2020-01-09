@@ -1,0 +1,150 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1995 Michael Chastain (mec@shell.portal.com), 15 April 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Fri Jan 31 16:11:17 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Wed Jul 30 14:25:16 1997 by Paul Slootman <paul@wurtel.demon.nl>
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ADJTIMEX 2 1997-07-30 "Linux 2.0" "Руководство программиста Linux"
+.SH ИМЯ
+adjtimex \- тонкая настройка часов в ядре
+.SH ОБЗОР
+.B #include <sys/timex.h>
+.sp
+.BI "int adjtimex(struct timex *" "buf" );
+.SH ОПИСАНИЕ
+Linux использует для подстройки часов алгоритм David L. Mills (см. RFC 1305).
+Системный вызов
+.B adjtimex
+читает и (необязательно) устанавливает параметры подстройки для этого
+алгоритма.
+В качестве аргумента используется указатель на структуру
+.I timex ,
+по значениям в полях которой осуществяется обновление параметров
+ядра и в этой же структуре происходит возврат текущих значений
+параметров ядра. Данная структура описана так:
+.PP
+.RS
+.nf
+struct timex {
+    int modes;           /* выбор режима */
+    long offset;         /* смещение по времени (usec) */
+    long freq;           /* частота смещения (scaled ppm) */
+    long maxerror;       /* максимальная ошибка (usec) */
+    long esterror;       /* ожидаемая ошибка (usec) */
+    int status;          /* команда/состояние для часов */
+    long constant;       /* временная константа pll */
+    long precision;      /* точность часов (usec) (только чтение) */
+    long tolerance;      /* clock frequency tolerance (ppm)
+                            (read only) */
+    struct timeval time; /* текущее время (только чтение) */
+    long tick;           /* usecs between clock ticks */
+};
+.fi
+.RE
+.PP
+Поле
+.I modes
+определяет какие параметры, если это необходимо, устанавливаются.
+Значение поля может содержать комбинации
+.RI битовых
+масок, значения которых следующие:
+.PP
+.RS
+.nf
+#define ADJ_OFFSET            0x0001 /* смещение времениtime offset */
+#define ADJ_FREQUENCY         0x0002 /* частота смещения */
+#define ADJ_MAXERROR          0x0004 /* максимальная ошибка времени */
+#define ADJ_ESTERROR          0x0008 /* ожидаемая ошибка времени */
+#define ADJ_STATUS            0x0010 /* состояние часов */
+#define ADJ_TIMECONST         0x0020 /* временная константа pll */
+#define ADJ_TICK              0x4000 /* значение тика */
+#define ADJ_OFFSET_SINGLESHOT 0x8001 /* old-fashioned adjtime */
+.fi
+.RE
+.PP
+Обычные пользователи могут писать в 
+.IR mode .
+только ноль.
+Только суперпользователь root может устанавливать любые параметры.
+.br
+.ne 12v
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха,
+.B adjtimex
+возвращает состояние часов:
+.PP
+.RS
+.nf
+#define TIME_OK   0 /* часы синхронизированы */
+#define TIME_INS  1 /* вставлено секундный прыжок */
+#define TIME_DEL  2 /* удалён секундный прыжок */
+#define TIME_OOP  3 /* выполняется секундный прыжок */
+#define TIME_WAIT 4 /* секундный прыжок осуществлён */
+#define TIME_BAD  5 /* часы не синхронизированы */
+.fi
+.RE
+.PP
+В случае неудачи,
+.B adjtimex
+возвращает \-1 и устанавливает
+.IR errno .
+.SH ОШИБКИ
+.TP
+.B EFAULT
+.I buf
+не является указателем на доступную для записи область памяти.
+.TP
+.B EPERM
+.I buf.mode
+не ноль, а пользователь не является суперпользователем.
+.TP
+.B EINVAL
+Попытка установить
+.I buf.offset
+в значение, выходящее за диапазон от \-131071 до +131071,
+или установить
+.I buf.status
+в значение отличное от перечисленных выше,
+или установить
+.I buf.tick
+в значение за пределами диапазона от 
+.RB 900000/ HZ
+до
+.RB 1100000/ HZ ,
+где
+.B HZ \-
+это частота прерываний системного таймера.
+.SH "СОВМЕСТИМОСТЬ СО СТАНДАРТАМИ"
+\fBadjtimex\fP \- это специфичный для Linux вызов и он не должен
+использоваться в программах, которые пишуться как переносимые.
+Существует похожий, но более общий для разных Unix систем вызов
+\fBadjtime\fR в SVr4.
+.SH "СМОТРИ ТАКЖЕ"
+.BR settimeofday (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

@@ -1,0 +1,68 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 2002-04-15 by Roger Luethi <rl@hellgate.ch> and aeb
+.\"
+.\" Дата последней коррекции перевода 03.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETDTABLESIZE 2 2002-04-15 "Linux 2.4" "Руководство программиста Linux"
+.SH ИМЯ
+getdtablesize \- получить размер таблицы дескрипторов
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.B int getdtablesize(void);
+.SH ОПИСАНИЕ
+.B getdtablesize
+возвращает максимальное количетство файлов, которое может быть
+открыто в процессе, на единицу больше, чем наибольшее возможное
+значение для дескриптора файла.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Текущее ограничение на количество открытых файлов для процесса.
+.SH ЗАМЕЧАНИЕ
+.B getdtablesize
+реализуется как библиотечная функция libc. В glibc существует
+вызов
+.BR getrlimit (2),
+которые возвращает для текущего процесса ограничение
+.B RLIMIT_NOFILE
+или
+.B OPEN_MAX ,
+если первый вызов закончился ошибкой.
+В libc4 и libc5 возвращается значение
+.B OPEN_MAX
+(установленное в 256 начиная с Linux 0.98.4).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (функция
+.B getdtablesize
+впервые появилась в BSD 4.2).
+.SH "СМОТРИ ТАКЖЕ"
+.BR close (2),
+.BR dup (2),
+.BR getrlimit (2),
+.BR open (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

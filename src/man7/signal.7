@@ -1,0 +1,147 @@
+'\" t
+.\" Copyright (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" License.
+.\" Modified Sat Jul 24 17:34:08 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Jan  7 01:41:27 1996 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Sun Apr 14 12:02:29 1996 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Sat Nov 13 16:28:23 1999 by Andries Brouwer (aeb@cwi.nl)
+.\"
+.TH SIGNAL 7  "14 апреля 1996" "Linux 1.3.88" "Руководство программиста Linux"
+.SH ИМЯ
+signal \- список доступных сигналов
+.SH ОПИСАНИЕ
+Linux поддерживает нижеописанные сигналы. Некоторые номера сигналов
+зависят от используемой архитектуры.  Сначала идут сигналы, описанные
+в стандарте POSIX.1.
+.sp
+.PP
+.TS
+l c c l
+____
+lB c c l.
+Сигнал	Значение	Действие	Описание
+SIGHUP	\01	A	Обнаружен обрыв связи с управляющим терминалом
+			либо завершение управляющего процесса
+SIGINT	\02	A	Прерывание с клавиатуры
+SIGQUIT	\03	C	Выход с клавиатуры
+SIGILL	\04	C	Несуществующая инструкция
+SIGABRT	\06	C	Сигнал прерывания, посланный функцией \fIabort\fP(3)
+SIGFPE	\08	C	Ошибка операций с плавающей запятой
+SIGKILL	\09	AEF	Kill-сигнал
+SIGSEGV	11	C	Обращение к запретной области памяти
+SIGPIPE	13	A	Оборванный канал: запись в канал, из которого не читают
+SIGALRM	14	A	Сигнал таймера от функции \fIalarm\fP(2)
+SIGTERM	15	A	Сигнал завершения
+SIGUSR1	30,10,16	A	Первый сигнал, определяемый пользователем
+SIGUSR2	31,12,17	A	Второй сигнал, определяемый пользователем
+SIGCHLD	20,17,18	B	Потомок остановлен или прекратил выполнение
+SIGCONT	19,18,25		Продолжить выполнение, если остановлен
+SIGSTOP	17,19,23	DEF	Приостановить выполнение процесса
+SIGTSTP	18,20,24	D	Останов введен с терминала
+SIGTTIN	21,21,26	D	ввод с терминала у фонового процесса
+SIGTTOU	22,22,27	D	вывод на терминал у фонового процесса
+.TE
+
+Следующие сигналы не входят в стандарт POSIX.1, но описаны в SUSv2.
+.sp
+.PP
+.TS
+l c c l
+____
+lB c c l.
+Сигнал	Значение	Действие	Описание
+SIGBUS	10,7,10	C	Ошибка шины (ошибка доступа к памяти)
+SIGPOLL		A	Ожидаемое событие (Sys V). Синоним SIGIO
+SIGPROF	27,27,29	A	Закончилось время профилирующего таймера
+SIGSYS	12,\-,12	C	Неправильный аргумент процедуры (SVID)
+SIGTRAP	5	C	Трассировка/ловушка
+SIGURG	16,23,21	B	Неотложное событие в сокете (4.2 BSD)
+SIGVTALRM	26,26,28	A	Виртуальный будильник (4.2 BSD)
+SIGXCPU	24,24,30	C	Лимит процессорного времени исчерпан (4.2 BSD)
+SIGXFSZ	25,25,31	C	Лимит на размер файла исчерпан (4.2 BSD)
+.TE
+
+(Для случаев SIGSYS, SIGXCPU, SIGXFSZ, а для некоторых архитектур -- и SIGBUS, Linux (до 
+настоящего времени -- 2.3.40) по умолчанию производит действие A (завершение 
+выполнения), тогда как SUSv2 предписывает делать C (завершить выполнение с записью 
+дампа памяти).)
+
+Дальше идут различные прочие сигналы.
+.sp
+.PP
+.TS
+l c c l
+____
+lB c c l.
+Сигнал	Значение	Действие	Описание
+SIGIOT	6	C	IOT-ловушка. Синоним для SIGABRT
+SIGEMT	7,\-,7	
+SIGSTKFLT	\-,16,\-	A	Переполнение стека сопроцессора
+SIGIO	23,29,22	A	I/O теперь возможно (4.2 BSD)
+SIGCLD	\-,\-,18		Синоним для SIGCHLD
+SIGPWR	29,30,19	A	Авария питающего напряжения (System V)
+SIGINFO	29,\-,\-		Синоним для SIGPWR
+SIGLOST	\-,\-,\-	A	Потеря файла блокировки
+SIGWINCH	28,28,20	B	Изменение размеров окна (4.3 BSD, Sun)
+SIGUNUSED	\-,31,\-	A	Неиспользуемый сигнал (в будущем будет SIGSYS)
+.TE
+
+(Здесь \- является признаком того, что сигнал отсутствует; там, где
+приведено три значения, первое -- для архитектур alpha и sparc, второе
+для архитектур i386, ppc и sh, последнее для mips.  29-й сигнал -- это
+.B SIGINFO
+/
+.B SIGPWR
+для alpha, но
+.B SIGLOST
+для sparc.)
+.PP
+Буквы в колонке "Действие" имеют следующее значение:
+.IP A
+Действие по умолчанию -- прекращение выполнения процесса.
+.IP B
+Действие по умолчанию -- игнорировать сигнал.
+.IP C
+Действие по умолчанию -- прекращение выполнения процесса и запись дампа памяти.
+.IP D
+Действие по умолчанию -- приостановка выполнения процесса.
+.IP E
+Сигнал не может быть перехвачен.
+.IP F
+Сигнал не может быть проигнорирован.
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+POSIX.1
+.SH ОШИБКИ
+.B SIGIO
+и
+.B SIGLOST
+имеют одинаковое значение.  Последний закомментирован в исходниках ядра,
+но некоторые программы продолжают думать, что 29-й сигнал -- это 
+.BR SIGLOST .
+.SH СМОТРИ ТАКЖЕ
+.BR kill (1),
+.BR kill (2),
+.BR setitimer (2)
+.RE
+.SH ПЕРЕВОД
+Перевел с английского Алексей Миллер <asm@asm.kiev.ua> 2000

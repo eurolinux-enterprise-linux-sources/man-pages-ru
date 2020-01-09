@@ -1,0 +1,113 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1995 Michael Chastain (mec@shell.portal.com), 15 April 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Fri Jan 31 16:14:33 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 06.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH BDFLUSH 2 1995-04-15 "Linux 1.2.4" "Руководство программиста Linux"
+.SH ИМЯ
+bdflush \- запустить, активизировать или настроить демона записи
+буферов кэша
+.SH ОБЗОР
+.nf
+.BI "int bdflush(int "  func ", long *" address );
+.BI "int bdflush(int "  func ", long " data );
+.fi
+.SH ОПИСАНИЕ
+.B bdflush
+запускает, активизирует или настраивает демона записи буферов кэша.
+Системный вызов
+.BR bdflush
+может быть выполнен только суперпользователем root.
+.PP
+Если аргумент
+.I func
+отрицателен или равен нулю, а демон ещё не был запущен, то
+.B bdflush
+запускает демона и не возвращает управления.
+.PP
+Если аргумент
+.I func
+равен 1, то некоторые "грязные" (dirty) буфера записываются на диск.
+.PP
+Если аргумент
+.I func
+равен двум или более, и является чётным числом (младший бит равен
+нулю), то аргумент
+.I address
+является адресом в виде длинного слова, и по этому адресу возвращается
+для вызываюшего процесса параметр настройки с номером
+.RI "(" "func" "\-2)/2" .
+.PP
+Если аргумент
+.I func
+равен трём или более и является нечётным числом (младший бит равен
+единице), то аргумент
+.I data
+является длинным словом, и ядро устанавливает в это значение параметр
+настройки с номером
+.RI "(" "func" "\-3)/2" .
+.PP
+Набор параметров и разрешённых диапазонов их значений определяется в
+файле
+.IR fs/buffer.c
+в исходных текстах ядра.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Если аргумент
+.I func
+отрицателен или равен нулю, и демон запускается успешно, то
+.B bdflush
+не возвращает управление.  В противном случае возвращается ноль в
+случае успеха, а \-1 -- в случае ошибке, при этом
+.I errno
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 0.8i
+.B EPERM
+Вызвавший не является суперпользователем.
+.TP
+.B EFAULT
+.I address
+указывает за пределы доступного адресного пространства.
+.TP
+.B EBUSY
+Попытка запустить демона, который уже запущен.
+.TP
+.B EINVAL
+Попытка прочитать или записать параметр с неверным номером, или
+записать неверное значение.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+\fBbdflush\fP является специфичным для Linux и не должен использоваться в
+программах, которые должны быть переносимы.
+.SH "СМОТРИ ТАКЖЕ"
+.BR fsync (2),
+.BR sync (2),
+.BR update (8),
+.BR sync (8).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

@@ -1,0 +1,58 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de), Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Sat Jul 24 17:37:50 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Wed Apr 27 13:33:53 MET DST 1994 by Michael Haardt.
+.TH INTRO 3 "13 декабря 1995" "Linux" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+intro \- введение в библиотечные функции
+.SH ОПИСАНИЕ
+В этой главе описаны все библиотечные функции, кроме тех, что
+реализуют системные вызовы и описаны во второй главе.  Функции
+разделены на группы, обозначаемые буквами, которые добавляются к
+номеру главы:
+.IP (3C)
+Эти функции, функции из второй главы и из главы 3S находятся в
+стандартной библиотеке libc, и используются компилятором
+.BR cc (1)
+по умолчанию.
+.IP (3S)
+Эти функции являются частью библиотеки
+.BR stdio (3S).
+Они находятся в стандартной библиотеке libc.
+.IP (3M)
+Эти функции находятся в арифметической библиотеке libm.  Они по
+умолчанию используются компилятором ФОРТРАНА
+.BR f77 (1),
+но не используются компилятором C
+.BR cc (1),
+которому для этого нужен дополнительный ключ \fI\-lm\fP.
+.IP (3F)
+Эти функции являются частью библиотеки ФОРТРАНА libF77.  Для их
+использования не требуются специальные флаги компилятора.
+.IP (3X)
+Различные специальные библиотеки.  Страницы руководства, описывающие
+эти функции, указывают название библиотеки.
+.SH АВТОРЫ
+Смотрите в заголовки страниц руководства, где находится информация об
+авторах и авторских правах.  Заметьте, что они могут отличаться для
+разных страниц!

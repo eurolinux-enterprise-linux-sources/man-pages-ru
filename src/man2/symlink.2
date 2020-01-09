@@ -1,0 +1,155 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Sat Jul 24 12:01:10 1993 by Rik Faith
+.\" Added correction due to Nick Duffek <nsd@bbc.com>, aeb, 960426
+.\" Modified Wed Nov  6 04:07:10 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Fri Jan 31 17:51:14 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 12.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH SYMLINK 2 1997-08-21 Linux "Руководство программиста Linux"
+.SH ИМЯ
+symlink \- создать новое имя для файла
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int symlink(const char *" topath ", const char *" frompath );
+.SH ОПИСАНИЕ
+.B symlink
+создает символьную ссылку, которая называется
+.I frompath
+и содержит строку
+.IR topath .
+
+Символьные ссылки интерпретируются "на лету", как будто бы
+содержимое ссылки было подставлено вместо пути, по которому идет
+поиск файла или каталога.
+
+Символьные ссылки могут содержать такие компоненты пути, как
+.B ..
+которые, (если используются в начале ссылки), ссылаются на
+родительский каталог того каталога, в котором находится ссылка.
+
+Символьная ссылка (также известная как "мягкая ссылка") может
+указывать как на существующий, так и на несуществующий файлы;  в
+последнем случае такая ссылка называется "висячей".
+
+Права доступа к символьной ссылке не используются; её владелец
+игнорируется при поиске по ссылке, но проверяется при удалении или
+переименовании ссылки, находящейся в каталоге с установленным sticky
+битом.
+
+Если
+.I newpath
+существует, он
+.I не
+будет перезаписан.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а
+значение 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+.TP 0.8i
+.TP
+.B EPERM
+Файловая система, содержащая
+.IR pathname ,
+не поддерживает создание символьных ссылок.
+.TP
+.B EFAULT
+.IR oldpath " или " newpath
+указывают за пределы доступного адресного пространства.
+.TP
+.B EACCES
+Доступ для записи в каталог, содержащий
+.I newpath,
+не разрешен для эффектиного uid владельца процесса, или же один из
+каталогов, являющихся частью
+.IR newpath,
+не допускает поиск.
+.TP
+.B ENAMETOOLONG
+.IR oldpath " или " newpath
+слишком длинны.
+.TP
+.B ENOENT
+Одна из частей пути
+.IR oldpath " или " newpath
+не существует или является "висячей" символьной ссылкой.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR oldpath " или " newpath ,
+в действительности таковым не является.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B EEXIST
+.I newpath
+уже существует.
+.TP
+.B ELOOP
+.IR newpath
+является зацикленной символьной ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.TP
+.B ENOSPC
+На устройстве, содержащем 
+.IR newpath ,
+нет места для создания новой записи в каталоге.  Это может произойти
+также, если исчерпана квота дискового пространства пользователя.
+.SH ЗАМЕЧАНИЯ
+Не производится никакой проверки
+.I oldpath.
+
+Удаление файла, на который ссылается символьная ссылка,
+действительно удалит файл (если только у него нет других жестких
+ссылок).  Если такое поведение нежелательно, используйте
+.BR link .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, BSD 4.3.  SVr4 документирует дополнительные коды
+ошибок EDQUOT, EIO, ENAMETOOLONG, ENOSYS.
+.SH ОШИБКИ
+Смотри
+.BR open (2)
+по поводу множества файлов с одним именем и NFS.
+.SH "СМОТРИ ТАКЖЕ"
+.BR link "(2), " unlink "(2), " rename "(2), " open (2),
+.BR lstat "(2), " ln "(1), " link (8).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

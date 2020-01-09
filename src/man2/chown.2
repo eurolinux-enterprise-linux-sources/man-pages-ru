@@ -1,0 +1,196 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\" Copyright (c) 1998 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified Wed Jul 21 21:53:01 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Jul  9 13:59:51 1996 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Wed Nov  6 03:49:07 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Sun May 18 10:34:09 1997 by Michael Haardt <michael@cantor.informatik.rwth-aachen.de>
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH CHOWN 2 1997-05-18 "Linux 2.1.81" "Руководство программиста Linux"
+.SH ИМЯ
+chown, fchown, lchown \- изменить владельца файла
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int chown(const char *" path ", uid_t " owner ", gid_t " group );
+.br
+.BI "int fchown(int " fd ", uid_t " owner ", gid_t " group );
+.br
+.BI "int lchown(const char *" path ", uid_t " owner ", gid_t " group );
+.SH ОПИСАНИЕ
+Изменяет владельца для файла, задаваемого параметрами
+.I path
+или
+.IR fd .
+Только суперпользователь может изменять владельца файла.  Владелец
+файла может изменять группу файла на любую группу, к которой
+он принадлежит. Суперпользователь может произвольно изменять группу.
+
+Если параметр
+.I owner
+или
+.I group
+заданы как \-1, то соответствующий идентификатор не изменяется.
+
+Когда владелец или группа исполняемого файла изменяются
+не-суперпользователем, то очищаются биты S_ISUID и S_ISGID.  POSIX не
+требует, чтобы это происходило, когда суперпользователь выполняет
+.IR chown ;
+в этом случае поведение зависит от версии ядра Linux.  Если в правах
+доступа к файлу не установлен бит исполнения группой (S_IXGRP), то бит 
+S_ISGID означает принудительную блокировку на этом файле и не
+очищается функцией
+.IR chown .
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+В зависимости от файловой системы могут также возвращаться другие
+ошибки.  Общий набор ошибок
+.B chown
+перечислен ниже:
+
+.TP 0.8i
+.B EPERM
+Фактический UID не совпадает с владельцем файла и не равен нулю; 
+параметры
+.I owner
+или
+.I group
+заданы неверно.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B EFAULT
+.I path
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENAMETOOLONG
+.I path
+слишком длинно.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR path ,
+в действительности таковым не является.
+.TP
+.B EACCES
+Запрещен поиск в одном из каталогов, находящихся на пути к файлу.
+.TP
+.B ELOOP
+При обработке
+.I path
+встречено слишком много символьных ссылок (возможно зацикливание
+по символьным ссылкам -- прим. пер.).
+.PP
+Общие ошибки
+.B fchown
+таковы:
+.TP 0.8i
+.B EBADF
+Неверный файловый дескриптор.
+.TP
+.B ENOENT
+См. выше.
+.TP
+.B EPERM
+См. выше.
+.TP
+.B EROFS
+См. выше.
+.TP
+.B EIO
+При модификации inode произошла низкоуровневая ошибка ввода-вывода.
+.SH ЗАМЕЧАНИЯ
+В версиях Linux до 2.1.81 (кроме 2.1.46),
+.B chown
+не следовал по символьным ссылкам. 
+Начиная с версии Linux 2.1.81
+.B chown
+следует по символьным ссылкам, и существует новый системный вызов
+.BR lchown ,
+который не следует по символьным ссылкам.  Начиная с Linux 2.1.86
+этот новый вызов (имеющий ту же смысл, что и старый
+.BR chown ),
+имеет тот же самый номер системного вызова, а
+.B chown
+получил новый номер.
+.LP
+Прототип
+.B fchown
+доступен только если определен символ
+.BR _BSD_SOURCE
+(или явно или неявно, но задан символ _POSIX_SOURCE или компиляция
+осуществляется с флагом -ansi).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системный вызов
+.B chown
+соответствует SVr4, SVID, POSIX, X/OPEN.  В версии 4.4BSD его может
+использовать только суперпользователь (то есть обычные пользователи не
+могут отдавать файлы).  SVr4 документирует EINVAL, EINTR, ENOLINK и
+EMULTIHOP, но не документирует ENOMEM.  POSIX.1 не документирует
+ENOMEM и ELOOP.
+.PP
+Системный вызов
+.B fchown
+соответствует 4.4BSD и SVr4.  SVr4 документирует дополнительные коды
+ошибки EINVAL, EIO, EINTR и ENOLINK.
+.SH ОГРАНИЧЕНИЯ
+Логика работы
+.B chown
+специально нарушается на файловых системах NFS с разрешенным
+преобразованием UID.  Вдобавок логика работы нарушается у всех
+системных вызовов, которые обращаются к содержимому файла, потому что
+.B chown
+может привести к немедленному запрету доступа к уже открытым файлам.
+Кэширование на клиенте может привести к задержке между сменой
+владельца и истинным моментом, когда этот пользователь сможет
+обратиться к файлу с других клиентов.
+.SH "СМОТРИ ТАКЖЕ"
+.BR chmod (2),
+.BR flock (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2000,
+Виктор Вислобоков <corochoone@perm.ru> 2003

@@ -1,0 +1,89 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 18:00:10 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Mon Jan 20 12:04:18 1997 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Tue Jan 23 20:23:07 2001 by Andries Brouwer (aeb@cwi.nl)
+.\"
+.TH STRSEP 3  "12 апреля 1993" "GNU" "Руководство программиста"
+.SH НАЗВАНИЕ
+strsep \- извлечение токена из строки
+.SH СИНТАКСИС
+.nf
+.B #include <string.h>
+.sp
+.BI "char *strsep(char **" stringp ", const char *" delim );
+.fi
+.SH ОПИСАНИЕ
+Если
+.RI * stringp
+равно NULL, то функция
+.B strsep()
+возвращает NULL и больше ничего не делает.  В противном случае эта
+функция находит первый токен в строке
+.IR stringp ,
+где токены разделены символами из строки
+.IR delim .
+Этот токен отделяется символом '\\0' (перезаписывая разделитель), а
+.RI * stringp
+обновляется, чтобы указывать на символ после токена.  В случае если
+разделители не найдены, вся строка
+.RI * stringp
+считается токеном, а
+.RI * stringp
+устанавливается в NULL.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBstrsep()\fP возвращает указатель на токен, то есть исходное
+значение
+.RI * stringp .
+.SH ЗАМЕЧАНИЯ
+Функция \fBstrsep()\fP была введена в качестве замены \fBstrtok()\fP,
+потому как последняя не может обрабатывать пустые поля.
+Тем не менее, \fBstrtok()\fP включена в стандарт ANSI-C и, таким
+образом, более переносима.
+.SH ОШИБКИ РЕАЛИЗАЦИИ
+Эта функция подвержена тем же проблемам, что и
+.BR strtok ().
+В частности, она модифицирует исходную строку.  Избегайте этой
+функции.
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+BSD 4.4
+.SH "СМОТРИ ТАКЖЕ"
+.BR index "(3), "
+.BR memchr "(3), "
+.BR rindex "(3), "
+.BR strchr "(3), "
+.BR strpbrk "(3), "
+.BR strspn "(3), "
+.BR strstr "(3), "
+.BR strtok (3)
+.SH ПЕРЕВОД
+.nf
+Перевод с английского (C) 2000 Дмитрий Морожников 
+    (dm@simplex.irkutsk.ru, 2:5070/141.3)
+.fi
+.\" Вычитано и скорректировано by alexm@hsys.msk.ru для проекта
+.\" http://alexm.here.ru/manpages-ru/

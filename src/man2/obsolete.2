@@ -1,0 +1,57 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1995 Michael Chastain (mec@shell.portal.com), 15 April 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified 22 July 1995 by Michael Chastain (mec@duracef.shout.net):
+.\"   Fixed incorrect word in 'TH' call.
+.\"
+.\" Modified Tue Oct 22 16:44:55 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH OBSOLETE 2 1995-07-22 "Linux 2.0" "Руководство программиста Linux"
+.SH ИМЯ
+oldfstat, oldlstat, oldstat, oldolduname, olduname \- устаревшие системные вызовы
+.SH ОБЗОР
+Устаревшие системные вызовы.
+.SH ОПИСАНИЕ
+Ядро Linux 2.0 реализовывает эти вызовы для поддержки старых программ.
+Эти вызовы возвращают структуры, которые увеличились с момента их
+первой реализации, но старые программы должны продолжать получать старые
+маленькие структуры.
+.PP
+В настоящий момент программы должны быть связаны с текущими версиями
+библиотек и никогда не использовать эти вызовы.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эти вызовы являются уникальными для Linux и не должны использоваться в
+новых программах.
+.SH "СМОТРИ ТАКЖЕ"
+.BR fstat (2),
+.BR lstat (2),
+.BR stat (2),
+.BR uname (2),
+.BR unimplemented (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

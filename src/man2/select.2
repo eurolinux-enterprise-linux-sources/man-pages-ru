@@ -1,0 +1,286 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is copyright (C) 1992 Drew Eckhardt,
+.\"                 copyright (C) 1995 Michael Shields.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1995-05-18 by Jim Van Zandt <jrv@vanzandt.mv.com>
+.\" Sun Feb 11 14:07:00 MET 1996  Martin Schulze  <joey@linux.de>
+.\"	* layout slightly modified
+.\"
+.\" Modified Mon Oct 21 23:05:29 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Thu Feb 24 01:41:09 CET 2000 by aeb
+.\" Modified Thu Feb  9 22:32:09 CET 2001 by bert hubert <ahu@ds9a.nl>, aeb
+.\"
+.TH SELECT 2 "11 февраля 1996" "Linux 1.2" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+select, pselect, FD_CLR, FD_ISSET, FD_SET, FD_ZERO \- синхронное мультиплексирование ввода-вывода
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/time.h>
+.br
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+\fBint select(int \fIn\fB, fd_set *\fIreadfds\fB,
+fd_set *\fIwritefds\fB, fd_set *\fIexceptfds\fB,
+struct timeval *\fItimeout\fB);
+.sp
+\fBint pselect(int \fIn\fB, fd_set *\fIreadfds\fB,
+fd_set *\fIwritefds\fB, fd_set *\fIexceptfds\fB,
+const struct timespec *\fItimeout\fB, sigset_t * \fIsigmask\fB);
+.sp
+.BI "FD_CLR(int " fd ", fd_set *" set );
+.br
+.BI "FD_ISSET(int " fd ", fd_set *" set );
+.br
+.BI "FD_SET(int " fd ", fd_set *" set );
+.br
+.BI "FD_ZERO(fd_set *" set );
+.fi
+.SH ОПИСАНИЕ
+Функции
+.B select
+и
+.B pselect
+ждут изменения статуса нескольких файловых дескрипторов.
+.PP
+Они почти идентичны, только
+.TP
+(i)
+.B select
+использует тайм-аут в виде
+.B struct timeval
+(с секундами и микросекундами), тогда как
+.B pselect
+использует
+.B struct timespec
+(с секундами и наносекундами).
+.TP
+(ii)
+Функция
+.B select
+может обновить параметр
+.IR timeout ,
+чтобы сообщить, сколько времени осталось.  Функция
+.B pselect
+не изменяет этот параметр.
+.TP
+(iii)
+Функция
+.B select
+не содержит параметра
+.IR sigmask ,
+и ведет себя как
+.B pselect
+с параметром
+.IR sigmask ,
+равным
+NULL.
+.PP
+Отслеживаются три независимых набора дескрипторов.  Те, что
+перечислены в параметре
+.IR readfds ,
+будут отслеживаться на предмет появления новых символов, доступных для 
+чтения (говоря точнее, операция чтения не будет блокирована -- в
+частности, файловый дескриптор находится в конце файла);
+те, что указаны в параметре
+.IR writefds ,
+будут отслеживаться на предмет того, что операция записи не будет
+заблокирована; те же, что указаны в параметре
+.IR exceptfds ,
+будут отслеживаться на предмет исключительных ситуаций.  При возврате
+из функции наборы дескрипторов модифицируются, чтобы показать, какие
+из них изменили свой статус.
+.PP
+Для манипуляций наборами существуют четыре макроса:
+.B FD_ZERO
+очищает набор.
+.B FD_SET
+и
+.B FD_CLR
+добавляют или удаляют заданный дескриптор из набора.
+.B FD_ISSET
+проверяет, является ли дескриптор частью набора; этот макрос полезен
+после возврата из функции
+.BR select .
+.PP
+.I n 
+на единицу больше самого большого номера дескриптора из всех наборов.
+.PP
+.IR timeout "\~--"
+это верхняя граница времени, которое пройдет перед возвратом из 
+.BR select .
+Можно использовать ноль, при этом
+.B select
+завершится немедленно.  (Это полезно для периодического опроса.)  Если
+.I timeout
+равен NULL (нет тайм-аута), то
+.B select
+будет ожидать изменений неопределенное время.
+.PP
+.IR sigmask "\~--"
+это указатель на маску сигналов (см.
+.BR sigprocmask (2));
+если этот параметр не равен NULL, то
+.B pselect
+сначала замещает текущую маску сигналов на ту, на которую указывает
+.IR sigmask ,
+затем выполняет select, и восстанавливает исходную маску сигналов.
+.PP
+Идея
+.B pselect
+в том, что если нужно подождать события: сигнала или активности на
+файловом дескрипторе, то требуется атомарная проверка, чтобы
+предотвратить race condition.  (Предположим, обработчик сигнала
+устанавливает глобальный флаг и возвращает управление.  Тогда проверка
+этого глобального флага, за которой следует
+.BR select (),
+может привести к подвисанию, если сигнал появляется сразу после
+проверки, но прямо перед вызовом select.  С другой стороны,
+.B pselect
+позволяет сначала заблокировать сигналы, обработать пришедшие сигналы,
+а затем вызвать
+.BR pselect ()
+с желаемой
+.IR sigmask ,
+тем самым избегая race condition.)
+Так как Linux в настоящее время не содержит системного вызова
+.IR pselect (),
+текущая реализация этой процедуры в glibc все еще содержит race
+condition.
+
+.SH ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ
+При успешном завершении
+.B select
+и
+.B pselect
+возвращают количество дескрипторов, находящихся в наборах
+дескрипторов, причем это количество может быть равным нулю, если
+тайм-аут истекает, а интересующие нас события так и не произошли. 
+При ошибке возвращается \-1, а
+.I errno
+устанавливается должным образом; наборы дескрипторов и значение
+.I timeout
+становятся неопределены, поэтому при ошибке нельзя полагаться на их
+значение.
+.SH ОШИБКИ
+.TP
+.B EBADF
+В одном из наборов находится неверный файловый дескриптор.
+.TP
+.B EINTR 
+Был пойман незаблокированный сигнал.
+.TP
+.B EINVAL 
+.I n
+отрицательно.
+.TP
+.B ENOMEM
+Функция
+.B select
+не смогла выделить участок памяти для внутренних таблиц.
+.SH ЗАМЕЧАНИЕ
+В некоторых программах
+.B select
+вызывается с тремя пустыми наборами файлов,
+.I n
+равным нулю, и ненулевым значением
+.IR timeout ,
+что является довольно переносимым способом сделать задержку с
+миллисекундной точностью.
+.PP
+Под Linux
+.I timeout
+изменяется, чтобы сообщить количество времени, которое не было
+использовано; большинство других реализаций не делают этого.  Это
+приводит к проблемам как в коде под Linux, который читает значение
+.I timeout
+и переносится в другие операционные системы, так и когда код
+переносится под Linux и использует при этом struct timeval для
+нескольких функций
+.B select
+в цикле без повторной инициализации.  Считайте, что параметр
+.I timeout
+неопределен после возврата из функции
+.BR select .
+.SH ПРИМЕР
+.nf
+#include <stdio.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int
+main(void)
+{
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+
+    /* Ждем, пока на стандартном вводе (fd 0) что-нибудь 
+       появится. */
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+    /* Ждем не больше пяти секунд. */
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    retval = select(1, &rfds, NULL, NULL, &tv);
+    /* Не полагаемся на значение tv! */
+
+    if (retval)
+        printf("Данные доступны.\\n");
+        /* Теперь FD_ISSET(0, &rfds) вернет истинное значение. */
+    else
+        printf("Данные не появились в течение пяти секунд.\\n");
+
+    exit(0);
+}
+.fi
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+4.4BSD (функция
+.B select
+впервые появилась в 4.2BSD).  Обычно переносится с/на не-BSD системы,
+поддерживающие уровень BSD-сокетов (включая варианты System\~V).
+Однако заметьте, что варианты System V обычно устанавливают значение
+переменной timeout перед выходом, а вариант BSD\~-- нет.
+.PP
+Функция
+.B pselect
+определена в IEEE Std 1003.1g-2000 (POSIX.1g).
+Ее можно найти в glibc2.1 и позднее.
+Glibc2.0 содержит функцию с таким именем, но без параметра
+.IR sigmask .
+.SH СМОТРИ ТАКЖЕ
+.BR accept (2),
+.BR connect (2),
+.BR poll (2),
+.BR read (2),
+.BR recv (2),
+.BR send (2),
+.BR sigprocmask (2),
+.BR write (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000-2001

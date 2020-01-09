@@ -1,0 +1,126 @@
+.\" sd.4
+.\" Copyright 1992 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Перевод на русский язык: Антон Лыков (last@last.ulsu.ru) 20010120
+.TH SD 4 "Чтв Дек 17 10:15:53 1992" "" "Руководство программиста Linux"
+.SH ИМЯ
+sd \- драйвер для дисковых накопителей SCSI
+.SH КРАТКАЯ СВОДКА
+#include <linux/hdreg.h>        /* для HDIO_GETGEO */
+#include <linux/fs.h>           /* для BLKGETSIZE и BLKRRPART */
+.SH КОНФИГУРАЦИЯ
+Название блочного устройства имеет форму:
+.BI sd lp,
+где
+.IR l "\~--"
+буква, определяющая физический диск, а
+.IR p "\~--"
+число, определяющее раздел на этом жёстком диске.  Зачастую
+номер раздела
+.IR p
+опускается, если устройство соответствует всему диску.
+
+Диски SCSI имеют старший номер устройства 8, а младший номер устройства в
+форме (16 *
+.IR номер_диска ") + " номер_раздела ,
+где
+.IR номер_диска "\~--"
+номер физического диска в порядке обнаружения системой, а
+.I partition_number
+определяется следующим образом:
+.sp
+раздел 0 -- это весь диск
+.br
+разделы 1-4 -- первичные разделы DOS
+.br
+разделы 5-8 -- расширенные (или логические) разделы DOS
+
+Например,
+.B /dev/sda
+будет иметь старший номер 8, младший 0, и относиться к целому первому
+SCSI-диску в системе;
+.B /dev/sdb3
+будет иметь старший номер 8, младший 19, и относиться к третьему первичному
+разделу DOS на втором SCSI-диске в системе.
+
+На данный момент предоставляется доступ только к блочным устройствам.
+Устройства с прямым доступом (raw devices) ещё не реализованы.
+.SH ОПИСАНИЕ
+Доступны следующие вызовы
+.IR ioctl :
+.TP
+.B HDIO_GETGEO
+.RS
+Возвращает параметры диска от BIOS в следующей структуре:
+.RS
+.nf
+.ft B
+struct hd_geometry {
+      unsigned char heads;
+      unsigned char sectors;
+      unsigned short cylinders;
+      unsigned long start;
+};
+.ft R
+.fi
+.RE
+
+Указатель на эту структуру передаётся как аргумент
+.BR ioctl (2) .
+
+Информация, возвращаемая в аргументе, является геометрией диска
+.I "как это понимается в DOS!"
+Это
+.I "не есть"
+физическая геометрия диска.  Однако, она используется при формировании
+таблицы разделов на диске и необходима для удобной работы
+.BR fdisk (1), efdisk "(1), и " lilo (1).
+Если информация о геометрии недоступна, все возвращаемые параметры будут
+равны нулю.
+.RE
+.TP
+.B BLKGETSIZE
+Возвращает размер устройства в секторах.  Параметром
+.BR ioctl (2)
+должен быть указатель на
+.BR long .
+.TP
+.B BLKRRPART
+Приводит к перечитыванию таблицы разделов SCSI диска.  В параметрах не
+нуждается.
+
+Также поддерживаются вызовы
+.BR ioctl ,
+описанные в 
+.BR scsi (4).
+Если параметр
+.BR ioctl (2)
+необходим и равен NULL, то
+.BR ioctl ()
+возвратит -EINVAL.
+.SH ФАЙЛЫ
+/dev/sd[a-h]: целое устройство
+.br
+/dev/sd[a-h][0-8]: отдельные блочные разделы
+.SH "СМОТРИ ТАКЖЕ"
+.BR scsi (4)

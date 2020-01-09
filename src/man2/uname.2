@@ -1,0 +1,135 @@
+.\" Copyright (C) 2001 Andries Brouwer <aeb@cwi.nl>.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 14.06.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH UNAME 2 2001-12-15 "Linux 2.5.0" "Руководство программиста Linux"
+.SH ИМЯ
+uname \- получить имя и информацию о текущем ядре
+.SH ОБЗОР
+.B #include <sys/utsname.h>
+.sp
+.BI "int uname(struct utsname *" buf );
+.SH ОПИСАНИЕ
+.B uname
+возвращает системную информацию в структуре, на которую указывает
+.IR buf .
+Структура 
+.I utsname 
+определяется в
+.IR <sys/utsname.h> :
+.RS
+.nf
+struct utsname {
+.in +8
+char sysname[];
+char nodename[];
+char release[];
+char version[];
+char machine[];
+.in -8
+#ifdef _GNU_SOURCE
+.in +8
+char domainname[];
+.in -8
+#endif
+};
+.fi
+.RE
+Длина массива в
+.I struct utsname
+не задаётся; поля завершаются нулевым символом.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль. В случае ошибки возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EFAULT
+Неправильное значение
+.I buf .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN.
+В BSD 4.3 вызова
+.B uname
+не существует.
+.PP
+Имя домена
+.I domainname
+для члена домена (домена NIS или YP) является расширением GNU.
+.SH ЗАМЕЧАНИЯ
+Это системный вызов и операционная система видимо знает своё имя,
+подверсию и версию. Она также знает на какой платформе она
+запущена. Таким образом четыре поля, описанной выше структуры
+являются важными. С другой стороны, поле \fInodename\fP является
+менее важным: оно содержит имя текущей машины в какой-либо
+неопределённой сети, но обычно машины входят более чем в одну сеть
+и имеют несколько имён. У ядра нет способа узнать об этих вещах,
+так что ему необходимо сказать, что здесь отвечать. Тоже касается
+и другого дополнительно поля \fIdomainname\fP.
+.LP
+Чтобы подсказать ядру, в Linux используются системные вызовы
+.BR sethostname (2)
+и
+.BR setdomainname (2).
+Заметим, что не существует стандарта, чтобы сказать имя узла какой длины
+устанавливается вызовом
+.BR sethostname (2),
+но именно это имя будет в поле \fInodename\fP структуры, возвращаемой
+вызовом
+.B uname
+(в самом деле, некоторые системы разрешают 256-байтовые имена узлов
+и только 8-байтовые nodename), но это так в Linux. Это же касается и
+вызова
+.BR setdomainname (2)
+и поля \fIdomainname\fP.
+.LP
+Длина указанных выше полей в структуре может быть разной. Некоторые
+операционные системы или библиотеки используют жёсткие ограничения
+9 или 33, или 65, или 257. Другие системы используют
+SYS_NMLN или _SYS_NMLN, или UTSLEN, или _UTSNAME_LENGTH. Использование
+таких констант -- это плохая идея -- просто используйте sizeif(...).
+Часто 257 выбирается, чтобы соответствовать имени узла в сети
+Интернет.
+.LP
+В Linux было три системных вызова \fIuname\fP(). Первый использовал
+длину 9, второй использовал 85, а третий также использует 65, но
+добавляет поле \fIdomainname\fP field.
+.LP
+Часть информации, возвращаемой данным системным вызовом также доступна
+через
+.I sysctl
+и через файлы
+.IR /proc/sys/kernel/ { ostype ,
+.IR hostname ,
+.IR osrelease ,
+.IR version ,
+.IR domainname }.
+.SH "СМОТРИ ТАКЖЕ"
+.BR uname (1),
+.BR getdomainname (2),
+.BR gethostname (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

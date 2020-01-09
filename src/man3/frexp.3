@@ -1,0 +1,49 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 19:34:42 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Переведен на русский Fri 22 Sep 2000 11:26:59, Alexey V. Medvedev 2:5022/78.6
+.TH FREXP 3  "June 6, 1993" "GNU" "Linux Programmer's Manual"
+.SH ИМЯ
+frexp \- разбивает число с плавающей точкой на мантиссу и показатель степени.
+.SH СИНТАКСИС
+.nf
+.B #include <math.h>
+.sp
+.BI "double frexp(double " x ", int *" exp );
+.fi
+.SH ОПИСАНИЕ
+Функция \fBfrexp()\fP используется для разбиения числа \fIx\fP на нормализованную
+мантиссу и показатель степени по основанию 2, который сохраняется по указателю \fIexp\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBfrexp()\fP возвращает нормализованную мантиссу.  Если аргумент
+\fIx\fP не равен нулю, нормализованная мантисса представляет собой \fIx\fP,
+деленный на степень двух, и находится в диапазоне от 1/2 (включительно) до
+1 (не включая 1).  Если \fIx\fP равен нулю, то нормализованная мантисса равна нулю. 
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVID 3, POSIX, BSD 4.3, ISO 9899
+.SH "СМОТРИ ТАКЖЕ"
+.BR ldexp "(3), " modf (3)

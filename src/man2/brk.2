@@ -1,0 +1,96 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1993 Michael Haardt
+.\" (michael@moria.de),
+.\" Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Wed Jul 21 19:52:58 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Aug 21 17:40:38 1994 by Rik Faith <faith@cs.unc.edu>
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH BRK 2 2003-11-01 "Linux 2.4" "Руководство программиста Linux"
+.SH ИМЯ
+brk, sbrk \- изменение размера сегмента данных
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int brk(void *" end_data_segment );
+.sp
+.BI "void *sbrk(intptr_t " increment );
+.SH ОПИСАНИЕ
+.B brk
+устанавливает конец сегмента данных в значение, указанное в
+аргументе
+.IR end_data_segment ,
+когда это значение является приемлимым, система симулирует
+нехватку памяти и процесс не достигает своего максимально
+возможного размера сегмента данных (см.
+.BR setrlimit (2)).
+
+.B sbrk
+увеличивает пространство данных программы на
+.I increment
+байт.
+.B sbrk
+не является системным вызовом, он просто является
+обёрткой (wrapper), которую использует библиотека C.
+Вызов
+.B sbrk
+с инкрементом 0 может быть использован, чтобы найти
+текущее местоположения прерывания программы.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха
+.B brk
+возвращает ноль, а
+.B sbrk
+возвращает указатель на начало новой области. В случае
+ошибки возвращается \-1 is и значение
+.I errno
+устанавливается в
+.BR ENOMEM .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+BSD 4.3
+
+.BR brk " и " sbrk
+не определены в стандарте на язык C и умышленно исключёны из
+стандарта POSIX.1 (см. параграфы B.1.1.1.3 и B.8.3.3).
+.SH ЗАМЕЧАНИЯ
+Некоторые системы используют разные типы для параметров
+.BR sbrk ().
+Общими являются \fBint\fP, \fBssize_t\fP, \fBptrdiff_t\fP, \fBintptr_t\fP.
+.\" One sees
+.\" \fBint\fP (e.g. XPGv4, DU 4.0, HP-UX 11, FreeBSD 4.0, OpenBSD 3.2),
+.\" \fBssize_t\fP (OSF1 2.0, Irix 5.3, 6.5),
+.\" \fBptrdiff_t\fP (libc4, libc5, ulibc, glibc2.0, 2.1),
+.\" \fBintptr_t\fP (e.g. XPGv5, AIX, SunOS 5.8, 5.9, FreeBSD 4.7, NetBSD 1.6,
+.\" Tru64 5.1, glibc2.2).
+XPGv6 описывает, что эта функция устарела.
+.SH "СМОТРИ ТАКЖЕ"
+.BR execve (2),
+.BR getrlimit (2),
+.BR malloc (3)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

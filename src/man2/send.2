@@ -1,0 +1,256 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: send.2,v 1.5 1999/06/12 10:11:39 freitag Exp 
+.\"
+.\" Modified Sat Jul 24 01:15:33 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 17:55:49 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Oct 1998 by Andi Kleen
+.\"
+.TH SEND 2 "Июль 1999" "Страница руководства по Linux" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+send, sendto, sendmsg \- отправить сообщение в сокет
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int send(int " s ", const void *" msg ", size_t " len ","
+.BI "int " flags );
+.br
+.BI "int sendto(int " s ", const void *" msg ", size_t " len ","
+.BI "int " flags ", const struct sockaddr *" to ", socklen_t " tolen );
+.br
+.BI "int sendmsg(int " s ", const struct msghdr *" msg ","
+.BI "int " flags );
+.SH ОПИСАНИЕ
+.BR send ,
+.BR sendto ,
+и
+.B sendmsg
+используются для пересылки сообщений на другой сокет.
+.B send
+можно использовать, только если сокет находится в 
+.I соединенном
+состоянии, тогда как
+.B sendto
+и
+.B sendmsg
+можно использовать в любое время.
+.PP
+Адрес получателя задается в параметре
+.I to
+длины
+.IR tolen .
+Длина сообщения задается в параметре 
+.IR len .
+Если сообщение слишком длинное, чтобы нижележащий протокол смог
+атомарно отослать его, возвращается код ошибки
+.BR EMSGSIZE ,
+а сообщение не отсылается.
+.PP
+No indication of failure to deliver is implicit in a
+.BR send .
+Локальные ошибки обозначаются с помощью возвращаемого значения \-1.  
+.PP
+Когда сообщение не помещается в буфер отправки сокета,
+.B send
+обычно дожидается завершения отправки, если только сокет не находится
+в неблокирующем режиме.  Если так, то возвращается
+.BR EAGAIN .
+Системный вызов
+.BR select (2)
+можно использовать для выяснения возможности отправки данных.
+.PP
+Параметр
+.I flags
+является битовой маской и может содержать такие флаги:
+.\" XXX document MSG_PROXY
+.TP
+.B MSG_OOB
+Посылает
+.I внепотоковые
+данные, если сокет поддерживает такое (например, сокеты типа
+.BR SOCK_STREAM );
+нижележащий протокол также должен поддерживать
+.I внепотоковые
+данные.
+.TP
+.B MSG_DONTROUTE
+Не использовать маршрутизацию при отправке пакета, а посылать его
+только на хосты в локальной сети.  Обычно это используется в
+диагностических программах и программах маршрутизации.  Этот флаг
+определен только для маршрутизируемых семейств протоколов; пакетные
+сокеты не используют маршрутизацию.
+.TP
+.B MSG_DONTWAIT
+Включает неблокирующий режим; если бы операция должна была
+заблокировать программу, возвращается
+.B EAGAIN 
+(этот режим также можно включить с помощью опции
+.B O_NONBLOCK
+и команды
+.B F_SETFL
+в функции
+.BR fcntl(2)).
+.TP
+.B MSG_NOSIGNAL
+Требует не посылать сигнал
+.B SIGPIPE 
+когда при работе с потоко-ориентированным сокетом другая сторона
+обрывает соединение.  Код ошибки
+.B EPIPE
+возвращается в любом случае.
+.TP
+.BR MSG_CONFIRM "(только Linux 2.3 и выше)"
+Сообщить уровню соединения, что вы успешно получили ответ от другой
+стороны.  Уровень соединения регулярно пытается обратиться к соседу
+(например, с помощью unicast ARP), до тех пор пока не получит такое
+сообщение.  Эту возможность можно использовать только на сокетах типа
+.B SOCK_DGRAM
+и
+.BR SOCK_RAW .
+В настоящий момент эта возможность реализована только для IPv4 и
+IPv6.  См.
+.BR arp (7),
+где описаны детали.
+.PP
+Определение структуры
+.I msghdr
+изложено ниже.  См. ниже, а также в
+.BR recv (2),
+где описано каждое поле.
+.IP
+.RS
+.nf
+.ta 4n 17n 33n
+struct msghdr {
+       void    * msg_name;     /* необязательный адрес */
+       socklen_t       msg_namelen;    /* размер адреса */
+       struct iovec    * msg_iov;      /* массив scatter/gather */
+       size_t  msg_iovlen;     /* # элементы в msg_iov */
+       void    * msg_control;  /* служебные данные, см. ниже */
+       socklen_t       msg_controllen; /* размер буфера служебных данных */
+       int     msg_flags;      /* флаги на принятом сообщении */
+};
+.ta
+.fi
+.RE
+.PP
+Управляющую информацию можно посылать с помощью членов
+.I msg_control 
+и
+.IR msg_controllen .
+Максимальная длина управляющего буфера, которую поддерживает ядро,
+ограничена sysctl-значением
+.BR net.core.optmem_max ;
+см.
+.BR socket (7).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Эти системные вызовы возвращают количество отправленных символов или
+\-1, если произошла ошибка.
+.SH ОШИБКИ
+Есть несколько стандартных ошибок, генерируемых на уровне сокетов.
+Нижележащие модули протоколов могут также возвращать дополнительные
+коды ошибок; смотри соответствующие страницы руководства.
+.TP 0.8i
+.B EBADF
+Указан неверный дескриптор.
+.TP
+.B ENOTSOCK
+Аргумент
+.I s
+не является сокетом.
+.TP
+.B EFAULT
+В качестве параметра передан неверный адрес.
+.TP
+.B EMSGSIZE
+Сокет требует, чтобы сообщение было отослано за одну операцию
+(атомарно), а размер сообщения не позволяет этого.
+.TP
+.BR EAGAIN " или " EWOULDBLOCK
+Сокет помечен как неблокирующий, а запрошенная операция должна была бы 
+заблокировать его.
+.TP
+.B ENOBUFS
+Исходящая очередь сетевого интерфейса заполнена.  Обычно это означает, 
+что интерфейс прекратил отправку, но может быть также вызвано
+временной перегрузкой.  (Этого не может произойти под Linux, потому
+что здесь пакеты просто отбрасываются, когда очередь устройства
+переполняется.)
+.TP
+.B EINTR
+Появился сигнал.
+.TP
+.B ENOMEM
+Не хватило памяти.
+.TP
+.B EINVAL
+Передан неверный аргумент.
+.TP
+.B EPIPE
+Локальный конец сокета, ориентированного на соединение, был закрыт.  В 
+этом случае процесс также получит сигнал
+.BR SIGPIPE ,
+если только не установлен флаг
+.BR MSG_NOSIGNAL .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD, SVr4, POSIX 1003.1g draft (эти системные вызовы появились в
+4.2BSD).
+
+.B MSG_CONFIRM
+является Linux-специфичным расширением.
+.SH ЗАМЕЧАНИЕ
+Вышеприведенные прототипы соответствуют glibc2.
+Стандарт SUS согласен с ними, за исключением того, что там
+возвращаемые значения определены как ssize_t (тогда как в BSD 4.x,
+libc4 и libc5 они определены как int).
+Аргумент
+.I flags
+является int в BSD 4.x, но unsigned int в libc4 и libc5.
+Аргумент
+.I len
+является int в BSD 4.x, но size_t в libc4 и libc5.
+Аргумент
+.I fromlen
+является int * в BSD 4.x, libc4 и libc5.  Текущее определение,
+socklen_t, было изобретено в POSIX (см. также 
+.BR accept (2)).
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR fcntl "(2), " recv "(2), " select "(2), " getsockopt "(2), "
+.BR sendfile "(2), " socket "(2), " write "(2), "
+.BR socket "(7), " ip "(7), " tcp "(7), " udp (7)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000-2001

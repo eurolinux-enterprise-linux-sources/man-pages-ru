@@ -1,0 +1,233 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\" 
+.\" Куски этого руководства извлечены из /usr/include/sys/socket.h, в
+.\" котором нет информации об авторстве.  Вероятно, этот файл доступен 
+.\" под GPL.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Остальные куски из страницы руководства из 6.9 (Berkeley) 3/10/91:
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\" Modified Fri Jan 31 16:22:26 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998,1999 by Andi Kleen
+.\" $Id: connect.2.in,v 1.3 2000/08/19 15:40:51 alexm Exp $
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\"
+.TH CONNECT 2 1998-10-03 "Linux 2.2" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+connect \- инициирует соединение на сокете
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int connect(int " sockfd ", const struct sockaddr *" serv_addr ,
+.BI "socklen_t " addrlen );
+.SH ОПИСАНИЕ
+Файловый дескриптор
+.I sockfd
+должен ссылаться на сокет.  Если сокет имеет тип
+.BR SOCK_DGRAM ,
+значит, адрес
+.I serv_addr
+является адресом по умолчанию, куда посылаются датаграммы, и
+единственным адресом, откуда они принимаются.  Если сокет имеет тип
+.B SOCK_STREAM
+или
+.BR SOCK_SEQPACKET ,
+то данный системный вызов попытается установить соединение с другим
+сокетом.  Другой сокет задан параметром
+.IR serv_addr ,
+являющийся адресом длиной
+.IR addrelen
+в пространстве коммуникации сокета.  Каждое пространство коммуникации
+интерпретирует параметр
+.I serv_addr
+по-своему.
+.PP
+Обычно сокеты с протоколами, основанными на соединении, могут
+устанавливать соединение только один раз; сокеты с протоколами без
+соединения могут использовать
+.B connect
+многократно, чтобы изменить адрес назначения.  Сокеты без поддержки
+соединения могут прекратить связь с другим сокетом, установив член
+.I sa_family
+структуры
+.B sockaddr
+в 
+.BR AF_UNSPEC .
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Если соединение или привязка прошла успешно, возвращается нуль.  При
+ошибке возвращается \-1, а
+.I errno
+устанавливается должным образом.
+.SH ОШИБКИ
+Ниже следуют только общие ошибки сокетов.  Могут также появляться коды 
+ошибок, существующие в конкретном домене.
+.TP 0.8i
+.B EBADF
+Файловый дескриптор не является правильными индексом в таблице
+дескрипторов.
+.TP
+.B EFAULT
+Адрес структуры сокета находится за пределами адресного пространства
+пользователя.
+.TP
+.B ENOTSOCK
+Файловый дескриптор не связан с сокетом.
+.TP
+.B EISCONN
+Соединение на сокете уже произошло.
+.TP
+.B ECONNREFUSED
+С той стороны никто не слушает.
+.TP
+.B ETIMEDOUT
+Произошел тайм-аут во время ожидания соединения.  Сервер, возможно,
+очень занят и не может принимать новые соединения.  Заметьте, что для
+IP-сокетов тайм-аут может быть очень длинным, если на сервере разрешено 
+использование syncookies.
+.TP
+.B ENETUNREACH
+Сеть недоступна.
+.TP
+.B EADDRINUSE
+Локальный адрес уже используется.
+.TP
+.B EINPROGRESS
+Сокет является неблокирующим, а соединение не может быть установлено
+прямо сейчас. Можно использовать
+.BR select (2)
+или 
+.BR poll (2),
+чтобы закончить соединение, установив ожидание возможности записи в
+сокет.  После того, как
+.B select
+сообщит о такой возможности, используйте
+.BR getsockopt (2),
+чтобы прочитать флаг
+.B SO_ERROR
+на уровне
+.BR SOL_SOCKET ,
+чтобы определить, успешно ли завершился
+.B connect
+(в этом случае
+.B SO_ERROR
+равен нулю) или неуспешно, тогда
+.RB SO_ERROR
+равен одному из обычных кодов ошибок, перечисленных здесь, и объясняет 
+причину неудачи).
+.TP
+.B EALREADY
+Сокет является неблокирующим, а предыдущая попытка установить
+соединение еще не завершилась.
+.TP
+.B EAGAIN
+Не осталось свободных локальных портов, или же недостаточно места в
+кэше маршрутизации.  Для домена
+.B PF_INET
+смотри описание системной переменной
+.B net.ipv4.ip_local_port_range
+в
+.BR ip (7),
+где описано, как увеличить количество локальных портов.
+.TP
+.B EAFNOSUPPORT
+Адрес имеет некорректную семью адресов в поле
+.IR sa_family .
+.TP
+.B EACCES, EPERM
+Пользователь попытался соединиться с широковещательным адресом, не
+установив широковещательный флаг на сокете или же запрос на соединение
+завершился неуспешно из-за локального правила на файерволле.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (функция
+.B connect
+впервые появилась в BSD 4.2).  SVr4 документирует дополнительные общие 
+коды ошибок
+.BR EADDRNOTAVAIL , 
+.BR EINVAL , 
+.BR EAFNOSUPPORT , 
+.BR EALREADY , 
+.BR EINTR , 
+.BR EPROTOTYPE , 
+и
+.BR ENOSR .
+Там также документируется множество дополнительных кодов ошибок, не
+описанных здесь.
+.SH ЗАМЕЧАНИЕ
+Третий аргумент
+.B connect
+в действительности имеет тип 
+.I int
+(а в BSD 4.*, libc4 и libc5 это так и есть).  Определенное
+недопонимание привело к появлению
+.IR socklen_t .
+Черновик стандарта еще не принят, но glibc2 уже следует ему и в ней
+присутствует
+.IR socklen_t .
+Смотри также
+.BR accept (2).
+.SH ОШИБКИ
+Прекращение соединения на сокете с помощью вызова
+.B connect
+с адресом
+.B AF_UNSPEC
+еще не реализовано.
+.SH "СМОТРИ ТАКЖЕ"
+.BR accept "(2), " bind "(2), " listen "(2), "
+.BR socket "(2), " getsockname (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

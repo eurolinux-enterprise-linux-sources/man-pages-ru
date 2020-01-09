@@ -1,0 +1,145 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Fri Jul 23 22:01:51 1993 Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Aug 21 18:18:14 1994: Michael Haardt's NFS diffs were
+.\"          applied by hand <faith@cs.unc.edu>
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Алексей Махоткин <alexm@hsys.msk.ru> 1999-2001
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH LINK 2 1997-12-10 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+link \- создать новое имя файла
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int link(const char *" oldpath ", const char *" newpath );
+.SH ОПИСАНИЕ
+.B link
+создает новую ссылку (также известную как "жесткая" ссылка) на
+существующий файл.
+
+Если
+.I newpath
+существует, он
+.I не
+будет перезаписан.
+
+Это новое имя может использоваться точно так же, как и старое, для
+любых операций; оба имени ссылаются на один и тот же файл (то есть 
+имеют те же права доступа и владельца) и невозможно сказать, какое имя 
+было "настоящим".
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP 0.8i
+.B EXDEV
+.IR oldpath " и " newpath
+находятся на разных файловых системах.
+.TP
+.B EPERM
+Файловая система, содержащая
+.IR oldpath " и " newpath ,
+не поддерживает жесткие ссылки.
+.TP
+.B EFAULT
+.IR oldpath " или " newpath
+указывают за пределы доступного адресного пространства.
+.TP
+.B EACCES
+Запись в каталог, содержащий 
+.I newpath\fR,
+не разрешен для uid'а процесса, или же один из каталогов 
+.IR oldpath " или " newpath
+не разрешает поиск. 
+.TP
+.B ENAMETOOLONG
+.IR oldpath " или " newpath
+слишком длинны.
+.TP
+.B ENOENT
+Одна из частей пути
+.IR oldpath " или " newpath
+не существует или является "висячей" символической ссылкой.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR oldpath " или " newpath ,
+в действительности таковым не является.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B EEXIST
+.I newpath
+уже существует.
+.TP
+.B EMLINK
+Файл, на который ссылается 
+.I oldpath
+уже имеет максимальное количество ссылок.
+.TP
+.B ELOOP
+.IR oldpath " или " newpath
+содержат зацикленную символическую ссылку, то есть при ее подстановке
+происходит ссылка на нее саму.
+.TP
+.B ENOSPC
+На устройстве, содержащем файл, нет места для создания новой записи в каталоге.  Это может произойти
+также, если исчерпана квота дискового пространства пользователя.
+.TP
+.B EPERM
+.I oldpath
+является записью 
+.B . " or " ..
+.SH ЗАМЕЧАНИЯ
+Жесткие ссылки, созданные с помощью
+.BR link ,
+не могут указывать в другие файловые системы.  Если это требуется,
+используйте
+.BR symlink .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, BSD 4.3.  SVr4 документирует дополнительные коды
+ошибки ENOLINK и EMULTIHOP; POSIX.1 не документирует ELOOP.
+.SH НЕДОСТАТКИ РЕАЛИЗАЦИИ
+На файловых системах NFS код возврата может быть неверен в случае,
+если NFS-сервер создает ссылку и умирает, прежде чем сообщает об
+этом.  Используйте
+.BR stat (2),
+чтобы узнать, создалась ли ссылка.
+.SH "СМОТРИ ТАКЖЕ"
+.BR symlink "(2), " unlink "(2), " rename "(2), " open (2),
+.BR stat "(2), " ln "(1), " link (8).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2000

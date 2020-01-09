@@ -1,0 +1,232 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de),
+.\"   Fri Apr  2 11:32:09 MET DST 1993
+.\" and Andries Brouwer (aeb@cwi.nl), Fri Feb 14 21:47:50 1997.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\" 
+.\" Modified Sun Jul 25 10:45:30 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Jul 21 21:25:26 1996 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Mon Oct 21 17:47:19 1996 by Eric S. Raymond (esr@thyrsus.com)
+.\" Modified Wed Aug 27 20:28:58 1997 by NicolАs Lichtmaier (nick@debian.org)
+.\" Modified Mon Sep 21 00:00:26 1998 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Wed Jan 24 06:37:24 2001 by Eric S. Raymond (esr@thyrsus.com)
+.\" Modified Thu Dec 13 23:53:27 2001 by Martin Schulze <joey@infodrom.org>
+.\" 
+.\" Дата последней коррекции перевода 07.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH ENVIRON 5 2001-12-14 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+environ \- окружение пользователя
+.SH ОБЗОР
+.ad l
+.nf
+.B extern char **environ;
+.br
+.fi
+.ad b
+.SH ОПИСАНИЕ
+Переменная
+.I environ
+указывает на массив строк, называемый `environment' (окружение).
+(Данная переменная должна быть описана в программе пользователя,
+а кроме того она описывается в заголовочном файле
+.I unistd.h
+в том случае, если мы говорим о libc4 или libc5, а для glibc
+это справедливо только если был задан флаг
+.B _GNU_SOURCE ).
+Указанный массив строк, становится доступным процессу через вызов
+.BR exec (3),
+который запускает процесс. По договорённости, эти строки имеют
+вид `\fIимя\fP\fB=\fP\fIзначение\fP'.  Вот некоторые примеры:
+.TP
+.B USER
+Имя пользователя, зарегистрированного в системе (используется некоторыми
+программами, происходящими из BSD)
+.TP
+.B LOGNAME
+Имя пользователя, зарегистрированного в системе (используется некоторыми
+программами, происходящими из System-V)
+.TP
+.B HOME
+Домашний каталог пользователя, устновленный программой
+.BR login (1),
+взятый из файла паролей
+.BR passwd (5).
+.TP
+.B LANG
+Имя локали (от локали зависят многие региональные настройки -- прим.пер.),
+используемой для категорий локали, которые не перекрыты \fBLC_ALL\fP или
+более специфичными переменными окружения, такими как
+\fBLC_COLLATE\fP, \fBLC_CTYPE\fP, \fBLC_MESSAGES\fP, \fBLC_MONETARY\fP,
+\fBLC_NUMERIC\fP и \fBLC_TIME\fP. См.
+.BR locale (5).
+.TP
+.B PATH
+Последовательность каталогов, которых \fBsh\fP(1) и многие другие
+программы, будут применять в качестве префикса при поиске файла, если он
+задан неполным именем. Каталоги разделяются `\fB:\fP'.
+(Похожим образом \fBCDPATH\fP используется некоторыми программами для
+поиска команды смены каталога, \fBMANPATH\fP используется командой \fBman\fP(1)
+для поиска страниц электронного руководства и т.д.)
+.TP
+.B PWD
+Текущий рабочий каталог. Устанавливается некоторыми программами.
+.TP
+.B SHELL
+Имя командного интерпретатора пользователя.
+.TP
+.B TERM
+Тип терминала, для которого будет подготавливаться вывод.
+.TP
+.B PAGER
+Предпочитаемая пользователем утилита просмотра текстовых файлов.
+.TP
+.BR EDITOR / VISUAL
+Предпочитаемая пользователем утилита редактирования текстовых файлов.
+.TP
+.B BROWSER
+Предпочитаемая пользователем утилита просмотра URL. Последовательность,
+разделённых двоеточиями, команд-браузеров.
+См. See http://www.catb.org/~esr/BROWSER/ .
+.PP
+Вышеуказанные имена переменных могут быть помещены в окружение
+командой \fBexport\fP и `имя=значение' в
+.BR sh (1),
+или командой \fBsetenv\fP, если вы используете
+.BR csh (1).
+При вызове
+.BR exec (3).
+в окружение также могут быть помещены и аргументы.
+Программа, написанная на языке C может манипулировать своим окружением
+с помощью функций
+.BR getenv (3),
+.BR putenv (3),
+.BR setenv (3),
+и
+.BR unsetenv (3).
+
+Заметим, что наличие или значения определённых переменных окружения
+может отказывать влияние на поведение многих программ и библиотечных
+вызовов. Вот случайная подборка:
+.LP
+Переменные
+.BR LANG ", " LANGUAGE ", " NLSPATH ", " LOCPATH ", " LC_ALL ", " LC_MESSAGES ", "
+и т.д. влияют на управление региональными настройками, см.
+.BR locale (5).
+.LP
+.B TMPDIR
+влияет на путь файлов, создаваемых вызовом
+\fBtmpnam(3)\fP и через некоторые другие вызовы, временный каталог также
+используется программой \fBsort\fP(1) и некоторыми другими, и т.д.
+.LP
+.BR LD_LIBRARY_PATH ", " LD_PRELOAD
+и другие переменные LD_* влияют на поведение динамического загрузчика
+и редактора связей (компановщика).
+.LP
+.B POSIXLY_CORRECT
+делает поведение определённых программ и системных вызовов
+соответствующим POSIX.
+.LP
+На поведение \fBmalloc\fP(3) оказывают влияние переменные MALLOC_*.
+.LP
+Переменная
+.B HOSTALIASES
+задаёт имя файла, содержащего псевдонимы имени узла, которые
+используются вызовом \fBgethostbyname\fP(3).
+.LP
+.BR TZ " и " TZDIR
+задают информацию о временной зоне, используемую вызовом
+.BR tzset (3)
+и такими функциями как
+.IR ctime (),
+.IR localtime (),
+.IR mktime (),
+.IR strftime ().
+См. также
+.BR tzselect (1).
+.LP
+.B TERMCAP
+задаёт информацию о адресе терминала
+(или имя файла, содержащего такую информацию).
+.LP
+.BR COLUMNS " и " LINES
+говорят приложению о размере окна, возможно перекрывая фактический размер.
+.LP
+.BR PRINTER " и " LPDEST
+могут задавать предпочтительный принтер. См.
+.BR lpr (1).
+.LP
+и т.д.
+.SH ОШИБКИ
+Честно говоря, использование переменных окружения таит в себе проблемы
+безопасности. Многие системные команды могут быть обмануты пользователем,
+который может задать неправильные значения для переменных
+.BR IFS " или " LD_LIBRARY_PATH .
+
+Также есть риск с загрязнением пространства имен.
+Такие программы как
+.I make
+и
+.I autoconf
+позволяют перекрывать имена назначенных по умолчанию утилит, через
+переменные окружения. Например, переменная 
+.B CC
+используется для выбора нужного C-компилятора (и похожим образом
+можно использовать переменные
+.BR MAKE ,
+.BR AR ,
+.BR AS ,
+.BR FC ,
+.BR LD ,
+.BR LEX ,
+.BR RM ,
+.BR YACC ,
+и т.д.)
+Однако, в некоторых традиционных случаях, эти переменные окружения
+задают опции для данных программ, вместо их имени.
+Например
+.BR MORE ,
+.BR LESS ,
+и
+.BR GZIP .
+Такое использование переменных окружения является ошибочным и будет
+избегаться в новых программах. Авторы
+.I gzip
+должны бы переименовать переменную в
+.BR GZIP_OPT .
+.SH "СМОТРИ ТАКЖЕ"
+.BR login (1),
+.BR sh (1),
+.BR bash (1),
+.BR csh (1),
+.BR tcsh (1),
+.BR execve (2),
+.BR exec (3),
+.BR getenv (3),
+.BR putenv (3),
+.BR setenv (3),
+.BR clearenv (3),
+.BR unsetenv (3),
+.BR locale (5)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

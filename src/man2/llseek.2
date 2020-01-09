@@ -1,0 +1,90 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1995 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Written 10 June 1995 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Thu Oct 31 15:16:23 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH LLSEEK 2 1995-06-10 "Linux 1.2.9" "Руководство программиста Linux"
+.SH ИМЯ
+_llseek \- установить позицию чтения/записи в файле
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.B #include <linux/unistd.h>
+.sp
+.B _syscall5(int, _llseek, uint, fd, ulong, hi, ulong, lo, loff_t *, res, uint, wh);
+.sp
+.BI "int _llseek(unsigned int " fd ", unsigned long " offset_high ,
+.BI "unsigned long " offset_low ", loff_t *" result ", unsigned int " whence );
+.SH ОПИСАНИЕ
+Функция
+.B _llseek
+устанавливает позицию в файле, заданном параметром
+.I fd
+в значение
+.I (offset_high<<32) | offset_low
+байт относительно начала файла, текущей позиции в файле или конца
+файла, в зависимости от того, равен ли параметр
+.I whence
+одному из значений
+.BR SEEK_SET ,
+.BR SEEK_CUR ,
+или
+.BR SEEK_END ,
+соответственно.
+Функция возвращает результирующую позицию в файле в аргументе
+.IR result .
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP
+.B EBADF
+.I fd
+не является открытым файловым дескриптором.
+.TP
+.B EINVAL
+Значение
+.I whence
+неверно.
+.TP
+.B EFAULT
+Проблема с копированием результатов в пространство пользователя.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция специфична для Linux и не должна использоваться в
+программах, которые должны быть переносимы.
+.SH "СМОТРИ ТАКЖЕ"
+.BR lseek (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

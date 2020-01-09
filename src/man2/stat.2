@@ -1,0 +1,370 @@
+'\" t
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\" Parts Copyright (c) 1995 Nicolai Langfeldt (janl@ifi.uio.no), 1/1/95
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt <u31b3hs@pool.informatik.rwth-aachen.de>
+.\" Modified Sat Jul 24 10:54:27 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Thu May 18 11:00:31 1995 by Rik Faith <faith@cs.unc.edu>
+.\"          to add comments suggested by Todd Larason <jtl@molehill.org>
+.\" Modified Fri Jan 31 17:43:02 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Thu Jan 9 10:20:31 1995 by Martin Schulze (joey@infodrom.north.de)
+.\"          to add more error codes suggested by Richard Kettlewell (richard@greenend.org.uk)
+.\" Modified Wed May 13 18:46:44 1998 by Michael Haardt <michael@cantor.informatik.rwth-aachen.de>
+.\" Modified 990706 by aeb; much of the info under Other Systems was
+.\"          taken from a net post by Albert Cahalan.
+.\" Modified 000107 by aeb: added <sys/types.h> include.
+.\" 
+.TH STAT 2 "May 13, 1998" "Linux" "Системные вызовы"
+.SH ИМЯ
+stat, fstat, lstat \- получить статус файла
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <sys/stat.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int stat(const char *" file_name ", struct stat *" buf );
+.br
+.BI "int fstat(int " filedes ", struct stat *" buf );
+.br
+.BI "int lstat(const char *" file_name ", struct stat *" buf );
+.SH ОПИСАНИЕ
+.PP
+Эти функции возвращают информацию об указанном файле.  Вам не
+требуется иметь права доступа к файлу, чтобы получить эту информацию,
+хотя всё же требуются права поиска во всех каталогах, которые
+находятся по пути к файлу.
+.PP
+.B stat
+возвращает информацию о файле, заданном с помощью
+.I file_name
+и заполняет буфер
+.IR buf .
+
+.B lstat
+идентична
+.BR stat ,
+но в случае, если обрабатывается символьная ссылка, то возвращается
+информация о самой ссылке, а не о файле, на который она ссылается.
+
+.B fstat
+идентична
+.BR stat ,
+но вместо
+.I file_name
+возвращается информация о
+.I filedes
+(который возвращается системным вызовом
+.IR open (2)).
+
+.PP
+Все эти функции возвращают структуру
+.IR stat ,
+которая содержит такие поля:
+.PP
+.RS
+.nf
+struct stat {
+    dev_t         st_dev;      /* устройство */
+    ino_t         st_ino;      /* inode */
+    mode_t        st_mode;     /* режим доступа */
+    nlink_t       st_nlink;    /* количество жестких ссылок */
+    uid_t         st_uid;      /* ID пользователя-владельца */
+    gid_t         st_gid;      /* ID группы-владельца */
+    dev_t         st_rdev;     /* тип устройства */
+                               /* (если это устройство) */
+    off_t         st_size;     /* общий размер в байтах */
+    unsigned long st_blksize;  /* размер блока ввода-вывода */
+                               /* в файловой системе */
+    unsigned long st_blocks;   /* количество выделенных блоков */
+    time_t        st_atime;    /* время последнего доступа */
+    time_t        st_mtime;    /* время последней модификации */
+    time_t        st_ctime;    /* время последнего изменения */
+};
+.fi
+.RE
+.PP
+Значение
+.I st_size
+дает размер файла в байтах (если это обычный файл или символьная
+ссылка).  Размер символьной ссылки равен длине пути, который она
+содержит, без концевого NUL.
+.PP
+Значение
+.I st_blocks
+задает размер файла в 512-байтных блоках.
+Значение
+.IR st_blksize
+задает "предпочтительный" размер блока для эффективного ввода-вывода
+на файловой системе.  (Запись в файл более мелкими порциями может
+привести к неэффективному чтению-изменению-повторной записи).
+.PP
+Не все файловые системы под Linux реализуют все метки времени.
+Некоторые файловые системы позволяют монтировать так, что обращения к
+файлам не изменяют поле
+.IR st_atime .
+(См. 'noatime' в
+.BR mount (8).
+
+Поле
+.I st_atime
+изменяется при доступе к файлу, например, при
+.BR exec (2),
+.BR mknod (2),
+.BR pipe (2),
+.BR utime (2)
+и
+.BR read (2)
+(если прочитано больше нуля байт).  Другие функции, например,
+.BR mmap (2),
+могут изменять, а могу и не изменять
+.IR st_atime .
+
+
+Поле
+.I st_mtime
+изменяется при модификациях файла, например, при
+.BR mknod (2),
+.BR truncate (2),
+.BR utime (2)
+и
+.BR write (2)
+(если записано больше нуля байт).  Более того, поле
+.I st_mtime
+каталога изменяется при создании и удалении файлов в этом каталоге.
+Поле
+.I st_mtime
+.I не
+изменяется при изменении владельца, группы, количества жестких ссылок
+или режима доступа.
+
+Поле
+.I st_ctime
+изменяется при записи или установке информации об inode (владельце,
+группе, количеству ссылок, режиме и т.\~д.).
+.PP
+Нижеследующие макросы POSIX определены для проверки типа файлов:
+.RS
+.TP 1.2i
+S_ISREG(m)
+является ли обычным файлом?
+.TP
+S_ISDIR(m)
+каталогом?
+.TP
+S_ISCHR(m)
+символьным устройством?
+.TP
+S_ISBLK(m)
+блочным устройством?
+.TP
+S_ISFIFO(m)
+каналом FIFO?
+.TP
+S_ISLNK(m)
+символической ссылкой? (Этого флага нет в POSIX.1-1996.)
+.TP
+S_ISSOCK(m)
+сокетом? (Этого флага нет в POSIX.1-1996.)
+.RE
+.PP
+Нижеследующие флаги определены для поля
+.IR st_mode :
+.P
+.TS
+l l l.
+S_IFMT	0170000	битовая маска для полей типа файла
+S_IFSOCK	0140000	сокет
+S_IFLNK	0120000	символическая ссылка
+S_IFREG	0100000	обычный файл
+S_IFBLK	0060000	блочное устройство
+S_IFDIR	0040000	каталог
+S_IFCHR	0020000	символьное устройство
+S_IFIFO	0010000	канал FIFO
+S_ISUID	0004000	бит setuid 
+S_ISGID	0002000	бит setgid (смотри ниже)
+S_ISVTX	0001000	бит липкости (смотри ниже)
+S_IRWXU	00700	маска для прав доступа пользователя
+S_IRUSR	00400	пользователь имеет право чтения
+S_IWUSR	00200	пользователь имеет право записи
+S_IXUSR	00100	пользователь имеет право выполнения
+S_IRWXG	00070	маска для прав доступа группы
+S_IRGRP	00040	группа имеет права чтения
+S_IWGRP	00020	группа имеет права записи
+S_IXGRP	00010	группа имеет права выполнения
+S_IRWXO	00007	маска прав доступа всех прочих (не находящихся в группе)
+S_IROTH	00004	все прочие имеют права чтения
+S_IWOTH	00002	все прочие имеют права записи
+S_IXOTH	00001	все прочие имеют права выполнения
+.TE
+.P
+Бит setgid (S_ISGID) имеет несколько специальных применений:
+На каталоге он означает, что для этого каталога используется семантика 
+BSD:  файлы, создаваемые в нем, наследуют свою группу-владельца от
+этого каталога, а не от фактической группы-владельца процесса,
+создавшего файл, а на подкаталогах, которые созданы в этом каталоге,
+также будет установлен бит S_ISGID.  Для файла, которые не имеет бит
+выполнения группой (S_IXGRP), бит setgid означает жесткую блокировку
+файла/записей.
+.P
+Бит "липкости" (S_ISVTX) на каталоге означает, что файлы в этом
+каталоге могут быть удалены или переименованы только владельцем файла, 
+владельцем каталога, и суперпользователем.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+.TP
+.B EBADF
+Плохой файловый дескриптор
+.IR filedes .
+.TP
+.B ENOENT
+Компонент пути
+.I file_name
+не существует, или путь является пустой строкой.
+.TP
+.B ENOTDIR
+Компонент пути не является каталогом.
+.TP
+.B ELOOP
+При поиске файла встретилось слишком много символических ссылок.
+.TP
+.B EFAULT
+Плохой адрес.
+.TP
+.B EACCES
+Доступ запрещен.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENAMETOOLONG
+Имя слишком длинное.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системные вызовы
+.B stat
+и
+.B fstat
+соответствуют SVr4, SVID, POSIX, X/OPEN, BSD 4.3.  Системный вызов
+.B lstat
+соответствует 4.3BSD и SVr4.  SVr4 документирует дополнительные коды
+ошибок
+.BR fstat :
+EINTR, ENOLINK и EOVERFLOW.  SVr4 документирует дополнительные коды
+ошибок
+.B stat
+и
+.BR lstat :
+EACCES, EINTR, EMULTIHOP, ENOLINK и EOVERFLOW.  Использование полей
+.I st_blocks
+и
+.I st_blksize
+может быть менее переносимо.  (Эти поля появились в BSD и не указана
+в POSIX.  Их интерпретация различается на разных системах и, вероятно, 
+даже на одной и той же системе, если есть смонтированные файловые
+системы NFS).
+.LP
+POSIX не описывает биты S_IFMT, S_IFSOCK, S_IFLNK, S_IFREG, S_IFBLK,
+S_IFDIR, S_IFCHR, S_IFIFO, S_ISVTX, но вместо этого требует
+использовать макросы S_ISDIR() и т.\~п.  Макросы S_ISLNK и S_ISSOCK не
+упомянуты в POSIX.1-1996, но будут присутствовать в следующем
+стандарте POSIX; первый из них взят из SVID 4v2, второй -- из SUSv2.
+.LP
+Unix V7 (и более поздние
+системы) имеют S_IREAD, S_IWRITE, S_IEXEC, тогда как POSIX требует
+присутствия синонимов S_IRUSR, S_IWUSR, S_IXUSR.
+.SH "ДРУГИЕ СИСТЕМЫ"
+Значения, которые использовались или используются на различных
+системах:
+.P
+.TS
+l l l l l.
+hex	имя	ls	oct	описание
+f000	S_IFMT		170000	маска типа файла
+0000			000000	SCO: недействующий inode
+				BSD: неизвестный тип
+				в SVID-v2 и XPG2 как 0, так и 0100000
+				означают обычный файл
+1000	S_IFIFO	p|	010000	именованный канал FIFO
+2000	S_IFCHR	c	020000	символьной устройство (V7)
+3000	S_IFMPC		030000	мультиплексированное символьное
+				устройство (V7)
+4000	S_IFDIR	d/	040000	каталог (V7)
+5000	S_IFNAM		050000	XENIX: именованный специальный файл с
+				двумя подтипами, с разными значениями
+				st_rdev (1 и 2)
+0001	S_INSEM	s	000001	XENIX семафор, подтип IFNAM
+0002	S_INSHD	m	000002	XENIX разделяемые данные, подтип IFNAM
+6000	S_IFBLK	b	060000	блочное устройство (V7)
+7000	S_IFMPB		070000	мультиплексированное блочное
+				устройство (V7)
+8000	S_IFREG	-	100000	обычный файл (V7)
+9000	S_IFCMP		110000	VxFS: компрессированный файл
+9000	S_IFNWK	n	110000	сетевое устройство (HP-UX)
+a000	S_IFLNK	l@	120000	символическая ссылка (BSD)
+b000	S_IFSHAD		130000	Solaris: теневой inode для ACL
+				(не виден пользовательскими
+				процессами)
+c000	S_IFSOCK	s=	140000	сокет (BSD; также "S_IFSOC" on VxFS)
+d000	S_IFDOOR	D>	150000	Solaris: door
+e000	S_IFWHT	w%	160000	BSD whiteout (не используется для inode'ов)
+
+0200	S_ISVTX		001000	бит липкости: сохранить код
+				программы в файле подкачки даже после
+				использования (V7)
+				зарезервировано (SVID-v2)
+				На не-каталогах:  не кэшировать этот
+				файл (SunOS)
+				На каталогах: флаг ограниченного
+				удаления (SVID-v4.2)
+0400	S_ISGID		002000	установить идентификатор группы при
+				выполнении (V7)
+				для каталогов: использовать семантику
+				BSD для установки группы-владельца
+0400	S_ENFMT		002000	жесткая блокировка файлов в стиле SysV
+				(делит функции c S_ISGID)
+0800	S_ISUID		004000	установить идентификатор пользователя
+				при выполнении (V7)
+0800	S_CDF		004000	каталог является файлом, зависящим от контекста (HP-UX)
+.TE
+
+Липкие команды появились в Version 32V AT&T UNIX.
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR chmod (2),
+.BR chown (2),
+.BR readlink (2),
+.BR utime (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2001
+.\" Local variables:
+.\" mode: nroff
+.\" End:

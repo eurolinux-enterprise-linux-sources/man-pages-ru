@@ -1,0 +1,163 @@
+'\" t
+.\" Copyright (c) 1980, 1991 Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"     @(#)lseek.2	6.5 (Berkeley) 3/10/91
+.\"
+.\" Modified 1993-07-23 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1995-06-10 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified 1996-10-31 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998-01-17 by Michael Haardt
+.\"   <michael@cantor.informatik.rwth-aachen.de>
+.\" Modified 2001-09-24 by Michael Haardt <michael@moria.de>
+.\" Modified 2003-08-21 by Andries Brouwer <aeb@cwi.nl>
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH LSEEK 2 2001-09-24 "Linux" "Системные вызовы"
+.SH ИМЯ
+lseek \- установить смещение для позиционирования операций чтения/записи
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "off_t lseek(int " fildes ", off_t " offset ", int " whence );
+.SH ОПИСАНИЕ
+Функция
+.B lseek
+устанавливает смещение для файлового дескриптора
+.I fildes
+в значение аргумента
+.I offset
+в соответствии с директивой
+.I whence
+которая может принимать одно из следующих значений:
+.TP
+.B SEEK_SET
+Смещение устанавливается в
+.I offset
+байт (от начала файла -- прим. пер.).
+.TP
+.B SEEK_CUR
+Смещение устанавливается как текущее смещение плюс
+.I offset
+байт.
+.TP
+.B SEEK_END
+Смещение устанавливается как размер файла плюс
+.I offset
+байт.
+.PP
+Функция
+.B lseek
+позволяет задавать смещения, которые будут находиться за существующим
+концом файла (но это не изменяет размер файла). Если позднее по этому
+смещению будут записаны данные, то последующее чтение в
+промежутке от конца файла до этого смещения, будет возвращать нулевые
+байты (пока в этот промежуток не будут фактически записаны данные).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнеии
+.B lseek
+возвращает получившееся в результате смещение в батах от начала
+файла. В противном случае, возвращается значение (off_t)\-1 и
+.I errno
+показывает ошибку.
+.SH ОШИБКИ
+.TP
+.B EBADF
+.I fildes
+не является дескриптором открытого файла.
+.TP
+.B ESPIPE
+.I fildes
+ассоциирован с каналом, сокетом или FIFO.
+.TP
+.B EINVAL
+.I whence
+не является одним из значений SEEK_SET, SEEK_CUR, SEEK_END
+или смещение в файле, которое получилось в результате является
+отрицательным.
+.\" Some systems may allow negative offsets for character devices
+.\" and/or for remote filesystems.
+.TP
+.B EOVERFLOW
+Получившееся в результате смещение не может быть представлено
+типом off_t.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX, BSD 4.3
+.SH ОГРАНИЧЕНИЯ
+Некоторые устройства несовместимы с позиционированием, а POSIX не
+определяет какие устройства должны его поддерживать.
+
+Специальные ограничения Linux: при использовании \fBlseek\fP на терминальных
+устройствах tty возвращается
+\fBESPIPE\fP.
+.\" Other systems return the number of written characters,
+.\" using SEEK_SET to set the counter. (Of written characters.)
+.SH ЗАМЕЧАНИЯ
+Использование в этом документе слова
+.I whence
+является некорректным для английского языка, но в силу исторических
+причин использование этого слова продолжается.
+
+Если вы будете конвертировать старый код, подставляйте вместо значений
+\fIwhence\fP следующие макросы:
+.PP
+.TS
+c c
+l l.
+old	new
+0	SEEK_SET
+1	SEEK_CUR
+2	SEEK_END
+L_SET	SEEK_SET
+L_INCR	SEEK_CUR
+L_XTND	SEEK_END
+.TE
+.PP
+SVR1-3 возвращает \fBlong\fP вместо \fBoff_t\fP, BSD возвращает \fBint\fP.
+.PP
+Заметим, что файловые дескрипторы, созданные через
+.BR dup (2)
+или
+.BR fork (2)
+разделяют указатель текущей позиции в файле, так что позиционирование таких
+файлов может быть выполнено на тех же условиях.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR dup (2),
+.BR fork (2),
+.BR open (2),
+.BR fseek (3)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

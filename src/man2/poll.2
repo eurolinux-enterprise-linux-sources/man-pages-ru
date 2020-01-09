@@ -1,0 +1,123 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1997 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Additions from Richard Gooch <rgooch@atnf.CSIRO.AU> and aeb, 971207
+.\"
+.TH POLL 2 "7 декабря 1997" "Linux 2.1.23" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+poll \- ожидание разнообразных событий на файловом дескрипторе
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/poll.h>
+.sp
+.BI "int poll(struct pollfd *" ufds ", unsigned int " nfds ", int " timeout );
+.SH ОПИСАНИЕ
+.B poll
+является вариацией на тему
+.BR select .
+Здесь задается массив из
+.I nfds
+структур типа
+.br
+.nf
+        struct pollfd {
+                int fd;           /* файловый дескриптор */
+                short events;     /* запрошенные события */
+                short revents;    /* возвращенные события */
+        };
+.fi
+и
+.I timeout
+в миллисекундах.  Отрицательное значение означает бесконечный
+тайм-аут.  Поле
+.I fd
+содержит файловый дескриптор открытого файла.
+Поле
+.IR events --
+входной параметр, указывающий битовую маску событий, интересующих
+приложение.
+Поле
+.IR revents --
+выходной параметр, куда ядро помещает информацию о произошедших
+событиях: запрошенных или событий типа
+.BR POLLERR ,
+.B POLLHUP
+или
+.BR POLLNVAL .
+(Эти три битовых флага не имеют смысла при использовании в поле
+.I events
+и будут установлены в поле
+.IR revents ,
+если соответствующее условие истинно.) 
+Если ни одно из запрошенных событий (или ошибок) не случилось, то ядро 
+ждет их появления до тайм-аута.
+Вот возможные биты, описанные в <sys/poll.h>:
+.br
+.nf
+    #define POLLIN      0x0001    /* Можно читать данные */
+    #define POLLPRI     0x0002    /* Есть срочные данные */
+    #define POLLOUT     0x0004    /* Запись не будет блокирована */
+    #define POLLERR     0x0008    /* Произошла ошибка */
+    #define POLLHUP     0x0010    /* "Положили трубку" */
+    #define POLLNVAL    0x0020    /* Неверный запрос: fd не открыт */
+.fi
+В <asm/poll.h> также определены значения
+.BR POLLRDNORM ,
+.BR POLLRDBAND ,
+.BR POLLWRNORM ,
+.B POLLWRBAND
+и
+.BR POLLMSG .
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении возвращается положительное значение, равное
+количеству структур с ненулевыми полями
+.I revents 
+(другими словами, дескрипторы с обнаруженными событиями или ошибками).
+Нуль означает, что системный вызов вышел по тайм-ауту, и ни один из
+файловых дескрипторов не был выбран.  При ошибке возвращается \-1, а
+.I errno
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP
+.B ENOMEM
+Не хватило памяти для создания таблицы файловых дескрипторов.
+.TP
+.B EFAULT
+Массив, переданный в качестве аргумента, не находится в адресном
+пространстве вызывающей программы.
+.TP
+.B EINTR
+До появления запрошенного события произошел сигнал.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+XPG4-UNIX.
+.SH ДОСТУПНОСТЬ
+Системный вызов poll() появился в Linux 2.1.23.  Библиотечный вызов
+poll() появился в libc 5.4.28 (использует эмуляцию с помощью
+.BR select (2),
+если в вашем ядре нет системного вызова
+.BR poll (2).
+.SH "СМОТРИ ТАКЖЕ"
+.BR select (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000

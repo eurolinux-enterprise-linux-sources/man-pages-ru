@@ -1,0 +1,106 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     @(#)setregid.2	6.4 (Berkeley) 3/10/91
+.\"
+.\" Modified Sat Jul 24 09:08:49 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Portions extracted from linux/kernel/sys.c:
+.\"             Copyright (C) 1991, 1992  Linus Torvalds
+.\"             May be distributed under the GNU General Public License
+.\" Changes: Fri Jul 29 10:56:01 BST 1994 by Wilf. <G.Wilford@ee.surrey.ac.uk>
+.\"          Tue Aug  2 14:56:48 BST 1994 by Wilf due to changes in kernel.
+.\"
+.TH SETREGID 2 "2nd August 1994" "Linux 1.1.38" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+setregid, setegid \- установить действительный и/или фактический идентификатор группы
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.BI "int setregid(gid_t " rgid ", gid_t " egid );
+.br
+.BI "int setegid(gid_t " egid );
+.SH ОПИСАНИЕ
+.B setregid
+устанавливает действительный и фактический идентификатор группы
+текущего процесса.  Непривилегированные пользователи могут изменять
+действительный идентификатор на фактический и наоборот.
+
+В Linux до версии 1.1.38 парадигма сохраненных идентификаторов,
+которая использовалась вместе с
+.B setregid 
+или
+.BR setegid ,
+была неверно реализована.  Начиная с 1.1.38, можно устанавливать
+фактический идентификатор группы в сохраненный идентификатор группы.
+
+Все остальные изменения может делать только суперпользователь.
+
+Передавая \-1 в качестве действительного или фактического
+идентификатора группы оставляет этот идентификатор без изменений.
+
+В настоящий момент (libc-4.x.x), вызов
+.BI setegid( egid )
+функционально эквивалентен вызову
+.BI setregid(  -1  , " egid" ) \fR.
+
+Если действительный идентификатор группы изменяется или фактический
+идентификатор группы устанавливается в значение, не равное предыдущему 
+действительному идентификатору, то сохраненный идентификатор группы
+будет установлен в новый фактический идентификатор группы.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ERRORS
+.TP
+.TP
+.B EPERM
+Текущий процесс не имеет прав суперпользователя и пытается выполнить
+что-то помимо (i) обмена фактического идентификатора на
+действительный, (ii) установки одного в значение другого, или же (iii) 
+установки фактического идентификатора группы в значение сохраненного
+идентификатора группы.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+BSD 4.3 (системный вызов
+.B setregid
+впервые появился в 4.2BSD).
+.SH "СМОТРИ ТАКЖЕ"
+.BR getgid (2),
+.BR setgid (2)
+.SH ПЕРЕВОД
+Перевод Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000
+
+http://alexm.here.ru/manpages-ru/

@@ -1,0 +1,126 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified 1993-07-21, Rik Faith <faith@cs.unc.edu>
+.\" Modified 1994-08-21, Michael Chastain <mec@shell.portal.com>:
+.\"   Fixed typoes.
+.\" Modified Fri Jan 31 16:23:46 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1997-01-31, Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2002-09-28, aeb
+.\"
+.\" Дата последней коррекции перевода 12.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH DUP 2 1994-08-21 "Linux 1.1.46" "Руководство программиста Linux"
+.SH ИМЯ
+dup, dup2 \- создать дубликат файлового дескриптора
+.SH ОБЗОР
+.nf
+.B #include <unistd.h>
+.sp
+.BI "int dup(int " oldfd );
+.BI "int dup2(int " oldfd ", int " newfd );
+.fi
+.SH ОПИСАНИЕ
+.BR dup " и " dup2
+создают копию файлового дескриптора
+.IR oldfd .
+
+Старый и новый дескрипторы можно использовать друг вместо друга.  Они
+имеют общие блокировки, указатель позиции в файле и флаги; например,
+если позиция в файле была изменена с помощью
+.BR lseek ,
+на одном из дескрипторов, то эта позиция также меняется и на втором.
+
+Два дескриптора, однако, каждый имеют свой собственный флаг
+закрыть-при-exec. 
+
+.B dup
+использует самый маленький свободный номер дескриптора.
+
+.B dup2
+.RI "делает " newfd " копией " oldfd ", закрывая " newfd ,
+если требуется.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.BR dup " и " dup2
+возвращают новый дескриптор или \-1, если произошла ошибка (в этом
+случае
+.I errno
+устанавливается должным образом).
+.SH ОШИБКИ
+.TP
+.B EBADF
+.I oldfd
+не является открытым файловым дескриптором, или же
+.I newfd
+находится вне допустимого диапазона файловых дескрипторов.
+.TP
+.B EMFILE
+Процесс уже открыл максимальное количество файлов и пытается открыть
+еще один.
+.TP
+.B EINTR
+Вызов
+.B dup2
+был прерван каким-либо сигналом.
+.TP
+.B EBUSY
+(Только в Linux) Может случиться в
+.B dup2
+во время при условии состязательных вызовов open() и dup().
+.SH ВНИМАНИЕ
+Ошибка, которую возвращает
+.BR dup2 ,
+отличается от той, что возвращает
+.BR fcntl( "..., " F_DUPFD ", ..." ) ,
+когда
+.I newfd
+находится вне допустимых пределов.  На некоторых системах
+.B dup2
+также иногда возвращает 
+.BR EINVAL ,
+как
+.BR F_DUPFD .
+.SH ОШИБКИ
+Если
+.I newfd
+был открыт, любые ошибки, которые могли бы случиться во время
+.IR close () ,
+теряются. Осторожный программист не будет использовать
+.B dup2
+не закрыв сперва
+.I newfd .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN, BSD 4.3. SVr4 документирует дополнительные
+коды ошибки EINTR и ENOLINK.  POSIX.1 добавляет EINTR.
+Ошибка EBUSY является специфичной для Linux.
+.SH "СМОТРИ ТАКЖЕ"
+.BR fcntl "(2), " open "(2), " close (2).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

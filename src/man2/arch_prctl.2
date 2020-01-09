@@ -1,0 +1,137 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 2003 Andi Kleen
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ARCH_PRCTL 2 2003-02-02 "Linux 2.4.20" "Руководство программиста Linux"
+.SH ИМЯ
+arch_prctl \- установить состояние треда, специфичное для архитектуры
+.SH ОБЗОР
+.B #include <asm/prctl.h>
+.sp
+.B #include <sys/prctl.h>
+.sp
+.BI "int arch_prctl(int code, unsigned long addr)"
+.SH ОПИСАНИЕ
+Функция
+.B arch_prctl
+устанавливает специфичное для данной архитектуры состояние процесса или треда.
+Параметр
+.I code
+выбирает подфункцию и передаёт ей аргумент
+.I addr . 
+.LP
+Подфункции для x86-64:
+.TP
+.B ARCH_SET_FS
+Установливает 64биную базу для регистра 
+.I FS
+в значение
+.IR addr .
+.TP
+.B ARCH_GET_FS
+Возращает значение 64биной базы для регистра
+.I FS
+текущего треда в
+.I unsigned long
+на который указывает параметр
+.I addr .
+.TP
+.B ARCH_SET_GS
+Установливает 64биную базу для регистра 
+.I GS
+в значение
+.IR addr .
+.TP
+.B ARCH_GET_GS
+Возращает значение 64биной базы для регистра
+.I GS
+текущего треда в
+.I unsigned long
+на который указывает параметр
+.I address .
+.SH ЗАМЕЧАНИЯ
+.I arch_prctl
+поддерживается в настоящий момент только в Linux/x86-64 для 64битных программ.
+
+64биная база изменяется, когда загружается новый 32битный селектор сегмента.
+
+.B ARCH_SET_GS
+запрещается в некоторых ядрах.
+
+Переключение контекста для 64битных баз сегментов является более
+экономичным. Использование селектора сегмента, устанавливаемого через
+один из LDT с помощью
+.BR modify_ldt (2)
+или с помощью системного вызова 
+.BR set_thread_area (2)
+в ядре 2.5, может быть более быстрой альтернативой для установки
+32биной базы. 
+Вызов
+.B arch_prctl
+нужен только, когда вы хотите установить базы, которые больше чем 4GB.
+Память в первых 2GB адресного пространтсва может быть выделена с помощью
+.BR mmap (2)
+при использоавании флага
+.I MAP_32BIT .
+
+Прототипов для 
+.I arch_prctl
+в glibc 2.2 не существуюет. Вы должны объявлять эту функцию сами.
+Это будет исправлено в будущих версиях glibc.
+
+Регистр
+.I FS 
+может быть уже использован библиотекой тредов.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+.I code 
+не является допустимым кодом подфункции.
+.TP
+.B EPERM
+.I addr
+находится за пределами адресного пространтсва.
+.TP
+.B EFAULT
+.I addr 
+указывает на невыделенный адрес или за пределы адресного пространства
+процесса.
+.SH АВТОР
+Страницу руководства написал Andi Kleen.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов
+.I arch_prctl
+является расширением для Linux/x86-64 и не должен использоваться в программах,
+которые задумываются как переносимые.
+.SH "СМОТРИ ТАКЖЕ"
+.BR mmap (2),
+.BR modify_ldt (2),
+.BR prctl (2),
+.BR set_thread_area (2)
+.sp
+Руководство программиста AMD X86-64
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

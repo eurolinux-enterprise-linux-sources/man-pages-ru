@@ -1,0 +1,149 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     @(#)truncate.2	6.9 (Berkeley) 3/10/91
+.\"
+.\" Modified Sat Jul 24 12:46:33 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Tue Oct 22 22:36:33 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Mon Dec 21 13:37:05 1998 by Andries Brouwer (aeb@cwi.nl)
+.\"
+.TH TRUNCATE 2 "21 декабря 1998" "" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+truncate, ftruncate \- обрезать файл до указанной длины
+.SH КРАТКАЯ СВОДКА
+.B #include <unistd.h>
+.sp
+.BI "int truncate(const char *" path ", off_t " length );
+.br
+.BI "int ftruncate(int " fd ", off_t " length );
+.SH ОПИСАНИЕ
+.B truncate
+обрезает файл с именем
+.I path
+или обозначенный файловым дескриптором 
+.I fd
+до 
+.I length
+байт.
+Если файл до этой операции был длиннее, то оставшиеся данные теряются.
+Если файл был короче, то не определено, останется ли длина файла
+неизменной или же она увеличится.  В последнем случае новый кусок
+файла будет содержать нулевые байты.
+При использовании
+.B ftruncate
+файл должен быть открыт для записи.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+Для
+.BR truncate :
+.TP
+.B ENOTDIR
+
+Компонент пути, использованный как каталог, в действительности таковым не является.
+
+.TP
+.B ENAMETOOLONG
+Компонент пути превышает 255 символов или весь путь превышает 1023
+символа.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B EACCES
+В одном из компонентов пути не разрешен поиск.
+.TP
+.B EACCES
+Пользователь не имеет прав на запись в указанный файл.
+.TP
+.B ELOOP
+При прохождении пути встречено слишком много символических ссылок.
+.TP
+.B EISDIR
+Указанный файл является каталогом.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B ETXTBSY
+Файл является исполняемым и в настоящий момент выполняется.
+.TP
+.B EIO
+При обновлении inode произошла ошибка ввода-вывода.
+.TP
+.B EFAULT
+.I path
+указывает за пределы доступного адресного пространства.
+.PP
+Для
+.BR ftruncate :
+.TP
+.B EBADF
+Неверный файловый дескриптор
+.IR fd .
+.TP
+.B EINVAL
+Дескриптор
+.I fd
+ссылается на сокет, а не на файл.
+.TP
+.B EINVAL
+Дескриптор
+.I fd
+не открыт для записи.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD, SVr4 (эти системные вызовы впервые появились в BSD 4.2).
+SVr4 документирует дополнительные коды ошибок
+.BR truncate :
+EINTR, EMFILE, EMULTIHP, ENAMETOOLONG, ENFILE, ENOLINK, ENOTDIR.  SVr4 
+документирует дополнительные коды ошибок
+.B ftruncate
+EAGAIN и EINTR.
+POSIX содержит
+.IR ftruncate ,
+но не
+.IR truncate .
+Стандарт POSIX не определяет, что произойдет, если в файле меньше
+байт, чем
+.IR length .
+.SH ОШИБКИ В РЕАЛИЗАЦИИ
+Эти системные вызовы должны быть обобщены, чтобы разрешить
+отбрасывание целых участков файла.
+.SH "СМОТРИ ТАКЖЕ"
+.BR open (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2000

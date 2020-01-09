@@ -1,0 +1,54 @@
+.\" -*- nroff -*- 
+.\"
+.\" This man-page is Copyright (C) 1997 John S. Kallal 
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" correction, aeb, 970825
+.\" Перевод на русский язык: Антон Лыков (last@last.ulsu.ru), 2000
+.TH FULL 4 "2 августа 1997" "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+full \- всегда заполненное устройство
+.SH ОПИСАНИЕ
+Файл \fB/dev/full\fP имеет старший номер устройства 1 
+и младший номер устройства 7.
+.LP 
+Запись в устройство \fB/dev/full\fP всегда завершится с ошибкой ENOSPC.
+
+Чтение из устройства \fB/dev/full\fP будет возвращать символы \\0.
+
+Перемещение файлового указателя по \fB/dev/full\fP всегда успешно.
+.SH КОНФИГУРАЦИЯ
+Если в вашей системе устройства \fB/dev/full\fP еще нет, оно 
+может быть создано следующими командами:
+.nf
+
+        mknod -m 666 /dev/full c 1 7
+        chown root:root /dev/full
+
+.fi
+.SH ФАЙЛЫ
+/dev/full
+.SH "СМОТРИ ТАКЖЕ"
+.BR mknod (1),
+.BR null (4),
+.BR zero (4)
+

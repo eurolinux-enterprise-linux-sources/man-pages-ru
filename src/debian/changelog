@@ -1,0 +1,21 @@
+manpages-ru (0.7-1) unstable; urgency=low
+
+  * New upstream source
+
+ -- Alexey Mahotkin <alexm@hsys.msk.ru>  Fri,  9 Mar 2001 17:30:06 +0300
+
+manpages-ru (0.5-1) unstable; urgency=low
+
+  * New upstream source.
+
+ -- Fedor Zuev <fedor@earth.crust.irk.ru>  Fri, 15 Sep 2000 13:49:04 +0900
+
+manpages-ru (0.4-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Fedor Zuev <fedor@earth.crust.irk.ru>  Mon,  3 Jul 2000 20:01:39 +0900
+
+Local variables:
+mode: debian-changelog
+End:

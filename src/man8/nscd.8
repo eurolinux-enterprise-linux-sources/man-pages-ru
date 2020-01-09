@@ -1,0 +1,79 @@
+.\" -*- nroff -*-
+.\" Copyright 1999 SuSE GmbH Nuernberg, Germany
+.\" Author: Thorsten Kukuk <kukuk@suse.de>
+.\"
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of the
+.\" License, or (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this program; see the file COPYING.  If not,
+.\" write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+.\" Boston, MA 02111-1307, USA.
+.\" 
+.\" Дата последней коррекции перевода 08.02.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH NSCD 8 1999-10 "Библиотека GNU C" "Руководство программиста Linux"
+.SH ИМЯ
+/usr/sbin/nscd - демон кэширования службы имён
+.SH ОПИСАНИЕ
+Nscd \- это демон, который предоставляет кэш для наиболее общих
+запросов службы имен. По умолчанию, поведение демона кэша определяет
+файл с настройками
+.IR /etc/nscd.conf .
+Смотри
+.BR nscd.conf (5).
+
+Nscd предоставляет кэширование для баз данных
+.BR passwd (5),
+.BR group (5),
+и
+.BR hosts(5)
+через стандартные интерфейсы libc, такие как
+.BR getpwnam (3),
+.BR getpwuid (3),
+.BR getgrnam (3),
+.BR getgrgid (3),
+.BR gethostbyname (3),
+и другие. Каждый кэш имеет для своих данных отдельное TLL (time-to-live
+\- время жизни); изменения в локальной базе данных
+.RI ( /etc/passwd ,
+и других) приводит к тому что кэш становится неправльным в течении
+пятнадцати секунд. Заметим, что файл
+.IR shadow
+специально не кэшируется.
+Вызовы
+.BR getspnam (3)
+оставляют результат некэшированным.
+
+.SH ОПЦИИ
+.TP
+.B "\-\-help"
+выдать список все опций и что они делают.
+
+.SH ЗАМЕЧАНИЯ
+Nscd ничего не знает о протоколах службы. Это также означает, что
+если вы изменяете
+.I /etc/resolv.conf
+для DNS запросов, nscd продолжит использование старых данных,
+если вы настроили в файле
+.I /etc/nsswitch.conf
+поиск узлов через использование DNS. В этом случае, вам нужно
+перезапустить nscd.
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR nscd.conf (5),
+.BR nsswitch.conf (5)
+.SH АВТОР
+.B nscd
+написал Thorsten Kukuk и Ulrich Drepper.
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

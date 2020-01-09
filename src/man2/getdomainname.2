@@ -1,0 +1,89 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Mon Aug 25 16:26:16 1997 by NicolАs Lichtmaier <nick@debian.org>
+.\"
+.\" Дата последней коррекции перевода 03.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETDOMAINNAME 2 1997-08-25 "Linux 2.0" "Руководство программиста Linux"
+.SH ИМЯ
+getdomainname, setdomainname \- получить/установить имя домена
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int getdomainname(char *" name ", size_t " len );
+.br
+.BI "int setdomainname(const char *" name ", size_t " len );
+.SH ОПИСАНИЕ
+Эти функции используются для доступа к имени домена текущего процессора
+или его изменения. Если длина имени домена, которое завершается нулевым
+символом больше, чем \fIlen\fP байт,
+.B getdomainname
+возвращает либо первые \fIlen\fP байт (glibc) или ошибку (libc).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль. При ошибке возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EINVAL
+Для
+.BR getdomainname
+в libc:
+.I name
+является
+.B NULL
+или
+.I name
+длиннее, чем
+.I len
+байт.
+.TP
+.B EINVAL
+Для
+.BR setdomainname :
+.I len
+является отрицательным или очень большим числом.
+.TP
+.B EPERM
+Для
+.BR setdomainname :
+вызвавший не имеет прав суперпользователя.
+.TP
+.B EFAULT
+Для
+.BR setdomainname :
+.I name
+указывает за пределы адресного пространства пользователя.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX не описывает эти вызовы.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR gethostname (2),
+.BR sethostname (2),
+.BR uname (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

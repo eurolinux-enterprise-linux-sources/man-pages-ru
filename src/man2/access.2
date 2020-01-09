@@ -1,0 +1,183 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Wed Jul 21 19:36:29 1993, Rik Faith (faith@cs.unc.edu)
+.\" Modified 21 Aug 1994 by Michael Chastain (mec@shell.portal.com):
+.\"   Removed note about old kernel (pre-1.1.44) using wrong id on path.
+.\" Modified 18 Mar 1996 by Martin Schulze (joey@infodrom.north.de):
+.\"   Stated more clearly how it behaves with symbolic links.
+.\" Added correction due to Nick Duffek (nsd@bbc.com), aeb, 960426
+.\" Modified Sat Sep 07 18:17:26 MET DST 1996 by Michael Haardt:
+.\"   Restrictions for NFS
+.\" Modified by Joseph S. Myers <jsm28@cam.ac.uk>, 970909
+.\" Modified Tue Jan 13 21:21:03 MET 1998 by Michael Haardt:
+.\"   Using access is often insecure
+.\" Modified Tue Oct 16 02:40:48 CEST 2001 by aeb
+.\" Modified Tue Apr 23 19:51:15 CEST 2002 by Roger Luethi <rl@hellgate.ch>
+.\" Дата последней коррекции перевода 06.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ACCESS 2 2002-04-23 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+access \- проверить права доступа пользователя к файлу
+.SH ОБЗОР
+.nf
+.B #include <unistd.h>
+.sp
+.BI "int access(const char *" pathname ", int " mode );
+.fi
+.SH ОПИСАНИЕ
+.B access
+проверяет, имеет ли процесс права на чтение или запись, или же просто
+проверяет, существует ли файл (или другой объект файловой системы),
+с именем
+.IR pathname .
+Если
+.I pathname
+является символьной ссылкой, то проверяются права доступа к файлу,
+на который она ссылается.
+
+.I mode
+-- это маска, состоящая из одного или более флагов
+.BR R_OK ", " W_OK ", " X_OK " и " F_OK .
+
+.BR R_OK ", " W_OK " и " X_OK
+запрашивают соответственно проверку существования файла и возможности
+его чтения, записи или выполнения.
+.B F_OK
+просто проверяет существование файла.
+
+Результаты проверки зависят от прав доступа к каталогам, находящимся
+по пути к файлу, заданному параметром
+.IR pathname ,
+и от прав доступа к каталогам и файлам, на которые ссылаются
+символьные ссылки, встреченные по пути.
+
+Проверка осуществляется, используя
+.IR реальные ,
+а не эффективные идентификаторы пользователя и группы.  Эффективные
+идентификаторы будут использоваться при действительной попытке
+выполнения той или иной операции.  Это дает setuid-программам простой
+способ проверить права доступа настоящего пользователя.
+
+Проверяются только биты прав доступа, а не тип файла или его
+содержимое.  Таким образом, если каталог имеет "возможность записи",
+это, вероятно, означает, что в нем можно создавать файлы, а не что в
+этот каталог можно писать так же, как в обычный файл.  Подобно этому
+файл из DOS может показаться "выполняемым", но системный вызов
+.BR execve (2)
+завершится неудачно.
+
+Если процесс имеет соответствующие привелегии, то некоторые реализации
+могут показать успех для
+.B X_OK
+даже если права на файл не содержат бит, разрешающий выполнение. 
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха (есть все запрошенные права) возвращается нуль.
+При ошибке (по крайней мере один запрос прав из
+.I mode
+был неудовлетворен, или случилась другая ошибка), возвращается \-1, а
+.I errno
+устанавливается должным образом.
+.SH ОШИБКИ
+.B access
+будет завершаться с ошибкой если:
+.TP 0.8i
+.B EACCES
+Запрошенный тип доступа не удовлетворен или один из каталогов в
+.I pathname
+не позволяет поиск.
+.TP
+.B ELOOP
+Во время определения
+.IR pathname
+встретилось слишком много символьных ссылок (зацикливание по символьным
+сслыкам -- прим. пер.).
+.TP
+.B ENAMETOOLONG
+.I pathname
+слишком длинно.
+.TP
+.B ENOENT
+Компонент пути
+.I pathname
+не существует или является "висячей" символической ссылкой.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR pathname ,
+в действительности таковым не является.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.PP
+.B access
+может завершиться с ошибкой, если:
+.B EFAULT
+.I pathname
+указывает за пределы доступного адресного пространства.
+.TP
+.B EINVAL
+.I mode
+был задан неверно.
+.TP
+.B EIO
+Произошла ошибка ввода-вывода.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ETXTBSY
+Права на запись были затребованы для исполняемого файла, который
+уже выполняется.
+.SH ОГРАНИЧЕНИЯ
+.B access
+возвращает ошибку, если один из запрошенных типов доступа не будет
+удовлетворён, даже если другие типы прошли бы успешно.
+.PP
+.B access
+может работать неверно на файловых системах NFS со включенным
+преобразованием UID'ов, потому что это преобразование происходит на
+сервере и спрятано от клиента, который пытается проверить права.
+.PP
+Использование
+.B access
+для проверки, можно ли пользователю, например, открыть файл перед тем, 
+как действительно выполнить
+.BR open (2),
+создает дыру в защите, потому что пользователь может в короткий
+промежуток между проверкой и открытием файла как-то его изменить.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVID, AT&T, POSIX, X/OPEN, BSD 4.3
+.SH "СМОТРИ ТАКЖЕ"
+.BR stat "(2), " open "(2), " chmod "(2), " chown "(2), "
+.BR setuid "(2), " setgid (2).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

@@ -1,0 +1,60 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 2003 Abhijit Menon-Sen <ams@wiw.org>
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETTID 2 "2003-02-01" "Linux 2.4.20" "Руководство программиста Linux"
+.SH ИМЯ
+gettid \- получить идентификацию треда
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <linux/unistd.h>
+.sp
+.B _syscall0(pid_t,gettid)
+.sp
+.B pid_t gettid(void);
+.SH ОПИСАНИЕ
+\fBgettid\fP возвращает идентифкатор треда текущего процесса. Это эквивалентно
+идентифкатору процесса (который возвращает
+.BR getpid (2)),
+за исключением того, что данный процесс является частью группы тредов
+(созданной через флаг CLONE_THREAD в системном вызове
+.BR clone (2)).
+Все процессы в той же группе тредов имеют одинаковый идентифкатор процесса
+PID, но каждый из них имеет уникальный идентификатор треда процесса TID.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращает идентификатор треда TID текущего процесса.
+.SH ОШИБКИ
+Этот системный вызов всегда завершается успешно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBgettid\fP является специфичным для Linux и не должен использоваться
+в программах, которые задумываются как кросплатформенные.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR getpid (2),
+.BR clone (2),
+.BR fork (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

@@ -1,0 +1,221 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\" Части этого руководства извлечены из /usr/include/sys/socket.h, в
+.\" котором нет указаний автора.  Вероятно, этот файл распространяется
+.\" под GPL. 
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Остальные части из страницы руководства к 6.9 (Berkeley) 3/10/91:
+.\"
+.\" Copyright (c) 1983 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\" Modified Mon Oct 21 23:05:29 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998 by Andi Kleen
+.\" Id: bind.2,v 1.3 1999/04/23 19:56:07 freitag Exp 
+.\"
+.\" Дата последней коррекции перевода 06.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH BIND 2 1998-10-03 "Linux 2.2" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+bind \- привязать имя к сокету
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int bind(int " sockfd ", struct sockaddr *" my_addr ", socklen_t " addrlen );
+.SH ОПИСАНИЕ
+.B bind
+привязывает к сокету
+.I sockfd
+локальный адрес
+.I my_addr
+длиной
+.IR addrlen .
+Традиционно, эта операция называется \(lqприсваивание сокету имени.\(rq
+Когда сокет только что создан с помощью
+.BR socket (2),
+он существует в пространстве имён (семействе адресов), но не имеет
+назначенного имени.
+.PP
+Обычно сокету типа
+.B SOCK_STREAM
+требуется назначить локальный адрес с помощью
+.BR bind ,
+перед тем, как он сможет принимать соединения (см.
+.BR accept (2)).
+
+Правила, используемые при привязке имён, разные в разных семействах
+адресов.   Обратитесь к соответствующему руководству в секции 7 за
+дальнейшей информацией.  Для
+.B AF_INET
+смотри
+.BR ip (7),
+для
+.B AF_UNIX
+смотри
+.BR unix (7),
+для
+.B AF_APPLETALK
+смотри
+.BR ddp (7),
+для 
+.B AF_PACKET
+смотри
+.BR packet (7),
+для
+.B AF_X25
+смотри
+.BR x25 (7),
+а для
+.B AF_NETLINK
+смотри
+.BR netlink (7).
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+.TP 0.8i
+.B EBADF
+.I sockfd
+не является правильным дескриптором.
+.TP
+.B EINVAL
+Сокет уже привязан к какому-то адресу.  Эта ошибка в будущем может не
+выдаваться, смотри
+.IR linux/unix/sock.c ,
+где описаны детали.
+.TP
+.B EACCES
+Адрес защищен, или пользователь не является суперпользователем.
+.TP
+.B ENOTSOCK
+Аргумент системного вызова является дескриптором файла, а не сокета.
+.PP
+Нижеследующие ошибки специфичны для сокетов домена UNIX
+.RB ( AF_UNIX ):
+.TP 0.8i
+.B EINVAL
+Параметр
+.I addrlen
+неверен, или сокет не был найден в семействе адресов
+.BR AF_UNIX .
+.TP
+.B EROFS
+Попытка создания inode сокета на файловой системе "только для чтения".
+.TP
+.B EFAULT
+.I my_addr
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENAMETOOLONG
+.I my_addr
+слишком длинно.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENOTDIR
+
+Компонент пути, использованный как каталог, в действительности таковым не является.
+
+.TP
+.B EACCES
+Не разрешен поиск в одном из компонентов пути.
+.TP
+.B ELOOP
+.IR my_addr
+является зацикленной символической ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.SH ОШИБКИ
+Не описываются ключи, связанные с работой прозрачных прокси.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (функция
+.B bind
+впервые появилась в BSD 4.2).  SVr4 документирует дополнительные коды
+ошибок
+.BR EADDRNOTAVAIL , 
+.BR EADDRINUSE , 
+и 
+.BR ENOSR ,
+и дополнительные коды ошибок домена Unix:
+.B EIO
+и
+.B EISDIR
+.SH ЗАМЕЧАНИЕ
+Третий аргумент вызова
+.B bind
+в действительности имеет тип
+.B int
+(это именно так в BSD 4.*, libc4 и libc5).  
+При разработке стандарта POSIX случилось некоторое недопонимание, и 
+появился тип
+.BR socklen_t .
+Смотри также
+.BR accept (2).
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR accept "(2), " connect "(2), " listen "(2), "
+.BR socket "(2), " getsockname "(2), " ip "(7), " socket (7)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

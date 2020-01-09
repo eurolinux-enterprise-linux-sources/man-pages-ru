@@ -1,0 +1,32 @@
+
+	HOW TO INSTALL MANPAGES-RU
+
+The simplest way to install man-pages-ru is, as always,
+
+	$ make install
+
+This will install manpages to /usr/local/share/man/$LANG/man[1-8]/.
+If there are old versions of manpages (possibly compressed), ``make
+install'' will remove them first.  If size of new manpage is greater
+than 4096 bytes, ``make install'' will compress it with gzip.
+
+
+The installation process is customizable:
+
+	$ make install INSTALLPATH=/usr/man
+
+will install manpages to /usr/man/$LANG/man[1-8]/.
+
+	$ make install INSTALLPATH=/usr/man LANG_SUBDIR=ru
+
+will install manpages to /usr/man/ru/man[1-8]/.
+
+	$ make install COMPRESS=bzip2
+
+will compress manpages with bzip2.  Known compressors are `none' (do
+not compress), `gzip', `compress' and `bzip2'.  Compressor options
+could be specified with COMPRESS_OPTIONS.
+
+	$make install COMPRESS_SIZE=0
+
+will compress every manpage however small it is.

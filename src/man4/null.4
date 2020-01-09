@@ -1,0 +1,53 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de), Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\" 
+.\" Modified Sat Jul 24 17:00:12 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Перевод на русский язык: Антон Лыков (last@last.ulsu.ru), 2000
+.TH NULL 4 "21 ноября 1992" "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+null, zero \- мусорная корзина для данных
+.SH ОПИСАНИЕ
+Данные, записываемые в специальный файл \fBnull\fP или \fBzero\fP, исчезают.
+.PP
+Чтение из специального файла \fBnull\fP всегда возвращает конец файла, тогда как
+чтение из \fBzero\fP всегда возвращает символы \e0.
+.LP
+\fBnull\fP и \fBzero\fP обычно создаются командами:
+.RS
+.sp
+mknod -m 666 /dev/null c 1 3
+.br
+mknod -m 666 /dev/zero c 1 5
+.br
+chown root:mem /dev/null /dev/zero
+.sp
+.RE
+.SH ПРИМЕЧАНИЕ
+Если эти устройства недоступны для чтения и записи всем пользователям, многие
+программы будут вести себя странно.
+.SH ФАЙЛЫ
+.I /dev/null
+.br
+.I /dev/zero
+.SH "СМОТРИ ТАКЖЕ"
+.BR chown (1),
+.BR mknod (1)

@@ -1,0 +1,73 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified Fri Jul 23 23:25:42 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 17:23:51 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\" Дата последней коррекции перевода 28.07.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH PIPE 2 1993-07-23 "Linux 0.99.11" "Руководство программиста Linux"
+.SH ИМЯ
+pipe \- создать канал
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int pipe(int " filedes "[2]);"
+.SH ОПИСАНИЕ
+.B pipe
+создаёт пару файловых дескрипторов, указывающих на индексный дескриптор
+(inode) канала и помещает их в массив
+.IR filedes .
+.I filedes[0]   
+для чтения,
+.I filedes[1]
+для записи.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. В случае ошибки, возвращается \-1
+и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EMFILE
+Данный процесс использует слишком много файловых дескрипторов.
+.TP
+.B ENFILE
+Таблица системных файлов заполнена.
+.TP
+.B EFAULT
+Указано недопустимое значение
+.IR filedes .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, AT&T, POSIX, X/OPEN, BSD 4.3
+.SH "СМОТРИ ТАКЖЕ"
+.BR read (2),
+.BR write (2),
+.BR fork (2),
+.BR socketpair (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

@@ -1,0 +1,58 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETUID 2 1993-07-23 "Linux 0.99.11" "Linux Programmer's Manual"
+.SH ИМЯ
+getuid, geteuid \- получить идентифкатор пользоватля
+.SH ОБЗОР
+.B #include <unistd.h>
+.br
+.B #include <sys/types.h>
+.sp
+.B uid_t getuid(void);
+.br
+.B uid_t geteuid(void);
+.SH ОПИСАНИЕ
+.B getuid
+возвращает фактический идентификатор ID пользователя в текущем процессе.
+
+.B geteuid
+возвращает эффективный идентификатор ID пользователя в текущем процессе.
+
+Фактический ID соответствует ID пользователя, который вызвал процесс.
+Эффективный ID соответствует установленному setuid биту на исполняемом
+файле.
+.SH ОШИБКИ
+Эти функции всегда завершаются успешно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX, BSD 4.3.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR setreuid (2),
+.BR setuid (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

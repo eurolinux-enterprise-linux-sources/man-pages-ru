@@ -1,0 +1,63 @@
+.\" Copyright (C) 2003 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\" Written by Kent Yoder.
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH "GET_THREAD_AREA" 2 "2003-02-21" "Linux 2.5.32" "Linux Programmer's Manual"
+.SH ИМЯ
+get_thread_area \- получить область Thread Local Storage (TLS)
+.SH ОБЗОР
+.B #include <linux/unistd.h>
+.br
+.B #include <asm/ldt.h>
+.sp
+.BI "int get_thread_area (struct user_desc *" u_info );
+
+.SH ОПИСАНИЕ
+Вызов
+.B get_thread_area
+возвращает запись в текущем массиве Thread Local Storage (TLS).
+Индекс этой записи соответствует значению переменной
+\fIu_info->\fR\fIentry_number\fR в структуре передаваемой пользователем. 
+Если это значение находится в правильных границах,
+\fBget_thread_info\fR копирует соответствующую TLS запись в область,
+на которую указывает \fIu_info\fR.
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха
+.B get_thread_area
+возвращает 0. В противном случае, возвращает значение \-1 и
+устанавливает
+.I errno
+соответстветствующим образом.
+
+.SH ОШИБКИ
+.TP
+.B EINVAL
+\fIu_info->\fR\fIentry_number\fR выходит за границы.
+.TP
+.B EFAULT
+\fIu_info\fR является неправильным указателем.
+
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов
+.B get_thread_area
+является специфичным для Linux и не должен быть использован в
+программах, которые задумываются как кросплатформенные.
+
+.SH ДОСТУПНОСТЬ
+A version of
+.B get_thread_area
+first appeared in Linux 2.5.32.
+
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR set_thread_area (2),
+.BR modify_ldt (2)
+
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

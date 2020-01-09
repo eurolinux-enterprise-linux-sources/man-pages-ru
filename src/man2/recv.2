@@ -1,0 +1,429 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1990, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: recv.2,v 1.3 1999/05/13 11:33:38 freitag Exp 
+.\"
+.\" Modified Sat Jul 24 00:22:20 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 17:45:19 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998,1999 by Andi Kleen
+.\"
+.TH RECV 2 "Apr 1999" "Страница Руководства по Linux" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+recv, recvfrom, recvmsg \- получить сообщение из сокета
+.SH КРАТКАЯ СВОДКА
+.\" .B #include <sys/uio.h>
+.\" .br
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int recv(int " s ", void *" buf ", size_t " len ", int " flags );
+.sp
+.BI "int recvfrom(int " s ", void *" buf ", size_t " len ,
+.BI "int " flags ", struct sockaddr *" from ", socklen_t *" fromlen );
+.sp
+.BI "int recvmsg(int " s ", struct msghdr *" msg ", int " flags );
+.SH ОПИСАНИЕ
+Системные вызовы
+.B recvfrom
+и
+.B recvmsg
+используются для получения сообщений из сокета, и могут использоваться
+для получения данных, независимо от того, является ли сокет
+ориентированным на соединения или нет.
+.PP
+Если параметр
+.I from
+не равен
+.BR NULL ,
+а сокет не является ориентированным на соединения, то адрес
+отправителя в сообщении не заполняется.  Аргумент
+.I fromlen
+передается по ссылке, в начале инициализируется размером буфера,
+связанного с
+.IR from ,
+а при возврате из функции содержит действительный размер адреса.
+.PP
+Вызов 
+.B recv
+обычно используется только на
+.I соединенном
+сокете (см.
+.BR connect (2))
+и идентичен вызову
+.B recvfrom
+с параметром
+.IR from ,
+установленным в 
+.BR NULL .
+.PP
+Все три функции возвращают длину сообщения при успешном завершении.
+Если сообщение слишком длинное и не поместилось в предоставленный
+буфер, лишние байты могут быть отброшены, в зависимости от типа
+сокета, на котором принимаются сообщения (см.
+.BR socket (2)).
+.PP
+Если на сокете не доступно ни одного сообщения, то обсуждаемые функции 
+ожидают их прибытия, если сокет не помечен как неблокирующий (см.
+.BR fcntl (2)),
+в противном случае возвращается значение \-1, а внешняя переменная
+.I errno
+устанавливается в значение
+.BR EAGAIN .
+Все эти функции обычно возвращают уже доступные данные вплоть до
+запрошенного объема, и не ждут, пока появятся данные полной
+запрошенной длины.
+.PP
+Системные вызовы
+.BR select (2) 
+или
+.BR poll (2)
+можно использовать для определения появления новых данных.
+.PP
+Аргумент
+.I flags
+системного вызова
+.B recv
+формируется с помощью объединения логической операцией
+.I ИЛИ
+одного или более нижеследующих значений:
+.TP
+.B MSG_OOB
+Этот флаг запрашивает прием внепотоковых данных, которые в противном
+случае не были бы получены в обычном потоке данных.  Некоторые
+протоколы помещают данные повышенной срочности в начало обычной
+очереди данных, и поэтому этот флаг не может использоваться с такими
+протоколами.
+.TP
+.B MSG_PEEK
+Этот флаг заставляет выбрать данные из начала очереди, но не удалять
+их оттуда.  Таким образом, последующий вызов функции вернет те же
+самые данные.
+.TP
+.B MSG_WAITALL
+Этот флаг просит подождать, пока не придет полное запрошенное
+количество данных.  Однако, этот вызов все равно может вернуть меньше
+данных, чем было запрошено, если был пойман сигнал, произошла ошибка
+или разрыв соединения, или если начали поступать данные другого типа,
+не того, который был сначала.
+.TP
+.B MSG_TRUNC
+Возвращает реальную длину пакета, даже если она была больше, чем
+предоставленный буфер.  Этот флаг можно использовать только с
+пакетными протоколами.
+.TP
+.B MSG_ERRQUEUE
+Получить пакет из очереди ошибок.
+.TP
+.B MSG_NOSIGNAL 
+Этот флаг отключает возникновение сигнала
+.B SIGPIPE
+на потоковых сокетах, если другая сторона вдруг исчезает.
+.TP
+.B MSG_ERRQUEUE
+Указание этого флага позволяет получить из очереди ошибок сокета
+накопившиеся ошибки.  Каждая ошибка передается во вспомогательном
+сообщении, чей тип зависит от протокола (для IPv4 этим типом является
+.BR IP_RECVERR ).
+Пользователь должен предоставить буфер достаточной длины.  См.
+.BR cmsg (3)
+и
+.BR ip (7),
+где приведена дополнительная информация.
+Содержимое исходного пакета, который привел к ошибке, передается в
+виде обычных данных с помощью
+.BR msg_iovec .
+Исходный адрес назначения датаграммы, которая вызвала ошибку,
+передается с помощью
+.BR msg_name .
+.IP
+Для локальных ошибок адрес не передается (это можно выяснить, проверив
+поле
+.I cmsg_len
+структуры
+.BR cmsghdr ).
+Для ошибок при приеме в
+.B msghdr
+устанавливается
+.BR MSG_ERRQUEUE .
+После того, как ошибка передана программе, следующая ошибка в очереди
+ошибок становится ожидающей ошибкой и передается программе при
+следующей операции на сокете.
+
+Ошибка хранится в структуре
+.BR sock_extended_err :
+.IP
+.RS
+.ne 18
+.nf
+.ta 4n 20n 32n
+.\" XXX switch to standard types
+#define SO_EE_ORIGIN_NONE	0
+#define SO_EE_ORIGIN_LOCAL	1
+#define SO_EE_ORIGIN_ICMP	2
+#define SO_EE_ORIGIN_ICMP6	3
+
+struct sock_extended_err
+{
+	__u32	ee_errno;	/* номер ошибки */
+	__u8	ee_origin;	/* источник её происхождения */ 
+	__u8	ee_type;	/* тип */
+	__u8	ee_code;	/* код */
+	__u8	ee_pad;
+	__u32	ee_info;	/* дополнительная информация */
+	__u32	ee_data;	/* прочие данные */  
+};
+
+struct sockaddr *SOCK_EE_OFFENDER(struct sock_extended_err *);
+.ta
+.fi
+.RE
+.IP
+.B ee_errno 
+содержит значение errno для ожидающей ошибки.
+.B ee_origin
+источник происхождения ошибки.
+Смысл остальных полей зависит от протокола.
+.B SOCK_EE_OFFENDER 
+возвращает указатель на адрес сетевого объекта, породившего ошибку.
+Если этот адрес неизвестен, то член
+.I sa_family 
+структуры
+.B sockaddr 
+содержит значение
+.BR AF_UNSPEC ,
+а прочие поля структуры не определены.  Содержимое пакета, вызвавшего
+ошибку, передаются в виде обычных данных.
+.IP
+Для локальных ошибок адрес не передается (это можно проверить,
+взглянув на член
+.I cmsg_len 
+структуры 
+.BR cmsghdr ). 
+При приеме ошибок в структуре
+.B msghdr 
+установлен флаг
+.BR MSG_ERRQUEUE .
+После того, как ошибка была передана, следующая в очереди ошибка
+используется для перегенерации ошибки сокета, и именно она будет
+возвращена при следующей операции с этим сокетом.
+.PP
+Системный вызов
+.B recvmsg
+использует структуру
+.I msghdr
+для того, чтобы минимизировать количество непосредственно передаваемых 
+параметров.  Эта структура определена в 
+.I <sys/socket.h>
+так:
+.IP
+.RS
+.nf
+.ta 4n 17n 33n
+struct msghdr {
+	void	* msg_name;	/* необязательный адрес */
+	socklen_t	msg_namelen;	/* размер адреса */
+	struct iovec	* msg_iov;	/* массив для scatter/gather */
+	size_t	msg_iovlen;	/* кол-во элементов в msg_iov */
+	void	* msg_control;	/* вспомогательные данные, см. ниже */
+	socklen_t	msg_controllen;	/* длина буфера вспомогательных данных */
+	int	msg_flags;	/* флаги принятого сообщения */
+};
+.ta
+.fi
+.RE
+.PP
+Здесь
+.I msg_name
+и
+.I msg_namelen
+задают адрес назначения, если сокет не соединен; в параметре
+.I msg_name
+можно передать 
+.BR NULL ,
+если имена не требуются или вообще нежелательны. Поля
+.I msg_iov
+и
+.I msg_iovlen
+описывают точки scatter-gather, что обсуждается в 
+.BR readv (2).
+Поле
+.IR msg_control ,
+имеющее длину
+.IR msg_controllen ,
+указывает на буфер для других сообщений, связанных с управлением
+протоколов, или на буфер для разнообразных вспомогательных данных.
+Когда вызывается
+.BR recvmsg ,
+в параметре
+.I msg_controllen
+должна находиться длина доступного буфера, чей адрес передается в
+.IR msg_control ; 
+при успешном завершении в этом параметре будет находиться длина
+последовательности контрольных сообщений.
+.PP
+Сообщения имеют такую форму:
+.PP
+.RS
+.nf
+.ta 4n 16n 28n
+struct cmsghdr {
+	socklen_t	cmsg_len;	/* количество байт данных, */
+					/* включая hdr */
+	int	cmsg_level;	/* протокол  */
+	int	cmsg_type;	/* тип, зависящий от протокола */
+/* дальше следует
+	u_char	cmsg_data[]; */
+};
+.ta
+.fi
+.RE
+.PP
+К вспомогательным данным нужно обращаться только с помощью макросов,
+определенных в 
+.BR cmsg (3).
+.PP
+Например, Linux использует этот механизм вспомогательных данных для
+того, чтобы передавать через Unix-сокеты расширенные ошибки, флаги IP
+и файловые дескрипторы.
+.PP
+Поле 
+.I msg_flags
+в
+.B msghdr
+устанавливается при возврате из
+.BR recvmsg (2).
+Оно может содержать несколько флагов:
+.TP
+.B MSG_EOR
+означает "конец записи": возвращенные данные заканчивают запись
+(обычно используется вместе с сокетами типа
+.BR SOCK_SEQPACKET ).
+.TP
+.B MSG_TRUNC
+означает, что хвостовая часть датаграммы была отброшена, потому что
+датаграмма была больше, чем предоставленный буфер.
+.TP
+.B MSG_CTRUNC
+означает, что часть управляющих данных была отброшена из-за недостатка 
+места в буфере вспомогательных данных.
+.TP
+.B MSG_OOB
+возвращается для индикации получения внепотоковых данных.
+.TP
+.B MSG_ERRQUEUE
+означает, что были получены не данные, а расширенное сообщение об
+ошибке из очереди ошибок сокета.
+.TP
+.B MSG_DONTWAIT
+Разрешает неблокирующий режим.  Если операция могла бы привести к
+блокировке, возвращается
+.BR EAGAIN
+(этот режим можно также включить с помощью
+.B O_NONBLOCK
+и функции
+.B F_SETFL
+системного вызова
+.BR fcntl (2)).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Эти системные вызовы возвращают количество принятых байт или \-1, если 
+произошла ошибка.
+.SH ОШИБКИ
+Есть несколько стандартных ошибок, возвращаемых с уровня сокетов.
+Могут также появиться другие ошибки, возвращаемые из соответствующих
+протокольных модулей; их описание находится на соответствующих
+страницах руководства.
+.TP 0.8i
+.B EBADF
+Аргумент
+.I s
+является неверным дескриптором.
+.TP
+.B ECONNREFUSED
+Сетевой компьютер с другой стороны отказался устанавливать сетевое
+соединение (обычно потому, что там не работает запрошенный сервис).
+.TP
+.B ENOTCONN
+Сокет, связанный с протоколом, ориентированным на соединения, не был
+соединен (см. описание функций
+.BR connect (2)
+и
+.BR accept (2)).
+.TP
+.B ENOTSOCK
+Аргумент
+.I s
+не является сокетом.
+.TP
+.B EAGAIN
+Сокет помечен как неблокирующий, а операция приема данных могла
+заблокировать его, или же был установлен тайм-аут на прием данных, и
+этот тайм-аут закончился, а данные так и не были приняты.
+.TP
+.B EINTR
+Прием данных был прерван сигналом, а данные еще не были доступны.
+.TP
+.B EFAULT
+Указатель на приемный буфер указывает вне адресного пространства
+процесса.
+.TP
+.B EINVAL
+Передан неверный аргумент.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD (эти системные вызовы впервые появились в 4.2BSD).
+.SH ЗАМЕЧАНИЕ
+Вышеприведенные прототипы соответствуют glibc2.
+Стандарт SUS согласен с ними, за исключением того, что там
+возвращаемые значения определены как ssize_t (тогда как в BSD 4.x,
+libc4 и libc5 они определены как int).
+Аргумент
+.I flags
+является int в BSD 4.x, но unsigned int в libc4 и libc5.
+Аргумент
+.I len
+является int в BSD 4.x, но size_t в libc4 и libc5.
+Аргумент
+.I fromlen
+является int * в BSD 4.x, libc4 и libc5.  Текущее определение,
+socklen_t, было изобретено в POSIX (см. также 
+.BR accept (2)).
+
+.SH "СМОТРИ ТАКЖЕ"
+.BR fcntl (2),
+.BR read (2),
+.BR select (2),
+.BR getsockopt (2), 
+.BR socket (2), 
+.BR cmsg (3)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2001

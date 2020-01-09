@@ -1,0 +1,148 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 2003 Andries E. Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ALLOC_HUGEPAGES 2 2003-02-02 "Linux 2.5.36" "Руководство программста Linux"
+.SH ИМЯ
+alloc_hugepages, free_hugepages \- выделение или освобождение огромных страниц памяти
+.SH ОБЗОР
+.BI "void *alloc_hugepages(int " key ", void *" addr ", size_t " len ", int " prot ", int " flag );
+.\" asmlinkage unsigned long sys_alloc_hugepages(int key, unsigned long addr,
+.\" unsigned long len, int prot, int flag);
+.sp
+.BI "int free_hugepages(void *" addr );
+.\" asmlinkage int sys_free_hugepages(unsigned long addr);
+.SH ОПИСАНИЕ
+Системные вызовы
+.B alloc_hugepages
+и
+.B free_hugepages
+были введены в Linux 2.5.36 и удалены снова в 2.5.54. Они существуют только
+на платформах i386 и ia64 (когда ядро собрано с CONFIG_HUGETLB_PAGE).
+В Linux 2.4.20 номера этих системных вызовов существуют, но возвращают ENOSYS.
+.LP
+На платформе i386 аппаратная часть управления памятью знает об обычных
+страницах (4 kB) и огромных страницах (2 или 4 MB). Похожим образом и
+на платформе ia64 аппартная часть знает об огромных страницах разных
+размеров. Упомянутые системные вызовы обслуживают выделение огромных
+страниц в память процесса или их освобождение.
+Огромные страницы остаются в памяти и не сбрасываются на своппиг.
+.LP
+Параметр
+.I key
+\- это некий идентификатор. Он равен нулю, если выделено ноль страниц и
+нет страниц унаследованных процессами-потомками. Он больше нуля,
+если несколько страниц разделяются несколькими приложениями,
+использующими один и тот же
+.IR key
+и приложения являются процессами-потомками.
+.LP
+Параметр
+.I addr
+вызова
+.B free_hugepages()
+говорит какая страница будет освобождена - это значение, которое
+возвращает вызов
+.BR alloc_hugepages() .
+(Память фактически освобождается только когда все пользователи
+освобождают её).
+Параметр
+.I addr
+вызова
+.B alloc_hugepages()
+имеет в длину hint, и ядро может это поддерживать, а может нет.
+Адреса должны быть должным образом выравнены.
+.LP
+Параметр
+.I len
+является длиной требуемого сегмента. Она должна быть кратной
+размеру огромной страницы.
+.LP
+Параметр
+.I prot
+задаёт защиту выделяемого сегмента памяти. Может принимать
+одно из значений PROT_READ, PROT_WRITE, PROT_EXEC.
+.LP
+Параметр
+.I flag
+игнорируется, пока значение
+.I key
+не является положительным. В этом случае, если
+.I flag
+установлен в значение IPC_CREAT, то новый огромный сегмент
+создаётся, если не существуют других сегментов с заданным
+значением
+.I key .
+Если флаг не установлен и не существуют других сегментов с
+заданным
+.I key ,
+то возвращается ENOENT.
+.IR 
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха
+.B alloc_hugepages
+возвращает выделенный виртуальный адрес, а
+.B free_hugepages
+возвращает ноль. В случае ошибки возврщается \-1 и значение
+.I errno
+устанавливается должным образом.
+.SH ОШИБКИ
+.TP
+.B ENOSYS
+Системный вызов не поддерживается данным ядром.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данные системные вызовы существуют только в Linux 2.5.36 - 2.5.54.
+Эти вызовы являются специфичными для Linux на процессорах Intel и
+не должны использоваться в программах, которые задумываются как
+переносимые. На самом деле, номера этих системных вызовов отмечены
+для переиспользования, так что программы которые используют их
+могут в будущих ядрах вытворять что-то совсем непонятное.
+.SH ФАЙЛЫ
+.I /proc/sys/vm/nr_hugepages
+Количество настроенных страниц hugetlb.
+Этот файл можно как читать так и писать.
+.LP
+.I /proc/meminfo
+Предоставляет информацию о количестве настроенных страниц hugetlb
+и их размер в трёх переменных
+HugePages_Total, HugePages_Free, Hugepagesize.
+.SH ЗАМЕЧАНИЯ
+Данные системные вызовы умерли. Теперь вместо них можно использовать
+файловую систему hugetlbfs. Память, выделяемая огромными страницами
+(если процессор позволяет их использование) получается через
+отображение файлов в этой виртуальной файловой системе.
+.LP
+Максимальное количество огромных страниц может быть задано с помощью
+параметра загрузки
+.B hugepages= .
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003
+
+.\" requires CONFIG_HUGETLB_PAGE (under "Processor type and features")
+.\" and CONFIG_HUGETLBFS (under "Filesystems").
+.\" mount -t hugetlbfs hugetlbfs /huge
+.\" SHM_HUGETLB

@@ -1,0 +1,139 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Sat Jul 24 00:06:00 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Wed Jan 17 16:02:32 1996 by Michael Haardt
+.\"   <michael@cantor.informatik.rwth-aachen.de>
+.\" Modified Thu Apr 11 19:26:35 1996 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Sun Jul 21 18:59:33 1996 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Fri Jan 31 16:47:33 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Sat Jul 12 20:45:39 1997 by Michael Haardt
+.\"   <michael@cantor.informatik.rwth-aachen.de>
+.\"
+.TH READ 2 "July 12, 1997" "Linux 2.0.32" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+read \- читает из файлового дескриптора
+.SH КРАТКОЕ ОПИСАНИЕ
+.nf
+.B #include <unistd.h>
+.sp
+.BI "ssize_t read(int " fd ", void *" buf ", size_t " count );
+.fi
+.SH ОПИСАНИЕ
+.B read()
+пытается читать из файлового дескриптора 
+.I fd
+байты в количестве
+.I count
+в буфер, начинающийся по адресу
+.IR buf .
+.PP
+Если
+.I count
+равен нулю, то \fBread()\fP возвращает ноль и ничего не делает.  Если
+.I count
+больше, чем
+.BR SSIZE_MAX ,
+то результат неопределен.
+.PP
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении возвращается количество байт, которые были
+прочитаны (ноль означает конец файла), а позиция в файле увеличивается
+на это значение.  Если количество прочитанных байт меньше, чем
+количество запрошенных, то это не считается ошибкой: например, мы
+могли читать вблизи конца файла, или же из трубы, или с терминала, или
+же
+.B read()
+был прерван сигналом.  В случае ошибки возвращается
+\-1, а
+.I errno
+устанавливается должным образом.  В этом случае позиция файла
+неопределена.
+
+.SH ОШИБКИ
+.TP 0.8i
+.B EINTR
+Системный вызов был прерван сигналом до того, как был прочитан хотя бы 
+байт.
+.TP
+.B EAGAIN 
+Был запрошен неблокирующий ввод-вывод с помощью
+.BR O_NONBLOCK ,
+и нет данных, немедленно доступных для чтения.
+.TP
+.B EIO
+Ошибка ввода-вывода.  Это может произойти, например, если процесс,
+находящийся в фоновой группе процессов, пытается читать с
+контролирующего терминала, и игнорирует или блокирует сигнал
+.BR SIGTTIN ,
+или же его группа процессов осталась без родителя.  Это может также
+случиться, если произошла низкоуровневая ошибка ввода-вывода при
+чтения с диска или ленты.
+.TP
+.B EISDIR
+.I fd
+ссылается на каталог.
+.TP
+.B EBADF
+.I fd
+не является допустимым дескриптором файлов или не открыт для чтения.
+.TP
+.B EINVAL
+.I fd
+связан с объектом, неприспособленным для чтения.
+.TP
+.B EFAULT
+.I buf
+указывает за пределы доступного адресного пространства.
+.PP
+Могут также возникнуть другие ошибки, в зависимости от объекта,
+связанного с
+.IR fd .
+POSIX позволяет системному вызову
+.BR read ,
+который был прерван после чтения первого куска запрошенных данных,
+вернуть \-1 (устанавливая
+.I errno
+в EINTR) или количество уже прочитанных байт.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, AT&T, POSIX, X/OPEN, BSD 4.3
+.SH ОГРАНИЧЕНИЯ
+На файловых системах NFS чтение небольших порций данных обновляет
+отметки времени только в первый раз, последующие операции чтения не
+делают этого.  Это вызвано кэшированием атрибутов с клиентской
+стороны, потому что большинство (если не все) клиентов NFS
+предоставляют серверу обновлять время доступа, а запросы на чтение,
+которые удовлетворяются из клиентского кэша, не вызывают обновления
+времени доступа, потому что данные не читаются с сервера.  Семантика
+UNIX может быть достигнута запретом кэширования атрибутов, но в
+большинстве случаев это увеличит нагрузку на сервер и уменьшит
+производительность.
+.SH "СМОТРИ ТАКЖЕ"
+.BR readdir "(2), " write "(2), " fcntl "(2), " close "(2), "
+.BR lseek "(2), "
+.BR select "(2), " readlink "(2), " ioctl "(2), " fread (3).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

@@ -1,0 +1,139 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified Wed Jul 21 22:10:52 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 15 April 1995 by Michael Chastain <mec@shell.portal.com>:
+.\"   Added 'fchdir'.
+.\"   Fix bugs in error section.
+.\" Modified Mon Oct 21 23:05:29 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified by Joseph S. Myers <jsm28@cam.ac.uk>, 970821
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH CHDIR 2 1997-08-21 "Linux 2.0.30" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+chdir, fchdir \- изменить рабочий каталог
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int chdir(const char *" path );
+.br
+.BI "int fchdir(int " fd );
+.SH ОПИСАНИЕ
+.B chdir
+изменяет текущий каталог каталог на
+.IR path .
+.PP
+.B fchdir
+идентично
+.BR chdir ,
+только каталог задан в виде открытого файлового дескриптора.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+ 
+В зависимости от файловой системы могут появляться также другие
+ошибки.  Обычные ошибки
+.B chdir
+таковы:
+.TP 0.8i
+.TP
+.B EFAULT
+.I path
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENAMETOOLONG
+.I path
+слишком длинно.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR path ,
+в действительности таковым не является.
+.TP
+.B EACCES
+В одном из каталогов, находящихся по пути к
+.IR path ,
+не разрешен поиск.
+.TP
+.B ELOOP
+.IR path
+является зацикленной символической ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.TP
+.B EIO
+Произошла ошибка ввода-вывода.
+.PP
+Обычные ошибки для
+.B fchdir
+таковы:
+.TP 0.8i
+.B EBADF
+.I fd
+не является правильным дескриптором файла.
+.TP
+.B EACCES
+В каталоге, заданном с помощью
+.IR fd ,
+не разрешен поиск.
+.SH ЗАМЕЧАНИЯ
+Прототип для
+.B fchdir
+доступен только, если определена переменная
+.B _BSD_SOURCE
+(или явно или неявно, но задана переменная
+_POSIX_SOURCE или компиляция осуществляется с флагом -ansi).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системный вызов
+.B chdir
+совместим с SVr4, SVID, POSIX, X/OPEN, 4.4BSD.  SVr4 документирует
+дополнительные коды ошибок EINTR, ENOLINK и EMULTIHOP, но не содержит
+ENOMEM.  POSIX.1 не содержит кодов ошибок ENOMEM и ELOOP.  X/OPEN не
+определяет кодов ошибок EFAULT, ENOMEM и EIO.
+
+Системный вызов
+.B fchdir
+совместим с SVr4, 4.4BSD and X/OPEN.  SVr4 документирует
+дополнительные коды ошибок EIO, EINTR, и ENOLINK.  X/OPEN
+документирует дополнительные коды ошибок EINTR и EIO.
+.SH "СМОТРИ ТАКЖЕ"
+.BR getcwd (3),
+.BR chroot (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

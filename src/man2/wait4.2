@@ -1,0 +1,217 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" License.
+.\"
+.\" Modified Sat Jul 24 13:32:44 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Mon Jun 23 14:09:52 1997 by aeb - add EINTR.
+.\" Modified Tue Jul  7 12:26:42 1998 by aeb - changed return value wait3
+.\"
+.\" Дата последней коррекции перевода 23.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH WAIT4 2  1997-06-23 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+wait3, wait4 \- ожидать окончания процесса, стиль BSD
+.SH ОБЗОР
+.nf
+.B #include <sys/types.h>
+.B #include <sys/time.h>
+.B #include <sys/resource.h>
+.B #include <sys/wait.h>
+.sp 2
+.BI "pid_t wait3(int *" "status" ", int " options ,
+.BI "      struct rusage *" rusage );
+.sp
+.BI "pid_t wait4(pid_t " pid ", int *" status ", int " options ,
+.BI "      struct rusage *" rusage );
+.fi
+.SH ОПИСАНИЕ
+Функция
+.B wait3
+приостанавливает выполнение текущего процесса, пока его потомок не
+завершится или пока не будет получен сигнал для завершения текущего
+процесса или вызова функции-обработчика этого сигнала. Если потомок
+уже завершился к моменту вызова этой функции (так называемый "zombie"
+(зомби) процесс), то возврат из функции происходит мнгновенно. Все
+системные ресурсы, которые использовал потомок - освобождаются.
+
+Функция
+.B wait4
+приостанавливает выполнение текущего процесса, пока его потомок,
+заданный аргументом
+.I pid
+не завершится или пока пока не будет получен сигнал для завершения
+текущего процесса или вызова функции-обработчика этого сигнала.
+Если потомок, заданный аргументом
+.I pid
+уже завершился к моменту вызова этой функции (так называемый "zombie"
+(зомби) процесс), то возврат из функции происходит мнгновенно. Все
+системные ресурсы, которые использовал потомок - освобождаются.
+
+Значение
+.I pid
+может быть:
+.IP "< \-1"
+что означает необходимость ожидать окончания всех процессов-потомков,
+чей идентификатор группы процесса равен по модулю значению
+.IR pid .
+.IP \-1
+что означает необходимость ожидать окончания всех процессов-потомков;
+это эквивалентно вызову
+.BR wait3 .
+.IP 0
+что означает необходимость ожидать окончания всех процессов-потомков,
+чей идентификатор группы процесса равен соответствующему идетификатору
+вызывающего процесса.
+.IP "> 0"
+что означает необходимость ожидать окончания процесса-потомка, чей
+идентификатор процесса равен значению
+.IR pid .
+.PP
+Значение
+.I options
+является битовой маской, которая получается битовым сложением (OR)
+следующих констант:
+.TP
+.B WNOHANG
+означет немедленный возврат, если нет потомков, для которых нужно
+ожидать завершения.
+.TP
+.B WUNTRACED
+означает также возврат для потомков которые остановлены и чьё
+состояние не поддаётся определению.
+.PP
+Если
+.I status
+не
+.BR NULL ,
+.B wait3
+или
+.B wait4
+сохраняют информацию о состоянии в месте, на которое указывает
+.IR status .
+.PP
+Это состояние может быть оценено следующими макросами (эти макросы
+получают буфер состояния (\fBin\fR) как аргумент \(em, но не указатель
+на буфер!):
+.TP
+.BI WIFEXITED( status )
+не ноль, если потомок нормально завершился.
+.TP
+.BI WEXITSTATUS( status )
+оценивает наименее значимые восемь бит кода возврата завершившегося
+процесса-потомка, который может быть задан как аргумент для вызова
+.B exit()
+или как аргумент для оператора
+.B return
+в основной программе.  Данный макрос можно применять только, если
+.B WIFEXITED
+вернул не ноль.
+.TP
+.BI WIFSIGNALED( status )
+возврашает true, если процесс-потомок завершился потому что получил
+сигнал, который не смог обработать.
+.TP
+.BI WTERMSIG( status )
+возвращает номер сигнала, который привёл к завершению процесса-потомка.
+Данный макрос можно применять только если
+.B WIFSIGNALED
+возвратил не ноль.
+.TP
+.BI WIFSTOPPED( status )
+возвращает true, если процесс-потомок, который вернул управление,
+в настоящий момент остановлен; такое возможно только если данный
+вызов был выполнен, используя
+.BR WUNTRACED .
+.TP
+.BI WSTOPSIG( status )
+возвращает номер сигнала, по которому процесс-потомок был остановлен.
+Данный макрос можно применять только если
+.B WIFSTOPPED
+вернул не ноль.
+.PP
+Если
+.I rusage
+не
+.BR NULL ,
+то структура
+.B struct rusage
+которая описывается в
+.I <sys/resource.h>
+будет заполнена учётной информацией. Подробности смотрите в
+.BR getrusage (2).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Возвращается идентификатор завершившегося процесса-потомка,
+\-1 в случае ошибки (особенно, когда не существует процессов-потомков,
+для которых нужно ожидать завершения)
+или возвращается ноль, если был использован
+.B WNOHANG ,
+но пока нет доступного процесса-потомка.
+В последних двух случаях
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B ECHILD
+Указанный процесс-потомок, для которого осуществляется ожидание
+завершения, не существует.
+.TP
+.B EINTR
+Если
+.B WNOHANG
+не был установлен и был перехвачен какой-либо неблокирующий
+сигнал или
+.B SIGCHLD .
+.TP
+.B EINVAL
+Для wait4 было задано неправильное значение для
+.I options .
+.SH ЗАМЕЧАНИЯ
+Подключение
+.I <sys/time.h>
+в данный момент не требуется, но увеличивает переносимость на
+другие платформы.
+(Действительно,
+.I <sys/resource.h>
+звдаёт структуру
+.I rusage
+с полями типа
+.I struct timeval ,
+описанными в
+.IR <sys/time.h> .)
+.LP
+Прототипы для этих функций доступны только если задан флаг
+.B _BSD_SOURCE
+(или явно или неявно, если не задан _POSIX_SOURCE или компиляция
+осуществляется с опцией -ansi).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1
+.SH "СМОТРИ ТАКЖЕ"
+.BR signal (2),
+.BR getrusage (2),
+.BR wait (2),
+.BR signal (7)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

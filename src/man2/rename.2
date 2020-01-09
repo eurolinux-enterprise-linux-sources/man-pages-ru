@@ -1,0 +1,178 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt;
+.\"                          1993,1995 Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Sat Jul 24 00:35:52 1993 by Rik Faith <faith@cs.unc.edu>
+.\"
+.TH RENAME 2 "24 July 1993" "Linux 0.99.7" "Руководство программиста Linux"
+.SH ИМЯ
+rename \- изменить имя или расположение файла
+.SH КРАТКАЯ СВОДКА
+.B #include <unistd.h>
+.sp
+.BI "int rename(const char *" oldpath ", const char *" newpath );
+.SH ОПИСАНИЕ
+.B rename
+переименовывает файл, перемещая его между каталогами, если требуется.
+
+Все прочие жесткие ссылки на файл (созданные с помощью 
+.BR link (2))
+не изменяются.
+
+Если
+.I newpath
+уже существует, то он будет атомарно перезаписан (при определенных
+условиях - смотри ОШИБКИ ниже), так что нет ни одной точки, когда
+другой процесс, пытающийся обратиться к
+.I newpath,
+не обнаружит его.
+
+Если 
+.I newpath
+существует, но операция завершается неуспешно или система аварийно
+завершает работу,
+.B rename
+гарантируется, что 
+.I newpath
+останется нетронутым.
+
+При перезаписи, однако, вероятно будет окно, в котором
+.I oldpath
+и
+.I newpath
+ссылаются на один и тот же файл.
+
+Если
+.I oldpath
+является символической ссылкой, то она переименовывается; если
+.I newpath
+является символической ссылкой, то будет перезаписан файл, на который
+она указывает.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+.TP 0.8i
+.B EISDIR
+.I newpath
+является существующим каталогом, но
+.I oldpath
+не является каталогом
+.TP
+.B EXDEV
+.IR oldpath " и " newpath
+находятся на разных файловых системах.
+.TP
+.B ENOTEMPTY
+.IR newpath
+является непустым каталогом.
+.TP
+.B EBUSY
+.I newpath
+существует и является текущим рабочим каталогом или корневым каталогом 
+какого-то процесса.
+.TP
+.B EEXIST
+Новое имя пути совпадает с началом старого имени.
+.TP
+.B EINVAL
+Попытка сделать каталог своим собственным подкаталогом.
+.TP
+.B EMLINK
+.I oldpath
+уже имеет максимальное количество ссылок на него, или это был каталог, 
+а каталог, содержащий 
+.I newpath,
+уже имеет максимальное количество ссылок.
+.TP
+.B ENOTDIR
+Компонент, используемый как каталог в
+.IR oldpath " или " newpath
+в действительности не является каталогом.
+.TP
+.B EFAULT
+.IR oldpath " или " newpath
+указывают за пределы доступного адресного пространства.
+.TP
+.B EACCES
+Запись в каталог, содержащий 
+.IR oldpath " или " newpath
+не разрешена для эффективного uid'а процесса, или один из каталогов в
+.IR oldpath " или " newpath
+не позволяет производить поиск (выполнять), или
+.I oldpath
+был каталогом и не позволял запись в него (необходимую, чтобы обновить 
+.B ..\fR).
+.TP
+.B EPERM
+Каталог, содержащий
+.I oldpath\fR,
+имеет sticky-bit, а эффективный uid процесса не равен ни uid'у файла,
+который нужно удалить, ни uid'у каталога, который его содержит, или
+файловая система, содержащая
+.IR pathname\fR,
+не поддерживает переименование запрошенного типа. 
+.TP
+.B ENAMETOOLONG
+.IR oldpath " или " newpath
+слишком длинны.
+.TP
+.B ENOENT
+Одна из частей каталога в 
+.I oldpath " или " newpath
+не существует или является "висячей" символической ссылкой.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B ELOOP
+.IR oldpath " или " newpath
+содержат зацикленную символическую ссылку, то есть при ее подстановке
+происходит ссылка на нее саму.
+.TP
+.B ENOSPC
+На устройстве, содержащем файл, нет места для новой записи в каталоге.
+.SH "СООТВЕТСТВУЕТ"
+POSIX, 4.3BSD, ANSI C
+.SH ОШИБКИ
+На файловых системах NFS вы не можете исходить из предположения, что
+если операция завершилась неудачно, то файл остался не
+переименованным.  Если сервер совершает операцию rename, а затем
+аварийно останавливается, то перепосланный пакет RPC будет опять обработан,
+когда сервер восстановит работу, и это вызовет ошибку.  Приложение
+должно справиться с этой ситуацией. См. 
+.BR link (2)
+за описанием подобной проблемы.
+.SH "СМОТРИ ТАКЖЕ"
+.BR link "(2), " unlink "(2), " symlink "(2), " mv "(1), " link (8).
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2000

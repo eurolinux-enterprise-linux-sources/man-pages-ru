@@ -1,0 +1,110 @@
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"     @(#)getpeername.2	6.5 (Berkeley) 3/10/91
+.\"
+.\" Modified Sat Jul 24 16:37:50 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Thu Jul 30 14:37:50 1993 by Martin Schulze <joey@debian.org>
+.\" Modified Sun Mar 28 21:26:46 1999 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified 17 Jul 2002, Michael Kerrisk <mtk16@ext.canterbury.ac.nz>
+.\"	Added 'socket' to NAME, so that "man -k socket" will show this page.
+.\"
+.\"
+.\" Дата последней коррекции перевода 29.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETPEERNAME 2 1993-07-30 "BSD Man Page" "Руководство программиста Linux"
+.SH ИМЯ
+getpeername \- получить имя удалённой стороны, подключенной к сокету
+.SH ОБЗОР
+.B #include <sys/socket.h>
+.sp
+.BI "int getpeername(int " s ", struct sockaddr *" name ", socklen_t *" namelen );
+.SH ОПИСАНИЕ
+.B Getpeername
+возвращает имя удалённой стороны, подключенной к сокету
+.IR s .
+Параметр
+.I namelen
+должен быть инициализирован, чтобы задать размер пространства, на которое
+указывает
+.IR name .
+При возврате он содержит фактический размер, возвращённого
+.IR name
+(в байтах). Если предоставленный буфер слишком мал, имя усекается.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. В случае ошибки, возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EBADF
+Аргумент
+.I s
+не является правильным дескриптором.
+.TP
+.B ENOTSOCK
+Аргумент
+.I s
+является файлом, а не сокетом.
+.TP
+.B ENOTCONN
+Указанный сокет не подключён.
+.TP
+.B ENOBUFS
+В системе было доступно недостаточно ресурсов для
+выполнения этой операции.
+.TP
+.B EFAULT
+Параметр
+.I name
+указывает на память, которая не является допустимой
+частью адресного пространства процесса.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (функция
+.B getpeername
+впервые появилась в 4.2BSD).
+.SH ЗАМЕЧАНИЕ
+Третий аргумент
+.B getpeername
+фактически является `int *' (это так в BSD 4.*, а также в libc4 и libc5).
+Некоторые POSIX реализации используют тип socklen_t.
+Пока это не адаптировано в стандарте, но glibc2 уже следует этому и также
+использует socklen_t. Смотри также
+.BR accept (2).
+.SH "СМОТРИ ТАКЖЕ"
+.BR accept (2),
+.BR bind (2),
+.BR getsockname (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

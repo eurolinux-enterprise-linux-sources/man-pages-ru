@@ -1,0 +1,71 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1997 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified, 2003-05-26, Michael Kerrisk, <mtk16@ext,canterbury.ac.nz>
+.\"
+.\" Дата последней коррекции перевода 29.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETRESUID 2 2003-05-26 "Linux 2.4" "Руководство программиста Linux"
+.SH ИМЯ
+getresuid, getresgid \- получить реальный, эффективный и сохранённый
+идентификатор пользователя или группы
+.SH ОБЗОР
+.B #define _GNU_SOURCE
+.br
+.B #include <unistd.h>
+.sp
+.BI "int getresuid(uid_t *" ruid ", uid_t *" euid ", uid_t *" suid );
+.br
+.BI "int getresgid(gid_t *" rgid ", gid_t *" egid ", gid_t *" sgid ); 
+.SH ОПИСАНИЕ
+.B getresuid
+и
+.B getresgid
+(оба вызова введены в Linux 2.1.44)
+получают реальный, эффективный или сохранённый идентифкатор пользователя
+(или соответственно группы) для текущего процесса.
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль. В случае ошибки, возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EFAULT
+Один из заданных аргументов находится за пределами адресного
+пространства, вызывающей программы.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов является специфичным для Linux.
+Прототип появился в glibc, начиная с версии 2.3.2 и предоставляется,
+если задан флаг _GNU_SOURCE is defined.
+.SH "СМОТРИ ТАКЖЕ"
+.BR getuid (2),
+.BR setuid (2),
+.BR setreuid (2),
+.BR setresuid (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

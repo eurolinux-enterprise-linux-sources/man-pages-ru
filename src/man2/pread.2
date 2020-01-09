@@ -1,0 +1,96 @@
+.\" Copyright (C) 1999 Joseph Samuel Myers.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Дата последней коррекции перевода 28.07.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH PREAD 2 1999-01-21 "Linux 2.2.0-pre9" "Руководство программиста Linux"
+.SH ИМЯ
+pread, pwrite \- читает из файлового дескриптора или пишет в него по
+заданному смещению
+.SH ОБЗОР
+.B #define _XOPEN_SOURCE 500
+.sp
+.B #include <unistd.h>
+.sp
+.BI "ssize_t pread(int " fd ", void *" buf ", size_t " count ", off_t " offset );
+.sp
+.BI "ssize_t pwrite(int " fd ", const void *" buf ", size_t " count ", off_t " offset );
+.fi
+.SH ОПИСАНИЕ
+.B pread()
+читает
+.I count
+байт из файлового дексриптора
+.I fd
+по смещению
+.I offset
+(от начала файла) в буфер
+.IR buf .
+Позиция смещения в файле при этом не изменяется.
+.PP
+.B pwrite()
+пишет
+.I count
+байт из буфера
+.I buf
+в файловый дескриптор
+.I fd
+по смещению
+.IR offset .
+Позиция смещения в файле при этом не изменяется.
+.PP
+Файл, на который указывает дескриптор
+.I fd
+должен поддерживать позиционирование.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается количество прочитанных или записанных
+байт (ноль говорит о том, что ничего не было записано в случае
+\fBpwrite\fR или что достигнут конец файла в случае \fBpread\fR),
+или \-1 в случае ошибки, при этом значение
+.I errno
+содержит ошибку.
+.SH ОШИБКИ
+.B pread
+может вернуть ошибку и установить
+.I errno
+в любое значение из тех, что устанавливаются для \fBread\fR(2) или
+\fBlseek\fR(2).
+.B pwrite
+может вернуть ошибку и установить
+.I errno
+в любое значение из тех, что устанавливаются для \fBwrite\fR(2) или
+\fBlseek\fR(2).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Unix98
+.SH ИСТОРИЯ
+Системные вызовы \fBpread\fR и \fBpwrite\fR были добавлен в Linux
+начиная с версии 2.1.60; записи в таблице системных вызовов для i386
+были добавлены в 2.1.69.  Поддержка libc (включая эмуляцию на старых
+ядрах, без этих системных вызовов) была добавлена в glibc 2.1.
+.SH "СМОТРИ ТАКЖЕ"
+.BR read (2),
+.BR write (2),
+.BR lseek (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

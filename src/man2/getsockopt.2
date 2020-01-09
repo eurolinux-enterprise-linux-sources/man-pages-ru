@@ -1,0 +1,195 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: getsockopt.2,v 1.1 1999/05/24 14:57:04 freitag Exp 
+.\"
+.\" Modified Sat Jul 24 16:19:32 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Mon Apr 22 02:29:06 1996 by Martin Schulze (joey@infodrom.north.de)
+.\" Modified Tue Aug 27 10:52:51 1996 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Thu Jan 23 13:29:34 1997 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified Sun Mar 28 21:26:46 1999 by Andries Brouwer (aeb@cwi.nl)
+.\" Modified 1999 by Andi Kleen <ak@muc.de>. Removed most stuff
+.\" because it is in socket(7) now.
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH GETSOCKOPT 2 1999-05-24 "Страница руководства Linux" "Руководство программиста Linux"
+.SH ИМЯ
+getsockopt, setsockopt \- получить или установить флаги на сокете
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp 2
+.BI "int getsockopt(int " s ", int " level ", int " optname ,
+.BI "void *" optval ", socklen_t *" optlen );
+.sp
+.BI "int setsockopt(int " s ", int " level ", int " optname ,
+.BI "const void *" optval ", socklen_t " optlen );
+.SH ОПИСАНИЕ
+.B getsockopt
+и
+.B setsockopt
+манипулируют
+.IR флагами ,
+установленными на сокете.  Флаги могут существовать на нескольких
+уровнях протоколов; они всегда присутствуют на самом верхнем из них.
+
+При манипулировании флагами сокета должен быть указан уровень, на
+котором находится этот флаг, и имя этого флага.  Для манипуляции
+флагами на уровне сокета
+.I level
+задается как
+.BR SOL_SOCKET .
+Для манипуляции флагами на любом другом уровне этим функциям
+передается номер соответствующего протокола, управляющего флагами.
+Например, для указания, что флаг должен интерпретироваться протоколом 
+.BR TCP ,
+в параметре
+.I level
+должен передаваться номер протокола
+.BR TCP ;
+смотри описание
+.BR getprotoent (3).
+
+Параметры
+.I optval
+и
+.I optlen
+используются в функции 
+.B setsockopt
+для доступа к значениям флагов.  Для
+.B getsockopt
+они задают буфер, в который нужно поместить запрошенное значение.  Для
+.BR getsockopt
+параметр
+.I optlen
+передается по ссылке.  При вызове он содержит размер буфера, на
+который указывает параметр
+.IR optval ,
+а после вызова -- реальный размер возвращенного значения.  Если
+значение флага не используется, то параметр
+.I optval
+может быть
+.BR NULL .
+
+.I optname
+и все указанные флаги без изменений передаются для интерпретации
+соответствующему модулю протоколов.  Файл
+.I <sys/socket.h>
+содержит определения флагов уровня сокета, описанные ниже.  Флаги на
+других уровнях протоколов различаются по формату и по имени.
+Обращайтесь к соответствующим пунктам секции 4 руководства.
+
+Большинство флагов уровня сокета используют тип
+.I int
+для параметра
+.IR optval .
+Для функции
+.BR setsockopt ,
+параметр должен быть ненулевым, чтобы установить флаг логического
+типа, или нуль, чтобы сбросить этот флаг.
+
+.PP
+Описание доступных флагов сокетов находится в 
+.BR socket (7)
+и соответствующих протоколам страницах руководства.
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+значение
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+.TP
+.B EBADF
+Неверный файловый дескриптор
+.IR s .
+.TP
+.B ENOTSOCK
+Аргумент
+.IR s " --"
+это файл, а не сокет.
+.TP
+.B ENOPROTOOPT
+Неизвестный на данном уровне флаг.
+.TP
+.B EFAULT
+Адрес, на который указывает параметр
+.I optval
+не находится в разрешенной части адресного пространства процесса.  Для
+.BR getsockopt ,
+эта ошибка может также появиться, если 
+.I optlen
+также выходит за пределы адресного пространства процесса.
+.TP
+.B EINVAL
+Неправильное значение
+.I optlen
+в setsockopt
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (эти системные вызовы впервые появились в  4.2BSD).  SVr4
+документирует дополнительные коды ошибок ENOMEM и ENOSR, но не
+документирует флаги
+.BR SO_SNDLOWAT ", " SO_RCVLOWAT ", " SO_SNDTIMEO ", " SO_RCVTIMEO .
+
+.SH ЗАМЕЧАНИЕ
+Третий аргумент вызова
+.B bind
+в действительности имеет тип
+.B int
+(это именно так в BSD 4.*, libc4 и libc5).  
+При разработке стандарта POSIX случилось некоторое недопонимание, и 
+появился тип
+.BR socklen_t .
+Рабочая версия стандарта ещё не содержит этого типа, но glibc2 уже
+следует ему и имеет тип
+.BR socklen_t .
+Смотри также
+.BR accept (2).
+
+.SH ОШИБКИ В РЕАЛИЗАЦИИ
+Некоторые флаги сокетов должны обрабатываться на более низких уровнях
+системы.
+.SH "СМОТРИ ТАКЖЕ"
+.BR ioctl "(2), " socket "(2), " getprotoent "(3), " protocols (5)
+
+.BR socket "(7), " unix "(7), " tcp "(7), "
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

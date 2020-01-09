@@ -1,0 +1,230 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\" Modified Sat Jul 24 13:30:06 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Aug 21 17:42:42 1994 by Rik Faith <faith@cs.unc.edu>
+.\"          (Thanks to Koen Holtman <koen@win.tue.nl>)
+.\" Modified Wed May 17 15:54:12 1995 by Rik Faith <faith@cs.unc.edu>
+.\"           To remove *'s from status in macros (Thanks to Michael Shields).
+.\" Modified as suggested by Nick Duffek <nsd@bbc.com>, aeb, 960426
+.\" Modified Mon Jun 23 14:09:52 1997 by aeb - add EINTR.
+.\" Modified Thu Nov 26 02:12:45 1998 by aeb - add SIGCHLD stuff.
+.\" Modified Mon Jul 24 21:37:38 2000 by David A. Wheeler
+.\"          <dwheeler@dwheeler.com> - noted thread issues.
+.\"
+.TH WAIT 2  "24 июля 2000" "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+wait, waitpid \- ожидает завершения процесса
+.SH КРАТКАЯ СВОДКА
+.B #include <sys/types.h>
+.br
+.B #include <sys/wait.h>
+.sp
+.BI "pid_t wait(int *" "status" ")"
+.br
+.BI "pid_t waitpid(pid_t " pid ", int *" status ", int " options );
+.SH ОПИСАНИЕ
+Функция
+.B wait
+приостанавливает выполнение текущего процесса до тех пор, пока
+дочерний процесс не прекратит выполнение или до появления сигнала,
+который либо завершает текущий процесс, либо требует вызвать
+функцию-обработчик.  Если дочерний процесс к моменту вызова функции
+уже завершился (так называемый "зомби"), то функция немедленно
+возвращается.  Системные ресурсы, связанные с дочерним процессом,
+освобождаются.
+
+Функция
+.B waitpid
+приостанавливает выполнение текущего процесса до тех пор, пока
+дочерний процесс, указанный в параметре
+.IR pid ,
+не завершит выполнение, или пока не появится сигнал, который либо
+завершает текущий процесс либо требует вызвать функцию-обработчик.
+Если указанный дочерний процесс к моменту вызова функции уже
+завершился (так называемый "зомби"), то функция немедленно
+возвращается.  Системные ресурсы, связанные с дочерним процессом,
+освобождаются.
+
+Параметр
+.I pid
+может принимать несколько значений:
+.IP "< \-1"
+означает, что нужно ждать любого дочернего процесса, чей идентификатор 
+группы процессов равен абсолютному значению
+.IR pid .
+.IP \-1
+означает ожидать любого дочернего процесса; функция
+.B wait
+ведет себя точно так же.
+.IP 0
+означает ожидать любого дочернего процесса, чей идентификатор группы
+процессов равен таковому у текущего процесса.
+.IP "> 0"
+означает ожидать дочернего процесса, чем идентификатор равен
+.IR pid .
+.PP
+Значение
+.I options
+создается путем битовой операции ИЛИ над следующими константами:
+.TP
+.B WNOHANG
+означает вернуть управление немедленно, если ни один дочерний процесс
+не завершил выполнение.
+.TP
+.B WUNTRACED
+означает возвращать управление также для остановленных дочерних
+процессов, о чьем статусе еще не было сообщено.
+.PP
+Если
+.I status
+не равен
+.BR NULL ,
+то функции
+.B wait
+и
+.B waitpid
+сохраняют информацию о статусе в переменной, на которую указывает
+.IR status .
+
+Этот статус можно исследовать с помощью нижеследующих макросов (они
+принимают в качестве аргумента буфер (типа int), \(em а не указатель
+на буфер!):
+.TP
+.BI WIFEXITED( status )
+не равно нулю, если дочерний процесс нормально завершился.
+.TP
+.BI WEXITSTATUS( status )
+возвращает восемь младших битов возвращаемого значения завершившегося
+дочернего процесса.  Эти биты могли быть установлены в аргументе
+функции
+.B exit()
+или в аргументе оператора
+.B return
+в функции
+.BR main() .
+Этот макрос можно использовать, только если
+.B WIFEXITED
+вернул ненулевое значение.
+.TP
+.BI WIFSIGNALED( status )
+возвращает истинное значение, если дочерний процесс завершился из-за
+неперехваченного сигнала.
+.TP
+.BI WTERMSIG( status )
+возвращает номер сигнала, который привел к завершению дочернего
+процесса.  Этот макрос можно использовать только если
+.B WIFSIGNALED
+вернул ненулевое значение.
+.TP
+.BI WIFSTOPPED( status )
+возвращает истинное значение, если дочерний процесс, из-за которого
+функция вернула управление, в настоящий момент остановлен; это
+возможно только если использовался флаг
+.BR WUNTRACED .
+.TP
+.BI WSTOPSIG( status )
+возвращает номер сигнала, из-за которого дочерний процесс был
+остановлен.  Этот макрос можно использовать только если
+.B WIFSTOPPED
+вернул ненулевое значение.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Идентификатор дочернего процесса, который завершил выполнение, \-1 в
+случае ошибки или нуль, если использовался
+.BR WNOHANG ,
+но ни один дочерний процесс еще не завершил выполнение (в этом случае
+.I errno
+устанавливается должным образом).
+.SH "ОШИБКИ"
+.TP
+.B ECHILD
+процесс, указанный в
+.IR pid ,
+не существует или не является дочерним процессом текущего процесса.
+(Это может случиться и для собственного дочернего процесса, если
+обработчик сигнала SIGCHLD установлен в SIG_IGN.  Смотри также главу
+ЗАМЕЧАНИЯ по поводу нитей.)
+.TP
+.B EINVAL
+Аргумент
+.I options
+неверен.
+.TP
+.B ERESTARTSYS
+Использовался флаг
+.BR WNOHANG ,
+и был пойман неблокированный сигнал или
+.BR SIGCHLD .
+Эта ошибка возвращается системным вызовом.  Библиотечные функции не
+могу вернуть
+.BR ERESTARTSYS ,
+но должны вернуть
+.BR EINTR .
+.SH "ЗАМЕЧАНИЯ"
+Стандарт Single Unix Specification описывает флаг SA_NOCLDWAIT (не
+реализован под Linux), такой, что если он установлен, или обработчик
+сигнала SIGCHLD установлен в SIG_IGN (что, кстати, не разрешено
+стандартном POSIX), то завершившиеся дочерние процессы не становятся
+зомби, а вызов
+.I wait()
+или
+.I waitpid()
+блокируется, пока все дочерние процессы не завершатся, а затем
+возвращает код ошибки, устанавливая
+.I errno
+в ECHILD.
+.PP
+В ядре Linux нити, управляемые ядром, устройством не отличаются от
+процесса.   Нить -- это просто процесс, который создан уникальным
+(существующим только в Linux) системным вызовом clone(2); другие
+процедуры, такие как переносимая версия
+.BR pthread_create (3),
+также реализованы с помощью
+.BR clone (2).
+Таким образом, если процессы A и B являются братьями, нить A не может
+подождать с помощью wait() процесс, порожденный потоком B или его
+потомками, потому что дядя не может ждать с помощью wait() своих
+племянников.
+В некоторых Unix-подобных системах, где множественные нити реализованы 
+как принадлежащие одиночному процессу, нить A может ждать с помощью
+wait() процессы, порожденные своей сестринской нитью B; вам придется
+переписать код, который делает такие допущения, чтобы он заработал под 
+Linux.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1
+.SH "СМОТРИ ТАКЖЕ"
+.BR clone (2),
+.BR signal (2),
+.BR wait4 (2),
+.BR pthread_create (3),
+.BR signal (7)

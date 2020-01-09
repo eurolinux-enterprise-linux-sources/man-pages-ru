@@ -1,0 +1,187 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified Fri Jan 31 16:26:07 1997 by Eric S. Raymond <esr@thyrsus.com> and
+.\" 2002 Michael Kerrisk
+.\" Modified 24 Apr 2002 by Michael Kerrisk <mtk16@ext.cannterbury.ac.nz>
+.\"	Substantial rewrites and additions
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH FLOCK 2 2002-04-24 Linux "Руководство программиста Linux"
+.SH ИМЯ
+flock \- установить или снять advisory блокировку на открытый файл
+.SH ОБЗОР
+.B #include <sys/file.h>
+.sp
+.BR "int flock(int " fd ", int " operation );
+.SH ОПИСАНИЕ
+Устанавливает или снимает advisory (мягкую, носящую рекомендательный
+характер) блокировку на открытый файл, заданный файловым дескриптором
+.IR fd .
+Параметр
+.I operation
+может принимать одно из следующих значений:
+.RS
+.sp
+.TP 1.0i
+.B LOCK_SH
+Установить разделяемую блокировку. Разделяемую блокировку
+на заданный файл может держать более чем один процесс.
+.TP
+.B LOCK_EX 
+Установить эксклюзивную блокировку.  Только один процесс
+может держать эксклюзивную блокировку файла.
+.TP
+.B LOCK_UN
+Удалить существующую блокировку, удерживаемую данным процессом.
+.sp
+.RE
+
+Вызов
+.BR flock ()
+может быть блокирован, если несовместимый тип блокировки
+уже удерживается другим процессом. Чтобы выполнить неблокирующий
+запрос, включите
+.B LOCK_NB
+(через
+.IR OR ing)
+вместе с одной из вышеописаных операций.
+
+
+Один файл не может иметь одновременно и общую и эксклюзивную блокировку.
+
+Блокировки, созданные
+.BR flock ()
+ассоциируются с файлом или, более точно, с записью в таблице открытых файлов.
+Это означает, что дублирующие файловые дескрипторы (созданные, например,
+вызоывами
+.BR fork "(2) или " dup (2))
+указывают на ту же самую блокировку и эта блокировка может быть
+изменена или снята при использовании любого из этих дескрипторов.
+Таким образом, блокировка освобождается либо через явное выполнение
+операции
+.B LOCK_UN
+на одном из дублирующих дескрипторов, либо когда все такие
+дескрипторы будут закрыты.
+
+Процесс может только держать на файле один из типов блокировки
+(разделяемую или экслюзивную).
+Последующие вызовы
+.BR flock ()
+на уже заблокированный файл будут преобразовывать текущую блокировку
+к новому заданному режиму блокировки.
+
+Блокировки, созданные
+.BR flock ()
+сохраняются при выполнении
+.BR execve (2).
+
+Разделяемая или эксклюзивная блокировка может быть установлена на
+файл вне зависимости от режима, в котором этот файл был открыт.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается ноль.  В случае ошибки возвращается \-1
+и значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EWOULDBLOCK
+Файл блокирован и был выбран флаг
+.B LOCK_NB .
+.TP
+.B EBADF
+.I fd
+не является дескриптором открытого файла.
+.TP
+.B EINTR
+Во время ожидания установки блокировки, вызов был прерван
+сигналом, пришедшим в обработчик.
+.TP
+.B EINVAL
+Неправильно задано значение
+.I operation .
+.TP
+.B ENOLCK
+Ядру не хватило памяти для создания записи блокировки.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD (вызов
+.BR flock (2)
+появился сперва в 4.2BSD).
+В большинстве Unix'ов
+.BR flock (2),
+может быть реализован в терминах
+.BR fcntl (2) .
+.SH ЗАМЕЧАНИЯ
+.BR flock (2)
+не блокирует файлы на NFS.  Используйте вместо этого вызов
+.BR fcntl (2),
+который работает на NFS, а также наиболее свежую версию
+Linux и сервер, который поддерживает блокировки.
+.PP
+Начиная с версии ядра 2.0,
+.BR flock (2)
+реализован как системный вызов со своими собственными правами,
+а не как эмуляция этого вызова в библиотеке GNU C через использование
+.BR fcntl (2).
+По смыслу BSD:
+не существует никакого взаимодействия между типами блокировок,
+устанавливаемыми
+.BR flock (2),
+.BR fcntl (2),
+и
+.BR flock (2)
+не видит блокировок типа deadlock.
+.PP
+.BR flock (2)
+устанавливает только advisory блокировки; имеющий соотвествующие права на
+файл, какой-либо процесс может игнорировать использование
+.BR flock (2)
+и выполнять над файлом операции ввода/вывода.
+.PP
+.BR flock (2)
+и блокировки
+.BR fcntl (2)
+имеют разный смысл для ожидающих разветвления (fork) процессов и
+.BR dup (2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+.BR open (2),
+.BR close (2),
+.BR dup (2),
+.BR execve (2),
+.BR fcntl (2),
+.BR fork (2),
+.BR lockf (3)
+
+В
+.IR /usr/src/linux/Documentation
+также есть файлы
+.I locks.txt
+и
+.I mandatory.txt .
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

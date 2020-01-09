@@ -1,0 +1,96 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de), Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\" 
+.\" Modified Sat Jul 24 16:56:20 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Mon Oct 21 21:38:51 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" (and some more by aeb)
+.\"
+.\" Перевод на русский язык: Антон Лыков (last@last.ulsu.ru), 2000
+.TH HD 4 "17 декабря 1992" "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+hd \- устройства жестких дисков MFM/IDE
+.SH ОПИСАНИЕ
+\fBhd*\fP - блочные устройства для доступа в "сыром" виде (raw mode) к
+жестким дискам стандартов MFM или IDE.
+Master-диск на первичном контроллере IDE (старший номер
+устройства 3) -- это \fBhda\fR; slave-диск -- \fBhdb\fR.  Master-диск
+на втором контроллере (старший номер устройства 22) -- это \fBhdc\fR,
+а slave -- \fBhdd\fR.
+.LP
+Имена блочных устройств IDE имеют форму
+.BI hd X\c
+ или
+.BI hd XP\c
+, где
+.I X
+- буква, указывающая на физический диск, а
+.I P
+- число, указывающее на раздел на этом физическом диске.
+Первая форма,
+.BI hd X,
+используется для доступа ко всему диску.
+Номера разделов присваиваются в том же порядке, в котором разделы
+создавались, и только непустой, не являющийся расширенным, раздел
+получает номер. Однако, номера разделов 1-4 назначаются
+четырем разделам, описанным в MBR (`первичного' раздела),
+даже если они не используются или являются расширенными.
+Таким образом, первый логический раздел будет
+.BI hd X 5\c
+\&.
+Поддерживается разбиение, которое делают DOS и BSD.
+На IDE-диске можно создать до 63 разделов.
+.LP
+Например,
+.B /dev/hda
+относится ко всему первому диску IDE в системе; а
+.B /dev/hdb3
+относится к третьему `первичному' разделу DOS на втором диске.
+.LP
+Файлы устройств для жестких дисков обычно создаются командами:
+.RS
+.sp
+mknod -m 660 /dev/hda b 3 0
+.br
+mknod -m 660 /dev/hda1 b 3 1
+.br
+mknod -m 660 /dev/hda2 b 3 2
+.br
+\&...
+.br
+mknod -m 660 /dev/hda8 b 3 8
+.br
+mknod -m 660 /dev/hdb b 3 64
+.br
+mknod -m 660 /dev/hdb1 b 3 65
+.br
+mknod -m 660 /dev/hdb2 b 3 66
+.br
+\&...
+.br
+mknod -m 660 /dev/hdb8 b 3 72
+.br
+chown root:disk /dev/hd*
+.RE
+.SH ФАЙЛЫ
+/dev/hd*
+.SH "СМОТРИ ТАКЖЕ"
+.BR mknod "(1), " chown "(1), " mount "(8), " sd "(4)"

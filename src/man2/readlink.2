@@ -1,0 +1,106 @@
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     @(#)readlink.2	6.8 (Berkeley) 3/10/91
+.\"
+.\" Modified Sat Jul 24 00:10:21 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Tue Jul  9 23:55:17 1996 by aeb
+.\" Modified Fri Jan 24 00:26:00 1997 by aeb
+.\"
+.TH READLINK 2 "21 August 1997" "Linux 2.0.30" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+readlink \- прочитать значение символической ссылки
+.SH КРАТКАЯ СВОДКА
+.B #include <unistd.h>
+.sp
+.BI "int readlink(const char *" path ", char *" buf ", size_t " bufsiz );
+.SH ОПИСАНИЕ
+.B readlink
+помещает содержимое символической ссылки
+.I path
+в буфер
+.IR buf " длины " bufsiz .
+.B readlink
+не добавляет в 
+.I buf
+символ
+.BR NUL .
+Содержимое символической ссылки будет обрезано при помещении в буфер,
+если он слишком маленький. 
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Этот вызов возвращает количество символов, помещенных в буфер, или
+возвращает \-1 в случае ошибки, помещая код ошибки в
+.IR errno .
+.SH ОШИБКИ
+
+.TP 0.8i
+.B ENOTDIR
+Один из компонентов пути не является каталогом.
+.TP
+.B EINVAL
+.I bufsiz
+не является положительным числом.
+.TP
+.B ENAMETOOLONG
+Путь или компонент пути слишком длинны.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B EACCES
+Доступ для поиска в каталоге запрещен.
+.TP
+.B ELOOP
+.IR pathname
+является зацикленной символической ссылкой, то есть при подстановке
+возникает ссылка на неё саму.
+.TP
+.B EINVAL
+Файл не является символической ссылкой.
+.TP
+.B EIO
+При чтении из файловой системы произошла ошибка ввода-вывода.
+.TP
+.B EFAULT
+.I buf
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+X/OPEN, 4.4BSD (системный вызов
+.B readlink
+появился в 4.2BSD).
+.SH "СМОТРИ ТАКЖЕ"
+.BR stat "(2), " lstat "(2), " symlink (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999

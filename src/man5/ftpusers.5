@@ -1,0 +1,54 @@
+.\" Copyright (c) 2000 Christoph J. Thompson <obituary@linuxbe.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\" 
+.\" Дата последней коррекции перевода 07.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH FTPUSERS 5 2000-08-27 "File formats" "Руководство программиста Linux"
+.SH ИМЯ
+ftpusers \- список пользователей, которым запрещён вход через FTP демон
+.SH ОПИСАНИЕ
+Текстовый файл
+.B ftpusers
+содержит список пользователей, которые не могут входить в систему через
+FTP сервер. Этот файл используется не только для целей системного
+администрирования, но и для увеличения безопасности сетевого окружения
+TCP/IP. В списке обычно указываются пользователи, которые
+не должны использовать FTP либо по своей функциональности, либо
+потому что имеют слишком много привелегий, чтобы разрешить им вход
+через FTP сервер. Среди таких пользователей обычно root, daemon, bin,
+uucp и news. Если ваш FTP сервер не использует файл
+.B ftpusers ,
+то мы советуем вам прочитать документацию по этому серверу, чтобы
+найти как блокировать доступ определённых пользователей. FTP сервер
+Вашингтонского университета (wuftpd) и Professional FTP Daemon (proftpd)
+знают как использовать файл
+.BR ftpusers .
+.SH ФОРМАТ
+Формат файла
+.B ftpusers
+очень прост. Одно имя бюджета (или имя пользователя) на строку.
+Строки, которые начинаются с # игнорируются.
+.SH ФАЙЛЫ
+.I /etc/ftpusers
+.SH "СМОТРИ ТАКЖЕ"
+.BR passwd (5),
+.BR wuftpd (8),
+.BR proftpd (8)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

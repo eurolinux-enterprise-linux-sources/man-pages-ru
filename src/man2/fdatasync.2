@@ -1,0 +1,103 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1996 Andries Brouwer (aeb@cwi.nl)
+.\" Copyright (C) 1996 Markus Kuhn.
+.\"
+.\" [This version merged from two independently written pages - aeb]
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" 1996-04-12  Andries Brouwer <aeb@cwi.nl>
+.\" 1996-04-13  Markus Kuhn <mskuhn@cip.informatik.uni-erlangen.de>
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH FDATASYNC 2 1996-04-13 "Linux 1.3.86" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+fdatasync \- синхронизирует содержимое файла в памяти с содержимым на
+диске
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int fdatasync(int " fd );
+.SH ОПИСАНИЕ
+.B fdatasync
+записывает на диск содержимое всех буферов данных, связанных с файлом,
+причем возврат из функции происходит только после того, как это было
+сделано.  Этот системный вызов напоминает
+.BR fsync ,
+но от него не требуется обновлять метаданные, например, время доступа.
+
+Приложения, которые работают с базами данных или журнальными файлами,
+часто пишут небольшие фрагменты данных (например, строчку журнала за
+строчкой), а затем вызывают
+.BR fsync ,
+чтобы убедиться, что записанные данные сохранены на жестком диске.  К
+сожалению,
+.B fsync
+всегда приводит к двум операциям записи: одной для новых данных, и еще
+одной для того, чтобы обновить информацию, хранящуюся в inode.  Если
+время модификации файла неважно для программы, то можно использовать
+.BR fdatasync ,
+чтобы избежать ненужной операции записи inode.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP 0.8i
+.B EBADF
+.I fd
+не является правильным дескриптором файла, открытым для записи.
+.TP
+.BR EROFS ", " EINVAL
+.I fd
+связан со специальным файлом, не поддерживающим синхронизацию.
+.TP
+.B EIO
+Во время синхронизации произошла ошибка.
+.SH ОШИБКИ
+В настоящий момент (Linux 2.2)
+.B fdatasync
+эквивалентен
+.BR fsync .
+.SH ДОСТУПНОСТЬ
+На POSIX системах, где вызов
+.B fdatasync
+недоступен, символ
+.B _POSIX_SYNCHRONIZED_IO ,
+определяемый в <unistd.h> устанавливается в значение больше 0. (См. также
+.BR sysconf (3).)
+.\" POSIX 1003.1-2001: It shall be defined to -1 or 0 or 200112L.
+.\" -1: unavailable, 0: ask using sysconf().
+.\" glibc defines them to 1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX1b (ранее известный как POSIX.4)
+.SH "СМОТРИ ТАКЖЕ"
+.BR fsync (2),
+B.O. Gallmeister, POSIX.4, O'Reilly, сс. 220-223 и 343.
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

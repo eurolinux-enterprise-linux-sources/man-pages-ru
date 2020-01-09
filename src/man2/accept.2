@@ -1,0 +1,319 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1990, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: accept.2,v 1.7 1999/05/24 11:53:23 freitag Exp 
+.\"
+.\" Modified Sat Jul 24 16:42:42 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Mon Oct 21 23:05:29 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998-2000 by Andi Kleen to match Linux 2.2 reality
+.\" Modified Tue Apr 23 20:33:18 CEST 2002 by Roger Luethi <rl@hellgate.ch>
+.\" Дата последней коррекции перевода 05.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH ACCEPT 2 2002-04-23 "Linux 2.2" "Руководство программиста Linux"
+.SH ИМЯ
+accept \- принять соединение на сокете
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <sys/socket.h>
+.sp
+.BI "int accept(int " s ", struct sockaddr *" addr ", socklen_t *" addrlen );
+.SH ОПИСАНИЕ
+Функция
+.B accept
+используется с сокетами, ориентированными на устанавление соединения
+.RB ( SOCK_STREAM ,
+.B SOCK_SEQPACKET
+и
+.BR SOCK_RDM ).
+Эта функция извлекает первый запрос на соединение из очереди ожидающих
+соединений, создаёт новый подключенный сокет почти с такими же параметрами,
+что и у
+.IR s ,
+и выделяет для сокета новый файловый дескриптор, который и
+возвращается.  Новый сокет более не находится в слушающем состоянии.
+Исходный сокет 
+.I s
+не изменяется при этом вызове.  Заметим, что флаги файловых
+дескрипторов (те, что можно установить с помощью параметра
+.B F_SETFL
+функции
+.BR fcntl ,
+типа неблокированного состояния или асинхронного ввода-вывода) не
+наследуются новым файловым дескриптором после
+.IR accept .
+
+.PP
+Аргумент
+.IR s "\~--"
+это сокет, который был создан с помощью
+.BR socket (2),
+привязан к локальному адресу с помощью
+.BR bind (2),
+и слушает соединения после
+.BR listen (2).
+
+Аргумент
+.IR addr "\~--"
+это указатель на структуру
+.BR sockaddr .
+В эту структуру помещается адрес другой стороны, в том виде, в каком
+он известен на коммуникационном уровне.  Точный формат адреса,
+передаваемого в параметре
+.IR addr ,
+определяется "семейством" сокета (см.
+.BR socket (2) 
+и страницу руководства по соответствующему протоколу).
+Аргумент
+.I addrlen
+является параметром, передаваемым по ссылке: перед вызовом он содержит
+размер структуры, на которую ссылается
+.IR addr ,
+а после вызова\~-- действительную длину адреса в байтах.  Если
+.I addr
+равен
+.BR NULL ,
+он не заполняется.
+.PP
+Если в очереди нет запросов на соединение, и на сокет не установлен
+флаг, что он является неблокирующим,
+.B accept
+блокирует вызвавшую программу до появления соединения.  Если сокет
+является неблокирующим, а в очереди нет запросов на соединение, то
+.B accept
+возвращает EAGAIN.
+
+.PP
+Для того, чтобы получать уведомления о входящих сооединениях на сокете,
+можно использовать
+.BR select (2)
+или
+.BR poll (2).
+В этом случае, когда придёт запрос на новое соединение, будет
+доставлено событие "можно читать", и после этого вы можете вызвать
+.BR accept ,
+чтобы получить сокет для этого соединения.  Можно также настроить
+сокет так, чтобы он посылал сигнал
+.BR SIGIO ,
+когда на нём происходит какая-либо активность; см.
+.BR socket (7),
+где описаны детали.
+.PP
+Для определённых протоколов, которые требуют явного подтверждения,
+например, DECNet, системный вызов
+.B accept
+можно рассматривать просто как извлечение из очереди следующего
+запроса на соединение, не подразумевающее подтверждение.
+Подтверждение, в свою очередь, произойдет при следующем чтении или
+записи в новом файловом дескрипторе, а отказ от соединения может
+произойти при закрытии сокета.  В настоящий момент под Linux такую
+семантику имеет только DECNet.
+
+.SH ЗАМЕЧАНИЯ
+Не всегда после доставки сигнала
+.B SIGIO
+или после возврата из
+.BR select (2)
+или
+.BR poll (2)
+в очереди будет находиться соединение.  Оно могло быть удалено в той
+же нити из-за асинхронной сетевой ошибки или же в другой нити до
+вызова
+.BR accept .
+Если такое произойдет, то 
+.B accept 
+заблокирует выполнение до следующего соединения.  Чтобы убедиться, что 
+такого не произойдет в любом случае, на сокет
+.I s
+должен быть установлен флаг
+.B O_NONBLOCK
+(см.
+.BR socket (7)).
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Этот системный вызов возвращает \-1 в случае ошибки.  При успешном
+завершении возвращается неотрицательное целое, являющееся дескриптором 
+сокета.
+
+.SH "ОБРАБОТКА ОШИБОК"
+.B accept 
+в реализации Linux передаёт уже ожидающие сетевые ошибки на новый
+сокет, как код ошибки из вызова
+.BR accept .
+Это поведение отличается от других реализаций BSD-сокетов.  Для
+надёжной работы приложения должны отслеживать сетевые ошибки, которые
+могут появиться при работе с протоколом, и обрабатывать их как 
+.BR EAGAIN ,
+повторным выполнением.  В случае TCP/IP такими ошибками являются
+.BR ENETDOWN ,
+.BR EPROTO ,
+.BR ENOPROTOOPT ,
+.BR EHOSTDOWN ,
+.BR ENONET ,
+.BR EHOSTUNREACH ,
+.BR EOPNOTSUPP ,
+и
+.BR ENETUNREACH .
+.SH ОШИБКИ
+.B accept
+завершится с ошибкой если:
+.TP
+.BR EAGAIN " или " EWOULDBLOCK
+сокет маркирован как неблокирующий, но нет ни одного соединения,
+которое можно было бы принять.
+.TP
+.B EBADF
+Дескриптор неправилен.
+.TP
+.B ENOTSOCK
+Дескриптор ссылается на файл, а не на сокет.
+.TP
+.B EOPNOTSUPP
+Тип сокета, на который ссылается дескриптор, отличается от
+.BR SOCK_STREAM . 
+.TP
+.B EINTR
+Системный вызов был прерван сигналом, который был получен
+перед тем как из очереди поступило корректное соединение.
+.TP
+.B ECONNABORTED
+Соединение было прервано.
+.TP
+.B EINVAL
+Сокет не слушает соединения.
+.TP
+.B EMFILE
+Было достигнуто ограничение по открытым файловым дескриптором
+на процесс.
+.TP
+.B ENFILE
+Был достигнут системный максимум на файловые дескрипторы.
+.PP
+.B accept
+может завершиться с ошибкой если:
+.TP
+Параметр
+.B EFAULT
+.I addr
+не находится в пространстве адресов с возможностью записи.
+.TP
+.B ENOBUFS, ENOMEM
+Не хватает свободной памяти.
+Это зачастую означает, что выделение памяти ограничено размерами
+буфера сокетов, а не системной памятью, но это не 100% верно.
+.TP
+.B EPROTO
+Ошибка протокола.
+.PP
+В Linux
+.B accept
+может завешиться с ошибкой если:
+.TP
+.B EPERM
+Правила межсетевого экрана запрещают соединение.
+.PP
+Вдобавок, могут также возвращаться сетевые ошибки на новом сокете и
+ошибки, могущие возникнуть в протоколе.  Различные ядра Linux могут
+вернуть другие ошибки, например,
+.BR EMFILE ,
+.BR EINVAL ,
+.BR ENOSR ,
+.BR ENOBUFS ,
+.BR EPERM ,
+.BR ECONNABORTED ,
+.BR ESOCKTNOSUPPORT ,
+.BR EPROTONOSUPPORT ,
+.BR ETIMEDOUT ,
+.BR ERESTARTSYS .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.4BSD (функция
+.B accept
+впервые появилась в BSD 4.2).  Страница руководства BSD документирует
+пять возможных кодов ошибок (EBADF, ENOTSOCK, EOPNOTSUPP, EWOULDBLOCK,
+EFAULT).
+SUSv3 документирует ошибки EAGAIN, EBADF, ECONNABORTED, EINTR, EINVAL,
+EMFILE, ENFILE, ENOBUFS, ENOMEM, ENOTSOCK, EOPNOTSUPP, EPROTO,
+EWOULDBLOCK. В дополнение, SUSv2 документирует EFAULT и ENOSR.
+
+Реализация
+.I accept
+в Linux _не_ наследует флаги сокетов (типа
+.BR O_NONBLOCK ).
+Это поведение отличается от других реализаций BSD-сокетов.
+Переносимые программы не должны полагаться на такое поведение и всегда
+должны устанавливать на сокете, полученном от
+.IR accept ,
+все требуемые флаги.
+
+.SH ЗАМЕЧАНИЕ 
+Третий аргумент функции
+.B accept
+изначально был объявлен как
+.RB  "int *" 
+(это именно так в libc4, libc5 и на многих других системах, включая
+BSD\~4.*, SunOS\~4 и SGI); черновик стандарта POSIX\~1003.1g пытался
+поменять этот тип на
+.RB  "size_t *" ,
+и в SunOS\~5 это именно так.  Поздние черновики POSIX содержат
+.RB  "socklen_t *" ,
+и в Single Unix Specification и glibc2 это именно так. 
+.PP
+По словам Линуса Торвальдса:
+.PP
+.\" .I не срабатывает: только первая строка выделяется курсивом
+\fIВ _любой_ разумной библиотеке размеры "socklen_t" и int _должны_
+совпадать.  Любой другой вариант разламывает реализацию BSD-сокетов.
+В POSIX сначала использовали size_t, но я (и, к счастью, кто-то ещё,
+хотя и не слишком многие) очень громко пожаловались.  Такая реализация
+полностью сломана, как раз потому, что size_t очень редко имеет тот же
+размер, что и "int", например, на 64-битных архитектурах.  Это
+необходимо потому, что интерфейс BSD-сокетов таков, каков он есть.
+.PP
+\fIВ любом случае, люди из POSIX наконец поняли и создали "socklen_t".
+Вообще, с самого начала они просто не должны были ничего трогать, но
+по какой-то причине они чувствовали, что должны использовать
+поименованный тип (вероятно, они не хотели ударить в грязь лицом,
+сделав глупость, поэтому они тихо переименовали место, в котором
+просчитались).\fP
+.SH "СМОТРИ ТАКЖЕ"
+.BR bind (2),
+.BR connect (2),
+.BR listen (2),
+.BR select (2),
+.BR socket (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999-2001,
+Виктор Вислобоков <corochoone@perm.ru> 2003

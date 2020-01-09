@@ -1,0 +1,140 @@
+.\" -*- nroff -*-
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS `AS IS' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+
+.\"
+.\"     Id: listen.2,v 1.6 1999/05/18 14:10:32 freitag Exp 
+.\"
+.\" Modified Fri Jul 23 22:07:54 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 950727 by aeb, following a suggestion by Urs Thuermann
+.\" <urs@isnogud.escape.de>
+.\" Modified Tue Oct 22 08:11:14 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1998 by Andi Kleen 
+.\" Modified 11 May 2001 by Sam Varshavchik <mrsam@courier-mta.com>
+.\"
+.\" Дата последней коррекции перевода 01.01.2004
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH LISTEN 2 1993-07-23 "Руководство по BSD" "Руководство программиста Linux"
+.SH ИМЯ
+listen \- слушать соединения на сокете
+.SH ОБЗОР
+.B #include <sys/socket.h>
+.sp
+.BI "int listen(int " s ", int " backlog );
+.SH ОПИСАНИЕ
+Для того, чтобы принимать соединения, сначала нужно создать сокет с помощью
+.BR socket (2),
+затем выразить готовность принимать входящие соединения и задать
+размер очереди с помощью
+.BR listen ,
+а затем вызывать
+.BR accept (2)
+по мере появления новых соединений.
+Системный вызов
+.B listen
+применим только к сокетам типа
+.B SOCK_STREAM
+или
+.BR SOCK_SEQPACKET .
+.PP
+Параметр
+.I backlog
+задает максимальную длину, до которой может расти очередь ожидающих
+соединений.  Если приходит запрос на соединение, а очередь полна, то
+клиент получит ошибку 
+.B ECONNREFUSED
+или, если соответствующие протокол поддерживает повторную передачу,
+запрос может быть игнорирован, чтобы попытаться ответить на повторный
+запрос.
+.SH ЗАМЕЧАНИЯ
+Поведение параметра
+.I backlog 
+на TCP-сокетах изменилось в Linux 2.2.  Теперь вместо количества
+неоконченных запросов на соединение он задает размер очереди для
+.I полностью 
+установленных соединений, ожидающих, пока процесс примет
+их.  Максимальный размер очереди для неоконченных сокетов может быть
+задано, используя sysctl
+.BR tcp_max_syn_backlog .
+Когда разрешено использование syncookies, логическая максимальная
+длина отсутствует и настройка этого sysctl игнорируется.
+См. 
+.BR tcp (7)
+за дальнейшей информацией.
+
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+.TP 0.8i
+.B EADDRINUSE
+Другой сокет уже слушает на этом же порту.
+.TP
+.B EBADF
+Аргумент
+.I s
+не является правильным дескриптором.
+.TP
+.B ENOTSOCK
+Аргумент
+.I s
+не является сокетом.
+.TP
+.B EOPNOTSUPP
+Тип сокета не поддерживает операцию
+.BR listen .
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Single Unix, 4.4BSD, черновик POSIX 1003.1g. Вызов
+.B listen
+впервые появился в 4.2BSD.
+.SH ОШИБКИ РЕАЛИЗАЦИИ
+Если сокет имеет тип
+.BR AF_INET , 
+а аргумент
+.I backlog
+больше, чем константа
+.B SOMAXCONN 
+(128 в Linux 2.0 & 2.2), то он незаметно обрезается до
+.BR SOMAXCONN . 
+Не полагайтесь на это значение в портабельных приложениях, потому что
+BSD и некоторые её потомки ограничивают размер очереди до 5.
+.SH "СМОТРИ ТАКЖЕ"
+.BR accept (2),
+.BR connect (2),
+.BR socket (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

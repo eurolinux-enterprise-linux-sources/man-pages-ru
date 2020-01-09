@@ -1,0 +1,90 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt (michael@moria.de)
+.\" Modified Sat Jul 24 13:22:07 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified 21 Aug 1994 by Michael Chastain (mec@shell.portal.com):
+.\"   Referenced 'clone(2)'.
+.\" Modified 1995-06-10, 1996-04-18, 1999-11-01, 2000-12-24
+.\"   by Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Дата последней коррекции перевода 11.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH FORK 2 1995-06-10 "Linux 1.2.9" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+fork \- создает дочерний процесс
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <unistd.h>
+.sp
+.B pid_t fork(void);
+.SH ОПИСАНИЕ
+.B fork
+создает процесс-потомок, который отличается от родительского только
+значениями PID (идентификатор процесса) и PPID (идентификатор
+родительского процесса), а также тем фактом, что счетчики
+использования ресурсов установлены в 0.  Блокировки файлов и сигналы,
+ожидающие обработки, не наследуются.
+.PP
+Под Linux
+.B fork
+реализован с помощью "копирования страниц при записи" (copy-on-write,
+COW), поэтому расходы на
+.B fork
+сводятся к копирования таблицы страниц родителя и созданию уникальной
+структуры, описывающей задачу.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении родителю возвращается PID процесса-потомка,
+а процессу-потомку возвращается 0.  При неудаче родительскому
+процессу возвращается \-1, процесс-потомок не создается, а значение
+.I errno
+устанавливается должным образом.
+.SH ОШИБКИ
+.TP
+.B EAGAIN
+.B fork
+не может выделить достаточно памяти для копирования таблиц страниц
+родителя и для выделения структуры описания процесса-потомка.
+.TP
+.B ENOMEM
+.B fork
+не может выделить необходимые ресурсы ядра, потому что памяти слишком
+мало.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системный вызов
+.B fork
+соответствует SVr4, SVID, POSIX, X/OPEN, BSD 4.3.
+.SH "СМОТРИ ТАКЖЕ"
+.BR clone (2),
+.BR execve (2),
+.BR vfork (2),
+.BR wait (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 2000,
+Виктор Вислобоков <corochoone@perm.ru> 2003

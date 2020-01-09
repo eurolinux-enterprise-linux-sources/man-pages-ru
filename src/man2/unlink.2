@@ -1,0 +1,151 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sat Jul 24 13:00:50 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Sep  8 18:59:01 1996 by aeb following remarks by
+.\"     Arnt Gulbrandsen <agulbra@troll.no>
+.\" Modified Fri Jan 31 23:49:15 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Thu May 17 12:15:26 2001 by aeb
+.\"
+.\" Дата последней коррекции перевода 14.06.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH UNLINK 2 1997-08-21 "Linux 2.0.30" "Руководство программиста Linux"
+.SH ИМЯ
+unlink \- удаляет имя и возможно файл, на который оно ссылается
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "int unlink(const char *" pathname );
+.SH ОПИСАНИЕ
+.B unlink
+удаляет имя из файловой системы. Если это имя было последней ссылкой
+на файл и больше нет процессов, которые держат этот файл открытым,
+данный файл удаляется и место, которое он занимает освобождается для
+дальнейшего использования.
+
+Если имя было посленей ссылкой на файл, но какие-либо процессы всё ещё
+держат этот файл открым, файл будет оставлен пока последний файловый
+дескриптор, указывающий на него, не будет закрыт.
+
+Если имя указывает на символьную ссылку, ссылка будет удалена.
+
+Если имя указывает на сокет, FIFO или устройство, имя будет удалено,
+но процессы, которые открыли любой из этих объектов могут продолжать
+его использовать.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль. В случае ошибки возвращается \-1
+и значение 
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EACCES
+Доступ на запись в каталог, содержащий
+.I pathname
+не разрешён для эффективного идентифкатора пользователя текущего
+процесса или права на один из каталогов в
+.IR pathname
+не позволяют поиск (выполнение).
+.TP
+.BR EPERM " или " EACCES
+Каталог, содержащий
+.I pathname
+имеет установленный sticky-бит
+.RB ( S_ISVTX )
+и эффективный идентификатор пользователя текущего процесса не
+совпадает и с идентификатором пользователя удаляемого файла и с
+идентификатором пользователя каталога, в котором содержится этот
+файл.
+.TP
+.BR EPERM " (Только в Linux)"
+Файловая система не разрешает удаление файлов.
+.TP
+.B EPERM
+Система не разраешает удаление каталогов или удаление каталогов
+требует превилегий, которыми не обладает текущий процесс.
+(Этот код ошибки появился в POSIX.)
+.TP
+.B EISDIR
+.I pathname
+указывает на каталог.
+(Это не-POSIX значение, возвращаемое в Linux начиная с 2.1.132.)
+.TP
+.BR EBUSY " (нет в Linux)"
+Файл
+.I pathname
+не может быть удалён, потому что он используется системой или
+другим процессом и текущая реализация вызова считает, что это ошибка.
+.TP
+.B EFAULT
+.I pathname
+указывает за пределы доступного вам адресного пространства.
+.TP
+.B ENAMETOOLONG
+.IR pathname " имеет слишком большую длину."
+.TP
+.B ENOENT
+Какой-либо компонент в
+.I pathname
+не существует или является битой ссылкой или в
+.I pathname
+пусто.
+.TP
+.B ENOTDIR
+Какой-либо компонент, используемый как каталог в
+.I pathname ,
+на самом деле не является каталогом.
+.TP
+.B ENOMEM
+Не хватает памяти.
+.TP
+.B EROFS
+.I pathname
+указывает на файл в файловой системе доступной только для чтения.
+.TP
+.B ELOOP
+Слишком много символьных ссылок было обнаружено при трансляции
+.IR pathname .
+.TP
+.B EIO
+Случилась ошибка ввода/вывода.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN, 4.3BSD.  SVr4 документирует дополнительные
+условия ошибок EINTR, EMULTIHOP, ETXTBSY, ENOLINK.
+.SH БАГИ
+Погрешности в протоколе при использовании NFS могут вызовать неожиданную
+пропажу файлов, которые, однако, ещё используются.
+.SH "СМОТРИ ТАКЖЕ"
+.BR link (2),
+.BR rename (2),
+.BR open (2),
+.BR rmdir (2),
+.BR mknod (2),
+.BR mkfifo (3),
+.BR remove (3),
+.BR rm (1)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

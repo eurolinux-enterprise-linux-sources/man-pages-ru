@@ -1,0 +1,163 @@
+.\" (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" License.
+.\" Modified Sat Jul 24 19:00:59 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Clarification concerning realloc, iwj10@cus.cam.ac.uk (Ian Jackson), 950701
+.\" Documented MALLOC_CHECK_, Wolfram Gloger (wmglo@dent.med.uni-muenchen.de)
+.\" Translated into russian 2000, Dmitry Morozhnikov (dm@simplex.irkutsk.ru)
+.TH MALLOC 3  "Апрель 4, 1993" "GNU" "Руководство программиста"
+.SH НАЗВАНИЕ
+calloc, malloc, free, realloc \- Выделение и освобождение динамической памяти
+.SH СИНТАКСИС
+.nf
+.B #include <stdlib.h>
+.sp
+.BI "void *calloc(size_t " "nmemb" ", size_t " "size" ");"
+.nl
+.BI "void *malloc(size_t " "size" ");"
+.nl
+.BI "void free(void " "*ptr" ");"
+.nl
+.BI "void *realloc(void " "*ptr" ", size_t "  "size" ");"
+.fi
+.SH ОПИСАНИЕ
+.B calloc()
+выделяет память для массива из 
+.I nmemb
+элементов по
+.I size
+байт каждый, и возвращает указатель на выделенную память.
+Выделенная память обнуляется.
+.PP
+.B malloc()
+выделяет
+.I size
+байт и возвращает указатель на
+выделенную память. Выделенная память не инициализируется.
+.PP
+.B free()
+освобождает область памяти, на которую указывает
+.IR ptr , 
+которая
+быть выделена ранее посредством
+.BR malloc() ", " calloc() " или " realloc() .
+Иначе, если
+.BI free( "ptr" )
+был уже вызван ранее, результат операции не определен.  Если
+.I ptr
+равен
+.BR NULL ,
+то ничего не происходит.
+.PP
+.B realloc()
+изменяет размер блока динамической памяти, на который указывает
+.IR ptr .
+Новый размер блока будет равен
+.I size
+байт.  Его содержимое останется неизменным в промежутке вплоть до
+прежнего или нового размера, смотря что меньше; 
+добавленная память не инициализируется.
+Если
+.I ptr
+равен
+.BR NULL ,
+то результат вызова эквивалентен
+.BI malloc( size ) \fR;\fP
+если
+.I size
+равен нулю, то результат вызова эквивалентен
+.BI free( ptr ) \fR.\fP 
+Кроме случая, когда
+.I ptr
+равен
+.BR NULL , 
+он должен указывать
+на память, выделенную ранее посредством
+.BR malloc() ", " calloc() " или " realloc() .
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.BR calloc() " и " malloc()
+возвращают указатели на выделенную память, выровненную так, что их
+можно использовать для переменных любого типа.  При неудаче выделения
+возвращается
+.BR NULL .
+.PP
+.B free
+ничего не возвращает.
+.PP
+.B realloc()
+возвращает указатель на новый участок памяти, выровненный так, что его 
+можно использовать для переменных любого типа, причем этот новый
+указатель может отличаться от
+.IR ptr .
+Если запрос выполнить не удается или новый размер равен нулю,
+возвращается
+.BR NULL .
+Если вызов
+.B realloc()
+завершился неудачно, то старый блок памяти остается нетронутым: он не
+освобождается и не перемещается.
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+ANSI-C
+.SH "СМОТРИ ТАКЖЕ"
+.BR brk (2)
+.SH ЗАМЕЧАНИЯ
+Стандарт Unix98 требует, чтобы 
+.BR malloc() ", " calloc() " и " realloc()
+устанавливали переменную
+.I errno
+в значение ENOMEM в
+случае неуспешного выделения памяти. Glibc полагает, что это 
+условие выполняется (и для glibc-версии этих функций это так);
+если же вы используете реализацию, не устанавливающую
+.IR errno ,
+то некоторые функции библиотеки могут завершаться ошибочно, не
+зная причины неудачи.
+.LP
+Сбои внутри
+.BR malloc() ", " free() " или " realloc()
+в большинстве случаев вызваны нарушениями структуры хипа, такими
+как запись за границы выделенного участка или повторное освобождение
+памяти по одному и тому же указателю.
+.PP
+Последние версии Linux libc (новее, чем 5.4.23) и GNU libc (2.x)
+включают в себя реализацию функций управления памятью,
+настраиваемую через переменные окружения. Когда установлена
+.BR MALLOC_CHECK_ ,
+используется специальная (и менее эффективная)
+реализация, которая разработана с целью быть более устойчивой к
+небольшим ошибкам, таким как двойной вызов \fBfree()\fP с одинаковым
+аргументом, или переполнениями на один байт. Это, тем не менее,
+обеспечивает защиту не от всех ошибок, которые могут привести к утечкам
+памяти. Если
+.B MALLOC_CHECK_
+установлена в 0, все замеченные нарушения
+структуры хипа игнорируются; если установлена в 1, диагностика
+печатается на stderr; если установлена в 2, то немедленно вызывается
+.BR abort() .
+Это может быть полезным, так как иначе реальный сбой
+мог бы произойти много позже, и истинную его причину было бы в этом
+случае очень трудно найти.
+.SH ПЕРЕВОД
+.nf
+Перевод с английского (C) 2000 Дмитрий Морожников
+    (dm@simplex.irkutsk.ru, 2:5070/141.3)
+.fi

@@ -1,0 +1,104 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+
+.\"
+.\" Modified Wed Jul 21 23:02:38 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 2001-11-17, aeb
+.\" Дата последней коррекции перевода 05.12.2003
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH _EXIT 2 2001-11-17 Linux "Руководство программиста Linux"
+.SH ИМЯ
+_exit,_Exit \- завершает текущий процесс
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "void _exit(int " status );
+.sp
+.B #include <stdlib.h>
+.sp
+.BI "void _Exit(int " status );
+.SH ОПИСАНИЕ
+Функция
+.B _exit
+"немедленно" завершает вызвавший её процесс. Любые открытые файловые
+дескрипторы, принадлежащие данному процессу, закрываются; любые
+потомки данного процесса наследуются процессом init, который имеет
+идентификатор (номер) 1; а родительскому процессу,
+посылается сигнал
+.B SIGCHLD.
+.LP
+Значение
+.I status
+возвращается родительскому процессу как код завершения процесса, и
+может быть затем получено при помощи вызова одной из функций семейства
+.BR wait .
+.LP
+Функция
+.B _Exit
+эквивалента функции
+.BR _exit .
+.SH "ВОЗВРАЩАЕМЫЕ ЗНАЧЕНИЯ"
+Эти функции ничего не возвращают.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN, BSD 4.3.
+Функция \fI_Exit()\fP была введена по C99.
+.SH ЗАМЕЧАНИЯ
+Информацию о действиях, выполняемых exit, о передаче кода завершения,
+о процессах зомби и об посылке сигналов и т.д. смотрите в
+.BR exit (3).
+.LP
+Функция
+.B _exit
+похожа на \fBexit()\fP, но не вызывает никаких зарегистрированных функций
+как ANSI C
+.BR atexit
+и никаких зарегистрированных обработчиков сигналов. Эта
+функция может сбрасывать стандартные буферы ввода/вывода и 
+в зависимости от реализации удалять временные файлы, созданные функцией
+.BR tmpfile (3) .
+С другой стороны
+.B _exit
+выполняет закрытие открытых файловых декскрипторов и это может вызывать
+непонятную задержку из-за того, что происходит ожидание завершения
+незаконченного вывода. Если такая задержка нежелательна, то возможно
+будет полезным использовать вызов такой функции как \fItcflush()\fP
+перед вызовом \fB_exit()\fP.
+Может ли \fB_exit()\fP отменять операции незаконеченного ввода/вывода
+и какие именно операции незаконеченного ввода/вывода могут быть
+отменены, зависит от реализации.
+.SH "СМОТРИ ТАКЖЕ"
+.BR fork (2),
+.BR execve (2),
+.BR waitpid (2),
+.BR wait4 (2),
+.BR kill (2),
+.BR wait (2),
+.BR exit (3)
+.BR termios (3)
+.RE
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2003

@@ -1,0 +1,139 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sat Jul 24 13:35:59 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Nov 28 17:19:01 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sat Jan 13 12:58:08 1996 by Michael Haardt
+.\"   <michael@cantor.informatik.rwth-aachen.de>
+.\" Modified Sun Jul 21 18:59:33 1996 by Andries Brouwer <aeb@cwi.nl>
+.\" 2001-12-13 added remark by Zack Weinberg
+.\"
+.\" Дата последней коррекции перевода 23.05.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH WRITE 2 2001-12-13 "Linux 2.0.32" "Руководство программиста Linux"
+.SH ИМЯ
+write \- писать в файловый дескриптор
+.SH ОБЗОР
+.B #include <unistd.h>
+.sp
+.BI "ssize_t write(int " fd ", const void *" buf ", size_t " count );
+.SH ОПИСАНИЕ
+.B write
+пишет
+.I count
+байт в файл, на который ссылается файловый дескриптор
+.I fd
+из буфера, на который указывает
+.IR buf .
+POSIX требут, чтобы \fBread()\fP, который может использоваться после
+\fBwrite()\fP возвратил новые данные.  Заметим, что не все файловые
+системы соответствуют стандарту POSIX.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается количество записанных байт
+(ноль говорит о том, что ничего записано не было). В случае ошибки,
+возвращается \-1 и значение \fIerrno\fP устанавливается соответствующим
+образом. Если \fIcount\fP равен нулю и файловый дескриптор указывает
+на обычный файл, будет возвращаться 0 без каких-либо других последствий.
+Для специальных файлов, получившиеся результаты не переносимы на
+другие платформы.
+.SH ОШИБКИ
+.TP
+.B EBADF
+.I fd
+не является правильным файловым дескриптором или не открыт для записи.
+.TP
+.B EINVAL
+.I fd
+ссылается на объект, который не может быть доступен для записи.
+.TP
+.B EFAULT
+.I buf
+находится за пределами доступного вам адресного пространства.
+.TP
+.B EFBIG
+Попытка записать в файл, который превышает заданное при реализации
+ограничение на размер файла или ограничение на размер файла для
+текущего процесса, или запись в позицию после максимально разрешённого
+смещения.
+.TP
+.B EPIPE
+.I fd
+ссылается на конвеер или сокет, у которого закрыто чтение. Когда такое
+случается, пишущий процесс также получит сигнал
+.B SIGPIPE .
+(Таким образом, возвращаемое значение можно будет увидеть только если
+программа перехватывает, блокирует или игнорирует этот сигнал).
+.TP
+.B EAGAIN
+Был выбран неблокирующий ввод/вывод, через
+.B O_NONBLOCK ,
+а запись должна произвести блокировку.
+.TP
+.B EINTR
+Этот вызов был прерван сигналом, перед тем как были записаны
+какие-либо данные.
+.TP
+.B ENOSPC
+На устройстве, содержащем файл, на который ссылается
+.I fd
+нет свободного места.
+.TP
+.B EIO
+Во время изменения индексного дескриптора (inode) возникла
+низкоуровневая ошибка ввода/вывода.
+.PP
+В зависимости от объекта, на который указывает
+.IR fd
+могут происходить и другие ошибки.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, SVID, POSIX, X/OPEN, 4.3BSD.  SVr4 документирует дополнительные
+условия ошибок EDEADLK, ENOLCK, ENOLNK, ENOSR, ENXIO или ERANGE.
+Под SVr4 вызов write может быть прерван и возвратить EINTR в
+любом месте, а не только перед тем как будут записаны какие-либо
+данные.
+.SH ЗАМЕЧАНИЯ
+Успешный возврат из вызова
+.B write
+не даёт никаких гарантий, что данные сохранены на диске. Фактически,
+в некоторых глючных реализациях, даже нет гарантии, что для данных
+было зарезервировано место. Есть только один способ, чтобы быть
+уверенным в сохранении данных на диске - это вызов
+.BR fsync (2)
+после того как вы запишете все ваши данные.
+.SH "СМОТРИ ТАКЖЕ"
+.BR close (2),
+.BR fcntl (2),
+.BR fsync (2),
+.BR ioctl (2),
+.BR lseek (2),
+.BR open (2),
+.BR read (2),
+.BR select (2),
+.BR fwrite (3),
+.BR writev (3)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

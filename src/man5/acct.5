@@ -1,0 +1,48 @@
+.\" Copyright (c) 1995 Dirk Eddelbuettel (Dirk.Eddelbuettel@qed.econ.queensu.ca)
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+.\" USA.
+.\" 
+.\" Дата последней коррекции перевода 07.03.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/man/
+.\"
+.TH ACCT 5 2003-11-01 "Linux" "Руководство программиста Linux"
+.SH ИМЯ
+acct \- выполнение файла учёта
+.SH ОБЗОР
+.B #include <sys/acct.h>
+.SH ОПИСАНИЕ
+Если ядро было собрано с включеной опцией учёта процессов, то
+системный вызов
+.RS
+acct("/somewhere/accountingfile");
+.RE
+запустит учёт процессов. Каждый раз при завершении процесса в
+файл учёта будет добавляться соответствующая этому процессу запись.
+Структура учёта
+.B "struct acct"
+также описывается в файле
+.IR /usr/include/linux/acct.h .
+.SH "СМОТРИ ТАКЖЕ"
+.BR sa (1),
+.BR acct (2)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

@@ -1,0 +1,95 @@
+.\" -*- nroff -*-
+.\"
+.\" (C)opyright 1993 by Dan Miner (dminer@nyx.cs.du.edu)
+.\"
+.\"  Permission is granted to freely distribute or modify this file
+.\"  for the purpose of improving Linux or its documentation efforts.
+.\"  If you modify this file, please put a date stamp and HOW you
+.\"  changed this file.  Thanks.   -DM
+.\"
+.\" Modified Sat Jul 24 12:35:12 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 22:29:51 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Mon Aug 25 16:06:11 1997 by NicolАs Lichtmaier <nick@debian.org>
+.\"
+.\" Дата последней коррекции перевода 28.07.2004
+.\" Перевод с английского сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH SYSINFO 2 1997-08-25 "Linux 2.0" "Руководство программиста Linux"
+.SH ИМЯ
+sysinfo \- возвращает информацию по общесистемной статистике
+.SH ОБЗОР
+.B #include <sys/sysinfo.h>
+.sp
+.BI "int sysinfo(struct sysinfo *" info );
+.SH ОПИСАНИЕ
+Начиная с Linux 2.3.16,
+.B sysinfo
+используется для получения информации в следующей структуре:
+
+.RS
+.nf
+struct sysinfo {
+	long uptime;             /* секунд с момента начальной загрузки */
+	unsigned long loads[3];  /* средняя загрузка системы за 1, 5 и 15 минут */
+	unsigned long totalram;  /* общее количество оперативной памяти */
+	unsigned long freeram;   /* объём доступной памяти */
+	unsigned long sharedram; /* объём разделяемой памяти */
+	unsigned long bufferram; /* память, используемая под буферы */
+	unsigned long totalswap; /* общий объём своппинга */
+	unsigned long freeswap;  /* доступно памяти на своппинге */
+	unsigned short procs;    /* количество текущих процессов */
+	char _f[22];             /* остаток структуры в 64 байта */
+};
+.fi
+.RE
+
+Все объёмы даются в байтах. Начиная с Linux 2.3.23 (i386), 2.3.48
+(все архитектуры) эта же структура выглядит так
+
+.RS
+.nf
+struct sysinfo {
+	long uptime;             /* секунд с момента начальной загрузки */
+	unsigned long loads[3];  /* средняя загрузка системы за 1, 5 и 15 минут */
+	unsigned long totalram;  /* общее количество оперативной памяти */
+	unsigned long freeram;   /* объём доступной памяти */
+	unsigned long sharedram; /* объём разделяемой памяти */
+	unsigned long bufferram; /* память, используемая под буферы */
+	unsigned long totalswap; /* общий объём своппинга */
+	unsigned long freeswap;  /* доступно памяти на своппинге */
+	unsigned short procs;    /* количество текущих процессов */
+	unsigned long totalhigh; /* общий объём старшей (high) памяти */
+	unsigned long freehigh;  /* доступный объём старшей (high) памяти */
+	unsigned int mem_unit;   /* Размер модуля памяти в байтах */
+	char _f[20-2*sizeof(long)-sizeof(int)]; /* остаток для libc5 */
+};
+.fi
+.RE
+
+и все объёмы даются с размерностью в \fImem_unit\fP байт.
+
+.B sysinfo
+предоставляет простой способ получения общесистемной статистики. Этот способ
+более переносим на другие платформы, чем чтение \fI/dev/kmem\fP.
+Пример использования смотрите в intro(2).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, возвращается 0. В случае ошибки возвращается \-1 и
+значение
+.I errno
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP
+.B EFAULT
+указатель на \fIstruct\ sysinfo\fP задан неправильно
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данная функция является специфичной для Linux и не должна использоваться
+в программах, которые задуманы как переносимые на другие платформы.
+.sp
+Системный вызов sysinfo появился в ядрах Linux начиная с версии 0.98.pl6.
+Linux libc содержит подпрограмму sysinfo(), начиная с версии 5.3.5, а
+glibc с версии 1.90.
+.SH "СМОТРИ ТАКЖЕ"
+.BR proc (5)
+.SH ПЕРЕВОД
+Перевёл с английского Виктор Вислобоков <corochoone@perm.ru> 2004

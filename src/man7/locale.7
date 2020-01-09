@@ -1,0 +1,197 @@
+.\" (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sat Jul 24 17:28:34 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Jun 01 17:16:34 1997 by Jochen Hein (jochen.hein@delphi.central.de)
+.\"
+.\" Вычитано и скорректировано by alexm@hsys.msk.ru для проекта
+.\" http://alexm.here.ru/manpages-ru/
+.\"
+.TH LOCALE 7  "24 апреля 1993" "Linux" "Руководство программиста Linux"
+.SH НАИМЕНОВАНИЕ
+locale \- Описание поддержки нескольких языков
+.SH СИНТАКСИС
+.nf
+.B #include <locale.h>
+.fi
+.SH ОПИСАНИЕ
+Локализация -- это набор языковых и культурных правил.  Они покрывают такие аспекты,
+как язык сообщений, различные наборы символов, лексикографические
+соглашения и т.\ д.
+Программа должна уметь определять локализацию и поступать в
+соответствии с ней, чтобы быть переносимой между различными культурами.
+.PP
+Заголовочный файл
+.B <locale.h>
+описывает типы данных, функции и макросы, полезные для выполнения этой задачи.
+.PP
+В нем описаны функции
+.BR setlocale() ,
+которая устанавливает текущие региональные настройки и
+.BR localeconv() ,
+которая возвращает информацию о форматировании чисел.
+.PP
+Существуют различные категории локализации, которые программа может
+использовать; они описаны как макросы.  Используя их в качестве первого аргумента функции
+.BR setlocale() ,
+можно установить региональные настройки одной из следующих категорий:
+.TP
+.B LC_COLLATE
+Эта категория используется для изменения поведения функций
+.B strcoll()
+и
+.BR strxfrm() ,
+которые используются для сравнения строк с учетом местного алфавита.  Например,
+Немецкая sharp s сортируется как "ss".
+.TP
+.B LC_CTYPE
+Эта категория влияет на поведение функций обработки и классификации символов,
+таких как
+.B isupper()
+и
+.BR toupper() ,
+а также многобайтных символьных функций, таких как
+.B mblen()
+или
+.BR wctomb() .
+.TP
+.B LC_MONETARY
+влияет на информацию, возвращаемую функцией
+.BR localeconv() ,
+которая описывает, как отображать числа: использовать ли в
+качестве десятичного разделителя точку или запятую. Эту информацию использует внутри себя
+функция
+.BR strfmon() .
+.TP
+.B LC_MESSAGES
+изменяет язык отображаемых сообщений, и как должны выглядеть положительный и 
+отрицательный ответы. Библиотека GNU C содержит функцию
+.B rpmatch()
+для легкого использования этой информации. 
+.TP
+.B LC_NUMERIC
+изменяет информацию, которой пользуется семейство функций
+.B printf()
+и
+.BR scanf() ,
+если им сказано использовать региональные настройки.
+Эта информация может быть также прочитана при помощи функции 
+.BR localeconv() .
+.TP
+.B LC_TIME
+влияет на поведение функции 
+.BR strftime() ,
+которая используется для отображения текущего времени в местном формате; например, 
+большая часть Европы использует 24\-х часовой формат, тогда как в США используют 
+12\-ти часовой.
+.TP
+.B LC_ALL
+Все вышеперечисленное.
+.PP
+Если второй аргумент функции
+.BR setlocale() ---
+пустая строка
+.BR """""" ,
+то
+локализация по умолчанию будет определяться, используя следующие шаги:
+.IP 1.
+Если существует непустая переменная окружения
+.BR LC_ALL ,
+то используется ее значение.
+.IP 2.
+Если существует переменная окружения с именем одной из вышеописанных категорий
+локализации и она не пустая, ее значение используется для этой категории.
+.IP 3.
+Если существует непустая переменная окружения
+.BR LANG ,
+то используется ее значение.
+.PP
+Информация о местном форматировании чисел доступна в структуре
+.BR "struct lconv" ,
+возвращаемой функцией
+.BR localeconv() ,
+которая объявлена следующим образом:
+.nf
+struct lconv
+{
+  /* Числовая (не связанная с деньгами) информация.  */
+
+  char *decimal_point;		/* Символ десятичной точки.  */
+  char *thousands_sep;		/* Разделитель тысяч.        */
+  /* Каждый элемент является номером цифры в каждой группе;
+     бОльшие элементы указывают на крайние левые значения.
+     Элемент с значением CHAR_MAX означает старших групп больше нет.
+     Элемент со значением 0 указывает что предыдущий элемент используется
+     для всех групп левее.  */
+  char *grouping;
+
+  /* Денежная информация.  */
+
+  /* Первые три символа являются символом валюты согласно ISO 4217.
+     Четвертый символ является разделителем. Пятый символ равен '\\0'.    */
+  char *int_curr_symbol;
+  char *currency_symbol;        /* Местный символ валюты.    */
+  char *mon_decimal_point;      /* Символ десятичной точки.  */
+  char *mon_thousands_sep;      /* Разделитель тысяч.        */
+  char *mon_grouping;           /* См. выше описание элемента `grouping' */
+  char *positive_sign;          /* Знак положительных значений.  */
+  char *negative_sign;          /* Знак отрицательных значений.  */
+  char int_frac_digits;         /* Int'l fractional digits.  */
+  char frac_digits;             /* Local fractional digits.  */
+  /* 1 если символ валюты предшествует положительному значению, 
+     0 если следует за ним.  */
+  char p_cs_precedes;
+  /* 1 если пробел отделяет символ валюты от положительного значения.    */
+  char p_sep_by_space;
+  /* 1 если символ валюты предшествует отрицательному значению, 
+     0 если следует за ним.  */
+  char n_cs_precedes;
+  /* 1 если пробел отделяет символ валюты от отрицательного значения.    */
+  char n_sep_by_space;
+  /* Позиция положительного или отрицательного знака:
+     0 Скобки окружают количество и символ валюты.
+     1 Знак предшествует количеству и символу валюты.
+     2 Знак следует за количеством и символом валюты.
+     3 Знак непосредственно предшествует символу валюты.
+     4 Знак непосредственно следует за символом валюты.       */
+  char p_sign_posn;
+  char n_sign_posn;
+};
+.fi
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1
+.SH "СМОТРИ ТАКЖЕ"
+.BR setlocale (3),
+.BR localeconv (3),
+.BR locale (1),
+.BR localedef (1),
+.BR rpmatch (3),
+.BR strfmon (3),
+.BR strcoll (3),
+.BR strxfrm (3),
+.BR strftime (3)
+
+.RE
+
+.SH "ПЕРЕВОД"
+
+Перевел с английского Алексей Миллер <asm@asm.kiev.ua>

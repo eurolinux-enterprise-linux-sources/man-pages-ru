@@ -1,0 +1,211 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+
+.\"
+.\" Modified by Michael Haardt (michael@moria.de)
+.\" Modified Wed Jul 21 20:18:11 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Jan 12 14:31:17 MET 1997 by Michael Haardt
+.\"   (michael@cantor.informatik.rwth-aachen.de): NFS details
+.\"
+.\" Дата последней коррекции перевода 08.12.2003
+.\" Оригинальный перевод Алексея Махоткина <alexm@hsys.msk.ru> 1999-2001
+.\" Дополнения и правки перевода сделал Виктор Вислобоков <corochoone@perm.ru>
+.\" http://www.linuxshare.ru/projects/trans/mans.html
+.\"
+.TH CHMOD 2 1997-12-10 "Linux 2.0.32" "Руководство программиста Linux"
+.SH НАЗВАНИЕ
+chmod, fchmod \- изменить права доступа к файлу
+.SH ОБЗОР
+.B #include <sys/types.h>
+.br
+.B #include <sys/stat.h>
+.sp
+.BI "int chmod(const char *" path ", mode_t " mode );
+.br
+.BI "int fchmod(int " fildes ", mode_t " mode );
+.SH ОПИСАНИЕ
+Изменяет права доступа к файлу, заданному параметром
+.I path
+или файловым дескриптором
+.IR fildes .
+
+Права задаются применением логической операции
+.I OR
+(битовое сложение -- прим. пер.) к следующим константам:
+.RS
+.sp
+.TP 1.0i
+S_ISUID
+04000 установить при выполнении идентификатор пользователя
+(suid бит -- прим.пер.)
+.TP
+S_ISGID
+02000 установить при выполнении идентификатор группы
+(sgid бит -- прим.пер.)
+.TP
+S_ISVTX
+01000 sticky бит
+.TP
+S_IRUSR (S_IREAD)
+00400 владелец может читать
+.TP
+S_IWUSR (S_IWRITE)
+00200 владелец может писать
+.TP
+S_IXUSR (S_IEXEC)
+00100 владелец может выполнять файл или искать в каталоге
+.TP
+S_IRGRP
+00040 группа-владелец может читать
+.TP
+S_IWGRP
+00020 группа-владелец может писать
+.TP
+S_IXGRP
+00010 группа-владелец может выполнять файл или искать в каталоге
+.TP
+S_IROTH
+00004 все остальные могут читать
+.TP
+S_IWOTH
+00002 все остальные могут писать
+.TP
+S_IXOTH
+00001 все остальные могут выполнять файл или искать в каталоге
+.sp
+.RE
+
+Эффективный идентификатор пользователя (UID) для вызывающего процесса
+должен быть нулем или совпадать с UID владельца файла.
+
+Если эффективный UID процесса не равен нулю, а группа-владелец файла
+не совпадает с фактическим GID процесса или одним из его
+дополнительных GID'ов, то бит S_ISGID будет сброшен, но ошибки при
+этом не возникнет.
+
+В зависимости от файловой системы, suid и sgid биты могут быть сброшены,
+когда происходит запись в файл. На некоторых файловых системах только
+суперпользователь может устанавливать sticky бит, который может иметь
+специальное значение. О значении sticky бита, а также suid и sgid
+битов на каталоги, см.
+.BR stat (2).
+На файловых системах NFS отмена некоторых прав доступа немедленно
+повлияет на открытые файлы, потому что контроль доступа осуществляется 
+сервером, а открытые файлы обрабатываются клиентом.  Добавление новых
+прав доступа может произойти не сразу, если на клиенте включено
+кэширование атрибутов.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращается ноль.  При ошибке возвращается \-1, а 
+.I errno
+устанавливается должным образом.
+
+.SH ОШИБКИ
+
+В зависимости от файловой системы могут также появиться другие
+ошибки.  Общий набор ошибок для
+.B chmod
+таков:
+
+.TP 0.8i
+.B EPERM
+Фактический UID не совпадает с владельцем файла и не равен нулю.
+.TP
+.B EROFS
+Файл находится на файловой системе, смонтированной только для чтения.
+.TP
+.B EFAULT
+.I path
+указывает за пределы доступного адресного пространства.
+.TP
+.B ENAMETOOLONG
+.I path
+слишком длинно.
+.TP
+.B ENOENT
+Файл не существует.
+.TP
+.B ENOMEM
+Ядру не хватило памяти.
+.TP
+.B ENOTDIR
+Компонент пути, использованный как каталог в
+.IR path ,
+в действительности таковым не является.
+.TP
+.B EACCES
+Запрещен поиск в одном из каталогов, находящихся на пути к файлу.
+.TP
+.B ELOOP
+При обработке 
+.I path
+встречено слишком много символических ссылок.
+.TP
+.B EIO
+Произошла ошибка ввода-вывода.
+.PP
+Общий набор ошибок для
+.B fchmod
+таков:
+.TP
+.B EBADF
+Неверный файловый дескриптор
+.IR fildes .
+.TP
+.B EROFS
+См. выше.
+.TP
+.B EPERM
+См. выше.
+.TP
+.B EIO
+См. выше.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системный вызов
+.B chmod
+соответствует стандартам SVr4, SVID, POSIX, X/OPEN, 4.4BSD.  SVr4
+документирует EINTR, ENOLINK и EMULTIHOP, но не документирует ENOMEM.
+POSIX.1 не документирует ни коды ошибок EFAULT, ENOMEM, ELOOP и EIO,
+ни макросы \fBS_IREAD\fP, \fBS_IWRITE\fP и \fBS_IEXEC\fP.
+.PP
+Системный вызов
+.B fchmod
+соответствует 4.4BSD и SVr4.
+SVr4 документирует дополнительные коды ошибок  EINTR и ENOLINK.
+POSIX требует присутствия функции
+.BR fchmod ,
+если определены символы
+.B _POSIX_MAPPED_FILES
+или
+.BR _POSIX_SHARED_MEMORY_OBJECTS ,
+и документирует дополнительные коды ошибок ENOSYS и EINVAL, но не
+документирует EIO.
+.PP
+POSIX и X/OPEN не документируют sticky бит.
+.SH "СМОТРИ ТАКЖЕ"
+.BR open (2),
+.BR chown (2),
+.BR stat (2)
+.SH ПЕРЕВОД
+Copyright (C) Alexey Mahotkin <alexm@hsys.msk.ru> 1999,
+Виктор Вислобоков <corochoone@perm.ru> 2003

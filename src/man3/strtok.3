@@ -1,0 +1,96 @@
+.\" Copyright (C) 1996 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one
+.\" 
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\" 
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Rewritten old page, 960210, aeb@cwi.nl
+.\" Updated, added strtok_r. 2000-02-13 NicolАs Lichtmaier <nick@debian.org>
+.TH STRTOK 3  "13 февраля 2000" "GNU" "Руководство программиста"
+.SH НАЗВАНИЕ
+strtok, strtok_r \- извлечение токенов из строки
+.SH СИНТАКСИС
+.nf
+.B #include <string.h>
+.sp
+.BI "char *strtok(char *" s ", const char *" delim );
+.sp
+.BI "char *strtok_r(char *" s ", const char *" delim ", char **" ptrptr );
+.fi
+.SH ОПИСАНИЕ
+`Токеном' называется непустая строка символов, не встречающихся в
+строке \fIdelim\fP, за которой следует символ \e0, символ, входящий в
+\fIdelim\fP.
+.PP
+Функцию \fBstrtok()\fP можно использовать для разделения строки
+\fIs\fP на токены.  При первом вызове \fBstrtok()\fP необходимо
+указать \fIs\fP первым аргументом.  В последующих вызовах в качестве
+первого аргумента нужно использовать NULL.  Каждый вызов возвращает
+указатель на следующий токен, или NULL, если токенов больше не
+обнаружено.
+.PP
+Если фрагмент завершается разделителем, то этот символ
+переписывается символом \e0 и указатель на следующий символ
+сохраняется для следующего вызова \fBstrtok()\fP.
+Разделители могут быть разными при каждом последующем вызове.
+.PP
+Функция
+.B strtok_r()
+работает похожим образом, но вместо статического буфера использует
+указатель на предоставленный пользователем указатель типа
+.BR char* .
+Этот указатель, передаваемый в параметре
+.IR ptrptr ,
+должен быть одним и тем же при обработке одной и той же строки.
+
+.SH ПРОБЛЕМЫ
+Никогда не используйте эти функции.  Если вы все же делаете это, то
+имейте в виду:
+.PP
+.RS
+Эти функции изменяют свой первый аргумент.
+.RS
+Информация о символах-разделителях теряется.
+.RS
+Эти функции нельзя использовать с константными строками.
+.PP
+Функция
+.BR strtok ()
+использует статический буфер при разборе строки, и поэтому её
+небезопасно использовать в многопоточных программах.  Используйте
+.BR strtok_r (),
+если это важно для вашей программы.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBstrtok()\fP возвращает указатель на следующий токен,
+или NULL, если токенов больше нет.
+.SH СООТВЕТСТВИЕ СТАНДАРТАМ
+.TP
+strtok()
+SVID 3, POSIX, BSD 4.3, ISO 9899
+.TP
+strtok_r()
+POSIX.1c
+.SH "СМОТРИ ТАКЖЕ"
+.BR index "(3), " memchr "(3), " rindex "(3), " strchr (3),
+.BR strpbrk "(3), " strsep "(3), " strspn "(3), " strstr (3)
+.SH ПРАВА
+.nf
+Перевод с английского (C) 2000 Дмитрий Морожников 
+    (dm@simplex.irkutsk.ru, 2:5070/141.3)
+.fi

@@ -1,0 +1,65 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 2003 Abhijit Menon-Sen <ams@wiw.org>
+.\" and Copyright (C) 2008 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETTID 2 2008\-04\-14 Linux "Руководство программиста Linux"
+.SH ИМЯ
+gettid \- получить идентификатор нити
+.SH ОБЗОР
+.nf
+\fB#include <sys/types.h>\fP
+.sp
+\fBpid_t gettid(void);\fP
+.fi
+.SH ОПИСАНИЕ
+\fBgettid\fP() возвращает идентификатор нити вызвавшего процесса (TID). В
+случае процесса с одной нитью он эквивалентен идентификатору процесса (PID,
+возвращаемому \fBgetpid\fP(2)). В случае процесса с множеством нитей все нити
+имеют одинаковый идентификатор процесса PID, но каждый из них имеет
+уникальный идентификатор нити TID. Для получения подробной информации
+см. обсуждение \fBCLONE_THREAD\fP \fBclone\fP(2).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха возвращает идентификатор нити вызывающего процесса.
+.SH ОШИБКИ
+Этот системный вызов всегда выполняется успешно.
+.SH ВЕРСИИ
+Вызов \fBgettid\fP() впервые появился в Linux в ядре версии 2.4.11.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBgettid\fP() является специфичным для Linux и не должен использоваться
+в переносимых программах.
+.SH ЗАМЕЧАНИЯ
+.\" FIXME See http://sourceware.org/bugzilla/show_bug.cgi?id=6399
+.\" "gettid() should have a wrapper"
+В glibc нет обёртки для данного системного вызова; запускайте его с помощью
+\fBsyscall\fP(2).
+
+Идентификатор нити, возвращаемый этим вызовом, не является идентификатором
+нити POSIX (т.е., неясным значением, возвращаемым \fBpthread_self\fP(3)).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclone\fP(2), \fBfork\fP(2), \fBgetpid\fP(2)

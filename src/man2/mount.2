@@ -1,0 +1,327 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1993 Rickard E. Faith <faith@cs.unc.edu>
+.\" and Copyright (C) 1994 Andries E. Brouwer <aeb@cwi.nl>
+.\" and Copyright (C) 2002, 2005 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 1996-11-04 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2001-10-13 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Added note on historical behavior of MS_NOSUID
+.\" Modified 2002-05-16 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Extensive changes and additions
+.\" Modified 2002-05-27 by aeb
+.\" Modified 2002-06-11 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Enhanced descriptions of MS_MOVE, MS_BIND, and MS_REMOUNT
+.\" Modified 2004-06-17 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\" 2005-05-18, mtk, Added MNT_EXPIRE, plus a few other tidy-ups.
+.\" 2008-10-06, mtk: move umount*() material into separate umount.2 page.
+.\" 2008-10-06, mtk: Add discussion of namespaces.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH MOUNT 2 2012\-05\-10 Linux "Руководство программиста Linux"
+.SH ИМЯ
+mount \- монтирует файловую систему
+.SH ОБЗОР
+.nf
+\fB#include <sys/mount.h>\fP
+.sp
+\fBint mount(const char *\fP\fIsource\fP\fB, const char *\fP\fItarget\fP\fB,\fP
+\fB          const char *\fP\fIfilesystemtype\fP\fB, unsigned long \fP\fImountflags\fP\fB,\fP
+\fB          const void *\fP\fIdata\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBmount\fP() подключает файловую систему, указанную в \fIsource\fP (обычно
+здесь задаётся название устройства, но также может быть указано имя каталога
+или фиктивное устройство), к каталогу, заданному в \fItarget\fP.
+
+Для монтирования файловых систем требуются специальные права (Linux: мандат
+\fBCAP_SYS_ADMIN\fP).
+
+.\" Multiple mounts on same mount point: since 2.3.99pre7.
+Начиная с Linux 2.4 одна файловая система может быть видна в нескольких
+точках монтирования, а множество подключений может быть собрано в одной
+точке.
+
+Значения аргумента \fIfilesystemtype\fP, поддерживаемые ядром, перечислены в
+\fI/proc/filesystems\fP (например: «minix», «ext2», «ext3», «jfs», «xfs»,
+«reiserfs», «msdos», «proc», «nfs», «iso9660»). Дополнительные типы
+становятся доступными после загрузки соответствующих модулей.
+
+.\" (as defined in \fI<linux/fs.h>\fP for libc4 and libc5
+.\" and in \fI<sys/mount.h>\fP for glibc2)
+.\" FIXME 2.6.15 added flags for "shared subtree" functionality:
+.\" MS_UNBINDABLE, MS_PRIVATE, MS_SHARED, MS_SLAVE
+.\" These need to be documented on this page.
+.\" See:
+.\" Documentation/filesystems/sharedsubtree.txt
+.\"
+.\" http://lwn.net/Articles/159077/
+.\"
+.\" http://myweb.sudhaa.com:2022/~ram/sharedsubtree/paper/sharedsubtree.1.pdf
+.\" Shared-Subtree Concept, Implementation, and Applications in Linux
+.\" Al Viro viro@ftp.linux.org.uk
+.\" Ram Pai linuxram@us.ibm.com
+.\"
+.\" http://foss.in/2005/slides/sharedsubtree1.pdf
+.\" Shared Subtree Concept and Implementation in the Linux Kernel
+.\" Ram Pai
+.\"
+.\" 2.6.25 Added MS_I_VERSION, which needs to be documented.
+.\"
+В аргументе \fImountflags\fP в старших 16 битах может содержаться
+идентификационное число 0xC0ED (\fBMS_MGC_VAL\fP) (это требовалось в версиях
+ядра вплоть до версии 2.4, но более не требуется и игнорируется, даже если
+указано), а остальные флаги монтирования указываются в младших 16 битах:
+.TP 
+\fBMS_BIND\fP (начиная с Linux 2.4)
+.\" since 2.4.0-test9
+.\" with the exception of the "hidden" MS_REC mountflags bit
+Выполнять привязку монтирования, при этом файл или каталог становятся
+видимыми в другой точке внутри файловой системы. Привязки монтирования могут
+пересекать границы файловой системы и изменять ограничения
+\fBchroot\fP(2). Аргументы \fIfilesystemtype\fP и \fIdata\fP игнорируются. До Linux
+2.6.26 включительно, также игнорировался и \fImountflags\fP (привязка
+монтирования имела те же параметры монтирования что и точка монтирования, к
+которой она подключалась).
+.TP 
+\fBMS_DIRSYNC\fP (начиная с Linux 2.5.19)
+Осуществлять изменения каталогов на этой файловой системе синхронно. Это
+свойство может быть получено для отдельных каталогов или дерева подкаталогов
+с помощью \fBchattr\fP(1).
+.TP 
+\fBMS_MANDLOCK\fP
+.\" FIXME Say more about MS_MOVE
+Разрешить обязательную блокировку файлов в этой файловой
+системе. Обязательная блокировка всё равно сначала должна быть включена для
+определённого файла как описано в \fBfcntl\fP(2).
+.TP 
+\fBMS_MOVE\fP
+Переместить подкаталог. В \fIsource\fP указывается существующая точка
+монтирования, а в \fItarget\fP \(em новое расположение. Перемещение
+производится атомарно: ни в один момент времени подкаталог не будет являться
+размонтированным. Аргументы \fIfilesystemtype\fP, \fImountflags\fP и \fIdata\fP
+игнорируются.
+.TP 
+\fBMS_NOATIME\fP
+Не обновлять время доступа для (всех типов) файлов в этой файловой системе.
+.TP 
+\fBMS_NODEV\fP
+Запретить доступ к устройствам (специальным файлам) в этой файловой системе.
+.TP 
+\fBMS_NODIRATIME\fP
+Не обновлять время доступа для каталогов в этой файловой системе. Данный
+флаг частично предоставляет свойство \fBMS_NOATIME\fP; то есть при
+\fBMS_NOATIME\fP подразумевается \fBMS_NODIRATIME\fP.
+.TP 
+\fBMS_NOEXEC\fP
+.\" (Possibly useful for a file system that contains non-Linux executables.
+.\" Often used as a security feature, e.g., to make sure that restricted
+.\" users cannot execute files uploaded using ftp or so.)
+Запретить исполнение программ в этой файловой системе.
+.TP 
+\fBMS_NOSUID\fP
+.\" (This is a security feature to prevent users executing set-user-ID and
+.\" set-group-ID programs from removable disk devices.)
+Не учитывать биты set\-UID и set\-GID при исполнении программ в этой файловой
+системе.
+.TP 
+\fBMS_RDONLY\fP
+.\"
+.\" FIXME Document MS_REC, available since 2.4.11.
+.\" This flag has meaning in conjunction with MS_BIND and
+.\" also with the shared subtree flags.
+Смонтировать файловую систему в режиме только для чтения.
+.TP 
+\fBMS_RELATIME\fP (начиная с Linux 2.6.20)
+.\" Matthew Garrett notes in the patch that added this behavior
+.\" that this lets utilities such as tmpreaper (which deletes
+.\" files based on last acces time) work correctly.
+При доступе к файлу на этой файловой системе значение времени последнего
+доступа к файлу (atime) обновляется, только если текущее значение atime
+меньше или равно времени последнего изменения файла (mtime) или времени
+последнего изменения состояния файла (ctime). Этот флаг полезен для программ
+(например, \fBmutt\fP(1)), которым нужно знать, что файл был прочитан с момента
+его последнего изменения. Начиная с Linux 2.6.30 в ядро это поведение
+включено по умолчанию (если не указан \fBMS_NOATIME\fP), а чтобы получить
+обычное поведение нужно указать флаг \fBMS_STRICTATIME\fP. Также, начиная с
+Linux 2.6.30 время последнего доступа к файлу всегда обновляется, если оно
+устаревает на один день.
+.TP 
+\fBMS_REMOUNT\fP
+Перемонтировать уже существующую точку. При этом можно изменить
+\fImountflags\fP и \fIdata\fP уже существующей точки монтирования без фактического
+размонтирования файловой системы. Значения \fIsource\fP и \fItarget\fP должны
+соответствовать значениям, указанным при первоначальном вызове \fBmount\fP();
+аргумент \fIfilesystemtype\fP игнорируется.
+
+Следующие флаги в \fImountflags\fP могут быть изменены: \fBMS_RDONLY\fP,
+\fBMS_SYNCHRONOUS\fP, \fBMS_MANDLOCK\fP; до ядра версии 2.6.16 также могут быть
+изменены: \fBMS_NOATIME\fP и \fBMS_NODIRATIME\fP; и, кроме того, до ядра версии
+2.4.10 также могут быть изменены: \fBMS_NOSUID\fP, \fBMS_NODEV\fP, \fBMS_NOEXEC\fP.
+.TP 
+\fBMS_SILENT\fP (начиная с Linux 2.6.17)
+Не выводить определённые (\fIprintk\fP()) предупреждающие сообщения в журнал
+ядра. Этот флаг заменяет неправильно названный и устаревший флаг
+\fBMS_VERBOSE\fP (доступный начиная с Linux 2.4.12), который выполняет такую же
+функцию.
+.TP 
+\fBMS_STRICTATIME\fP (начиная с Linux 2.6.30)
+Всегда обновлять время последнего доступа (atime) при доступе к файлам на
+этой файловой системе. (Это выполнялось по умолчанию до Linux 2.6.30.)
+Задание этого флага отменяет поведение флагов \fBMS_NOATIME\fP и
+\fBMS_RELATIME\fP.
+.TP 
+\fBMS_SYNCHRONOUS\fP
+Осуществлять запись на эту файловую систему синхронно (как если бы флаг
+\fBO_SYNC\fP для \fBopen\fP(2) был указан для всех файлов, открытых на этой
+файловой системе).
+.PP
+Начиная с Linux 2.4 флаги \fBMS_NODEV\fP, \fBMS_NOEXEC\fP и \fBMS_NOSUID\fP можно
+установить на каждую точку монтирования. Начиная с ядра версии 2.6.16
+\fBMS_NOATIME\fP и \fBMS_NODIRATIME\fP также можно установить на каждую точку
+монтирования. Флаг \fBMS_RELATIME\fP также можно установить на каждую точку
+монтирования.
+.PP
+Аргумент \fIdata\fP рассматривается каждой файловой системой по\-своему. Обычно,
+это строка параметров, перечисленных через запятую, которые понимает
+файловая система. О том, какие параметры доступны для каждого типа файловой
+системы смотрите \fBmount\fP(8).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+Коды ошибок, описанные ниже, не зависят от типа файловой системы. У каждой
+файловой системы могут быть свои коды ошибок и своё собственное
+поведение. Подробности смотрите в исходном коде ядра.
+.TP 
+\fBEACCES\fP
+.\" mtk: Probably: write permission is required for MS_BIND, with
+.\" the error EPERM if not present; CAP_DAC_OVERRIDE is required.
+В компоненте пути запрещён поиск (смотрите также
+\fBpath_resolution\fP(7)). Или была попытка монтирования файловой системы,
+доступной только для чтения, без указания флага \fBMS_RDONLY\fP. Или блочное
+устройство \fIsource\fP находится на файловой системе, смонтированной с
+параметром \fBMS_NODEV\fP.
+.TP 
+\fBEBUSY\fP
+\fIsource\fP уже смонтирована. Или она не может быть перемонтирована в режим
+только для чтения, так как всё ещё содержит файлы, которые открыты на
+запись. Или она не может быть смонтирована в \fItarget\fP, так как \fItarget\fP
+сейчас занята (является рабочим каталогом какой\-то нити, точкой монтирования
+другого устройства, содержит открытые файлы и т.д.).
+.TP 
+\fBEFAULT\fP
+Один из аргументов\-указателей указывает на каталог за пределами
+пользовательского адресного пространства.
+.TP 
+\fBEINVAL\fP
+\fIsource\fP содержит некорректный суперблок. Или была предпринята попытка
+перемонтирования (\fBMS_REMOUNT\fP), но \fIsource\fP ещё не была смонтирована в
+\fItarget\fP. Или была предпринята попытка перемещения (\fBMS_MOVE\fP), но
+\fIsource\fP не является точкой монтирования, или это «/».
+.TP 
+\fBELOOP\fP
+Во время разбора имён найдено слишком много ссылок. Или сделана попытка
+перемещения, а \fItarget\fP является подкаталогом \fIsource\fP.
+.TP 
+\fBEMFILE\fP
+(В случае, если не требуются блочные устройства): таблица фиктивных
+устройств переполнена.
+.TP 
+\fBENAMETOOLONG\fP
+Значение пути длиннее чем \fBMAXPATHLEN\fP.
+.TP 
+\fBENODEV\fP
+Тип из \fIfilesystemtype\fP в ядре не настроен.
+.TP 
+\fBENOENT\fP
+Указан пустой путь или одна из его частей не существует.
+.TP 
+\fBENOMEM\fP
+Ядро не может выделить свободную страницу для копирования имени файла или
+данных.
+.TP 
+\fBENOTBLK\fP
+Значение \fIsource\fP не является блочным устройством (а устройство было
+запрошено).
+.TP 
+\fBENOTDIR\fP
+Значение \fItarget\fP или префикс \fIsource\fP не является каталогом.
+.TP 
+\fBENXIO\fP
+Старший номер блочного устройства \fIsource\fP вне допустимого диапазона.
+.TP 
+\fBEPERM\fP
+Вызывающий процесс не имеет требуемых привилегий.
+.SH ВЕРСИИ
+.\" FIXME: Definitions of the so-far-undocumented MS_UNBINDABLE, MS_PRIVATE,
+.\"  MS_SHARED, and MS_SLAVE were (also) only added to glibc headers in 2.12.
+Определения \fBMS_DIRSYNC\fP, \fBMS_MOVE\fP, \fBMS_REC\fP, \fBMS_RELATIME\fP и
+\fBMS_STRICTATIME\fP были добавлены в заголовочные файлы glibc начиная с версии
+2.12.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данная функция есть только в Linux и не должна использоваться в программах,
+которые задуманы как переносимые.
+.SH ЗАМЕЧАНИЯ
+Изначальный флаг \fBMS_SYNC\fP был переименован в \fBMS_SYNCHRONOUS\fP в 1.1.69,
+когда в \fI<mman.h>\fP был добавлен другой флаг \fBMS_SYNC\fP.
+.LP
+.\" The change is in patch-2.4.0-prerelease.
+До Linux 2.4 попытка выполнения программ set\-UID или set\-GID на файловой
+системе, подключённой с параметром \fBMS_NOSUID\fP, вызывает ошибку
+\fBEPERM\fP. Начиная с Linux 2.4 биты set\-UID и set\-GID в этом случае негласно
+игнорируются.
+.SS "Попроцессные пространства имён"
+Начиная с ядра версии 2.4.19, Linux предоставляет попроцессные пространства
+имён монтирования. Пространство имён монтирования \(em это набор
+смонтированных файловых систем, которые видимы процессу. Пространства имён
+точек монтирования могут (обычно так и есть) совместно использоваться
+несколькими процессами, и изменение пространства имён (т.е., монтирование и
+размонтирование) одним процессом видимы всеми остальными процессами,
+использующими одно общее пространство имён. (Поведение до версии 2.4.19 в
+Linux можно рассматривать так, как если бы всеми процессами в системе
+использовалось одно пространство имён.)
+
+Процесс\-потомок, создаваемый \fBfork\fP(2), использует родительское
+пространство имён монтирования совместно с родителем; пространство имён
+монтирования сохраняется при вызове \fBexecve\fP(2).
+
+Процесс может получить собственное пространство имён монтирования если: он
+был создан с помощью \fBclone\fP(2) с флагом \fBCLONE_NEWNS\fP; в этом случае его
+новое пространство имён инициализируется \fIкопией\fP пространства имён
+процесса, который вызвал \fBclone\fP(2); или он вызовет \fBunshare\fP(2) с флагом
+\fBCLONE_NEWNS\fP; в этом случае пространство имён вызвавшего получит свою
+копию пространства имён, которое он раньше совместно использовал с другими
+процессами, и дальнейшие монтирования и размонтирования вызвавшим будут
+невидимы другим процессам (за исключением потомков, которые вызывающий
+создаст позже) и наоборот.
+
+Файл \fI/proc/PID/mounts\fP, который есть только в Linux, содержит список точек
+монтирования в пространстве имён монтирования процесса с заданным ID;
+подробней см. в \fBproc\fP(5).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBumount\fP(2), \fBpath_resolution\fP(7), \fBmount\fP(8), \fBumount\fP(8)

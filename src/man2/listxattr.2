@@ -1,0 +1,124 @@
+.\"
+.\" Extended attributes system calls manual pages
+.\"
+.\" Copyright (C) Andreas Gruenbacher, February 2001
+.\" Copyright (C) Silicon Graphics Inc, September 2001
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH LISTXATTR 2 2001\-12\-01 Linux "Руководство программиста Linux"
+.SH ИМЯ
+listxattr, llistxattr, flistxattr \- выводит список названий расширенных
+атрибутов
+.SH ОБЗОР
+.fam C
+.nf
+\fB#include <sys/types.h>\fP
+\fB#include <attr/xattr.h>\fP
+.sp
+\fBssize_t listxattr(const char\ *\fP\fIpath\fP\fB, char\ *\fP\fIlist\fP\fB, size_t \fP\fIsize\fP\fB);\fP
+\fBssize_t llistxattr(const char\ *\fP\fIpath\fP\fB, char\ *\fP\fIlist\fP\fB, size_t \fP\fIsize\fP\fB);\fP
+\fBssize_t flistxattr(int \fP\fIfd\fP\fB, char\ *\fP\fIlist\fP\fB, size_t \fP\fIsize\fP\fB);\fP
+.fi
+.fam T
+.SH ОПИСАНИЕ
+Расширенные атрибуты представляют собой пару имя:значение и связываются с
+записями inode (файлы, каталоги, символьные ссылки и т.п.). Они являются
+расширениями к обычным атрибутам, связанным со всеми записями inode в
+системе (например, данные \fBstat\fP(2)). Полное описание модели расширенных
+атрибутов можно найти в \fBattr\fP(5).
+.PP
+\fBlistxattr\fP() получает список \fIlist\fP названий расширенных атрибутов,
+связанных с заданным путем \fIpath\fP в файловой системе. Список представляет
+собой набор названий (заканчивающихся NULL) один за одним. Названия
+расширенных атрибутов, к которым вызывающий процесс не может иметь доступ,
+могут быть исключены из списка. Возвращается длина списка \fIlist\fP.
+.PP
+\fBllistxattr\fP() идентичен \fBlistxattr\fP(), за исключением случая с символьной
+ссылкой, где возвращается список названий расширенных атрибутов, связанных с
+самой ссылкой, а не с файлом, на который она ссылается.
+.PP
+\fBflistxattr\fP() идентичен \fBlistxattr\fP(), отличием является то, что
+используется открытый файл, на который указывает \fIfd\fP (возвращаемом
+\fBopen\fP(2)), а не указанный в \fIpath\fP.
+.PP
+Одиночный расширенный атрибут \fIname\fP является просто строкой,
+заканчивающейся NULL. Имя включает префикс пространства имен; их может быть
+несколько, разрозненные пространства связаны с отдельной записью inode.
+.PP
+Для возврата текущего размера списка названий расширенных атрибутов этим
+вызовам может быть передан пустой буфер с нулевым размером \fIsize\fP, что
+может быть использовано для определения размера буфера, который существенно
+больше, так как должен содержать список расширенных атрибутов.
+.SS Пример
+\fIСписок\fP названий возвращается в виде неупорядоченного массива символьных
+строк, заканчивающихся null (названия атрибутов разделяются байтами null
+(\(aq\e0\(aq)), например:
+.fam C
+.RS
+.nf
+
+user.name1\e0system.name1\e0user.name2\e0
+.fi
+.RE
+.fam T
+.P
+Файловые системы ext2, ext3 и XFS, реализующие ACL стандарта POSIX с помощью
+расширенных атрибутов, могут возвращать такой \fIсписок\fP:
+.fam C
+.RS
+.nf
+
+system.posix_acl_access\e0system.posix_acl_default\e0
+.fi
+.RE
+.fam T
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении работы возвращается положительное число,
+обозначающее размер списка названий расширенных атрибутов. При ошибках
+возвращается \-1 и \fIerrno\fP устанавливается в соответствующее значение.
+.PP
+Если размер \fIsize\fP буфера \fIlist\fP слишком мал для хранения результата, то
+\fIerrno\fP присваивается значение \fBERANGE\fP.
+.PP
+Если расширенные атрибуты не поддерживаются файловой системой или отключены,
+то \fIerrno\fP присваивается значение \fBENOTSUP\fP.
+.PP
+Ошибки системного вызова \fBstat\fP(2) также применимы и тут.
+.SH ВЕРСИИ
+Данные системные вызовы доступны в Linux начиная с ядра версии 2.4;
+поддержка в glibc появилась в версии 2.3.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" .SH AUTHORS
+.\" Andreas Gruenbacher,
+.\" .RI < a.gruenbacher@computer.org >
+.\" and the SGI XFS development team,
+.\" .RI < linux-xfs@oss.sgi.com >.
+.\" Please send any bug reports or comments to these addresses.
+Данные системные вызовы есть только в Linux.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetfattr\fP(1), \fBsetfattr\fP(1), \fBgetxattr\fP(2), \fBopen\fP(2),
+\fBremovexattr\fP(2), \fBsetxattr\fP(2), \fBstat\fP(2), \fBattr\fP(5), \fBsymlink\fP(7)

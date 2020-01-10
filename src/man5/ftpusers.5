@@ -1,0 +1,43 @@
+.\" Copyright (c) 2000 Christoph J. Thompson <obituary@linuxbe.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FTPUSERS 5 2000\-08\-27 Linux "Руководство программиста Linux"
+.SH ИМЯ
+ftpusers \- список пользователей, не имеющих доступа к демону FTP
+.SH ОПИСАНИЕ
+Текстовый файл \fBftpusers\fP содержит список пользователей, который не могу
+войти на FTP\-сервер. Этот файл используется не только в целях
+администрирования системы, гл и для улучшения безопасности в сетевой среде
+TCP/IP. Обычно он содержит список пользователей, которые не пользуются ftp
+или имеют слишком много привилегий, позволяющих войти на FTP\-сервер. Такими
+пользователями обычно являются root, daemon, bin, uucp и news. Если ваш
+FTP\-сервер не использует \fBftpusers\fP, то вам рекомендуется прочитать его
+документацию, чтобы найти способ блокирования определённых
+пользователей. Сервер Washington University FTP Daemon (wuftpd) и
+Professional FTP Daemon (proftpd) умеют обращаться с \fBftpusers\fP.
+.SS Формат
+Формат \fBftpusers\fP очень прост. Он содержит по одному имени учётной записи
+(или имени пользователя) в каждой строке. Строки, начинающиеся с #
+игнорируются.
+.SH ФАЙЛЫ
+\fI/etc/ftpusers\fP
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBpasswd\fP(5), \fBproftpd\fP(8), \fBwuftpd\fP(8)

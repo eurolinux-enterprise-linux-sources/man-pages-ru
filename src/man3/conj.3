@@ -1,0 +1,36 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CONJ 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+conj, conjf, conjl \- вычисление комплексно сопряженного числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex conj(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex conjf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex conjl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция \fBconj\fP() возвращает значение комплексно сопряженного числа
+\fIz\fP. Оно получается путем смены знака мнимой части.
+.LP
+Формула вычисления:
+.nf
+
+    cabs(z) = csqrt(z * conj(z))
+.fi
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBcsqrt\fP(3), \fBcomplex\fP(7)

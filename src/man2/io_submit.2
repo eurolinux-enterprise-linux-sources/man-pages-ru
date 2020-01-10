@@ -1,0 +1,72 @@
+.\" Copyright (C) 2003 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH IO_SUBMIT 2 2012\-05\-08 Linux "Руководство программиста Linux"
+.SH ИМЯ
+io_submit \- отправляет асинхронные блоки ввода\-вывода для обработки
+.SH ОБЗОР
+.nf
+\fB#include <linux/aio_abi.h>\fP          /* определяет необходимые типы */
+
+\fBint io_submit(aio_context_t \fP\fIctx_id\fP\fB, long \fP\fInr\fP\fB, struct iocb **\fP\fIiocbpp\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+.PP
+Системный вызов \fBio_submit\fP() ставит в очередь \fInr\fP запросов блоков
+ввода\-вывода для обработки в контексте AIO \fIctx_id\fP. Значение \fIiocbpp\fP
+должно быть массивом из \fInr\fP управляющих блоков AIO, которые будут
+отправлены в контекст \fIctx_id\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успешного завершения \fBio_submit\fP() возвращает число отправленных
+\fIiocb\fP или 0 при \fInr\fP, равном нулю. В случае ошибки смотрите ЗАМЕЧАНИЯ.
+.SH ОШИБКИ
+.TP 
+\fBEAGAIN\fP
+Недостаточно ресурсов для постановки в очередь \fIiocb\fP.
+.TP 
+\fBEBADF\fP
+Некорректный файловый дескриптор, указанный в первом \fIiocb\fP.
+.TP 
+\fBEFAULT\fP
+Одна из структур данных указывает на некорректные данные.
+.TP 
+\fBEINVAL\fP
+Некорректен контекст AIO, указанный \fIctx_id\fP. Значение \fInr\fP меньше
+0. Значение \fIiocb\fP в \fI*iocbpp[0]\fP некорректно инициализировано, или
+указанная операция некорректна для файлового дескриптора в \fIiocb\fP.
+.TP 
+\fBENOSYS\fP
+Вызов \fBio_submit\fP() не реализован для этой архитектуры.
+.SH ВЕРСИИ
+.PP
+Асинхронные системные вызовы ввода\-вывода впервые появились в Linux 2.5.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.PP
+Вызов \fBio_submit\fP() есть только в Linux, и он не должен использоваться в
+переносимых программах.
+.SH ЗАМЕЧАНИЯ
+.\" http://git.fedorahosted.org/git/?p=libaio.git
+В glibc нет обёрточной функции для данного системного вызова. Вы можете
+вызвать его с помощью \fBsyscall\fP(2). Но лучше воспользоваться обёрточной
+функцией \fBio_submit\fP() из библиотеки \fIlibaio\fP.
+
+.\" But glibc is confused, since <libaio.h> uses 'io_context_t' to declare
+.\" the system call.
+Заметим, что в обёрточной функции \fIlibaio\fP используется другой тип
+(\fIio_context_t\fP) аргумента \fIctx_id\fP. Также заметим, что \fIlibaio\fP не
+следует соглашениям обычной библиотеки C для возврата ошибок: при ошибке она
+возвращает отрицательный номер ошибки (из списка в разделе ОШИБКИ). Если
+системный вызов вызывается с помощью \fBsyscall\fP(2), то возвращаемое значение
+следует обычным соглашениям для указания на ошибку: возвращается \-1 и в
+\fIerrno\fP записывается (положительное) значение возникшей ошибки.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBio_cancel\fP(2), \fBio_destroy\fP(2), \fBio_getevents\fP(2), \fBio_setup\fP(2),
+\fBaio\fP(7)
+.\" .SH AUTHOR
+.\" Kent Yoder.

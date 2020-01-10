@@ -1,0 +1,91 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 18:11:47 1993 by Rik Faith (faith@cs.unc.edu)
+.\" 2007-06-15, Marc Boyer <marc.boyer@enseeiht.fr> + mtk
+.\"     Improve discussion of strncat().
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH STRCAT 3 2012\-05\-10 GNU "Руководство программиста Linux"
+.SH ИМЯ
+strcat, strncat \- объединяет две строки
+.SH ОБЗОР
+.nf
+\fB#include <string.h>\fP
+.sp
+\fBchar *strcat(char *\fP\fIdest\fP\fB, const char *\fP\fIsrc\fP\fB);\fP
+.sp
+\fBchar *strncat(char *\fP\fIdest\fP\fB, const char *\fP\fIsrc\fP\fB, size_t \fP\fIn\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBstrcat\fP() добавляет строку \fIsrc\fP к строке \fIdest\fP, перезаписывая
+байт null (\(aq\e0\(aq) в конце \fIdest\fP и добавляет завершающий байт
+null. Строки не могут перекрываться, а в строке \fIdest\fP должно хватать
+свободного места для размещения объединённой строки.
+.PP
+Функция \fBstrncat\fP() работает аналогичным образом, но
+.IP * 3
+задействует не менее \fIn\fP первых байт строки \fIsrc\fP и
+.IP *
+строка \fIsrc\fP может не завершаться байтом null, если в ней содержится \fIn\fP
+или более байт.
+.PP
+Как и \fBstrcat\fP(), строка\-результат в \fIdest\fP всегда заканчивается байтом
+null.
+.PP
+Если в \fIsrc\fP содержится \fIn\fP или более байт, то \fBstrncat\fP() записывает
+\fIn+1\fP байт в \fIdest\fP (\fIn\fP из \fIsrc\fP плюс завершающий байт null). Поэтому
+размер \fIdest\fP должен быть не менее \fIstrlen(dest)+n+1\fP.
+
+Простейшей реализацией \fBstrncat\fP() может быть:
+.in +4n
+.nf
+
+char*
+strncat(char *dest, const char *src, size_t n)
+{
+    size_t dest_len = strlen(dest);
+    size_t i;
+
+    for (i = 0 ; i < n && src[i] != \(aq\e0\(aq ; i++)
+        dest[dest_len + i] = src[i];
+    dest[dest_len + i] = \(aq\e0\(aq;
+
+    return dest;
+}
+.fi
+.in
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функции \fBstrcat\fP() и \fBstrncat\fP() возвращают указатель на скопированную
+строку \fIdest\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.3BSD, C89, C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBbcopy\fP(3), \fBmemccpy\fP(3), \fBmemcpy\fP(3), \fBstrcpy\fP(3), \fBstring\fP(3),
+\fBstrncpy\fP(3), \fBwcscat\fP(3), \fBwcsncat\fP(3)

@@ -1,0 +1,111 @@
+.\" Copyright 2008, Linux Foundation, written by Michael Kerrisk
+.\"     <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH ERFC 3 2010\-09\-20 GNU "Руководство программиста Linux"
+.SH ИМЯ
+erfc, erfcf, erfcl \- дополнительная функция ошибки
+.SH ОБЗОР
+.nf
+\fB#include <math.h>\fP
+
+\fBdouble erfc(double \fP\fIx\fP\fB);\fP
+\fBfloat erfcf(float \fP\fIx\fP\fB);\fP
+\fBlong double erfcl(long double \fP\fIx\fP\fB);\fP
+
+.fi
+Компонуется при указании параметра \fI\-lm\fP.
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBerfc\fP():
+.RS 4
+_BSD_SOURCE || _SVID_SOURCE || _XOPEN_SOURCE || _ISOC99_SOURCE ||
+_POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.br
+\fBerfcf\fP(), \fBerfcl\fP():
+.RS 4
+_BSD_SOURCE || _SVID_SOURCE || _XOPEN_SOURCE\ >=\ 600|| _ISOC99_SOURCE
+|| _POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.ad b
+.SH ОПИСАНИЕ
+Функция \fBerfc\fP() возвращает дополнительную функцию ошибки от \fIx\fP, т.е. 1.0
+\- erf(x).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении эти функции возвращают дополнительную функцию ошибки
+от \fIx\fP, значение в диапазоне [0,2].
+
+Если \fIx\fP имеет значение NaN, будет возвращено NaN.
+
+Если \fIx\fP равен +0 или \-0, возвращается \-1.
+
+Если \fIx\fP стремится к плюс бесконечности, то будет возвращено +0.
+
+Если \fIx\fP равно минус бесконечности, возвращается +2.
+
+Если результат функции теряет разрядность и создаётся непредставимое
+значение, то возвращается значение 0.0.
+
+.\" e.g., erfc(27) on x86-32
+Если в результате функции исчезает порядок числа, но значение представимо
+(т.е. субнормально), то возвращается это значение и возникает ошибка
+диапазона.
+.SH ОШИБКИ
+Смотрите \fBmath_error\fP(7), чтобы определить, какие ошибки могут возникать
+при вызове этих функций.
+.PP
+Могут возникать следующие ошибки:
+.TP 
+Ошибка диапазона: результат потерял разрядность (результат субнормален)
+.\" .I errno
+.\" is set to
+.\" .BR ERANGE .
+Возникает исключение исчезновение порядка плавающей запятой
+(\fBFE_UNDERFLOW\fP).
+.PP
+.\" FIXME . Is it intentional that these functions do not set errno?
+.\" Bug raised: http://sources.redhat.com/bugzilla/show_bug.cgi?id=6785
+Эти функции не изменяют \fIerrno\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99, POSIX.1\-2001. Вариант, возвращающий значение типа \fIdouble\fP, также
+соответствует SVr4 и 4.3BSD.
+.SH ЗАМЕЧАНИЯ
+Функции \fBerfc\fP() созданы с целью избежания потери точности, которая
+возникает при вычислении 1\-erf(x) для больших значений \fIx\fP (для которых
+значение erf(x) стремится к 1).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcerf\fP(3), \fBerf\fP(3), \fBexp\fP(3)

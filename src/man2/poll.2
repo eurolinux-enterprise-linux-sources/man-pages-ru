@@ -1,0 +1,248 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1997 Andries Brouwer (aeb@cwi.nl)
+.\" and Copyright (C) 2006, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Additions from Richard Gooch <rgooch@atnf.CSIRO.AU> and aeb, 971207
+.\" 2006-03-13, mtk, Added ppoll() + various other rewordings
+.\" 2006-07-01, mtk, Added POLLRDHUP + various other wording and
+.\"	formatting changes.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH POLL 2 2012\-05\-05 Linux "Руководство программиста Linux"
+.SH ИМЯ
+poll, ppoll \- ожидает некоторое событие над файловым дескриптором
+.SH ОБЗОР
+.nf
+\fB#include <poll.h>\fP
+.sp
+\fBint poll(struct pollfd *\fP\fIfds\fP\fB, nfds_t \fP\fInfds\fP\fB, int \fP\fItimeout\fP\fB);\fP
+.sp
+\fB#define _GNU_SOURCE\fP         /* см. feature_test_macros(7) */
+\fB#include <poll.h>\fP
+.sp
+\fBint ppoll(struct pollfd *\fP\fIfds\fP\fB, nfds_t \fP\fInfds\fP\fB, \fP
+\fB        const struct timespec *\fP\fItimeout_ts\fP\fB, const sigset_t *\fP\fIsigmask\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBpoll\fP() выполняет сходную с \fBselect\fP(2) задачу: он ждёт пока один
+дескриптор из набора файловых дескрипторов не станет готов выполнить
+операцию ввода\-вывода.
+
+Отслеживаемый набор файловых дескрипторов задаётся в аргументе \fIfds\fP,
+который представляет собой массив структур:
+.in +4n
+.nf
+
+struct pollfd {
+    int   fd;         /* файловый дескриптор */
+    short events;     /* запрашиваемые события */
+    short revents;    /* возвращённые события */
+};
+.in
+.fi
+.PP
+Вызывающий должен указать количество элементов в массиве \fIfds\fP в аргументе
+\fInfds\fP.
+
+В поле \fIfd\fP содержится файловый дескриптор открытого файла. Если значение
+поля отрицательно, то соответствующее поле \fIevents\fP игнорируется, а полю
+\fIrevents\fP возвращает ноль (простой способ игнорирования файлового
+дескриптора в одиночном вызове \fBpoll\fP(): просто сделать значение поля \fIfd\fP
+отрицательным).
+
+Поле \fIevents\fP представляет собой входной параметр — битовую маску —
+указывающую на события, происходящие с файловым дескриптором \fIfd\fP, которые
+важны для приложения. Если значение поля равно нулю, то все события с \fIfd\fP
+игнорируются и \fIrevents\fP возвращает ноль.
+
+Поле \fIrevents\fP представляет собой параметр\-результат, в который ядро
+помещает информацию о произошедших событиях. В \fIrevents\fP могут содержаться
+любые битовые флаги из задаваемых в \fIevents\fP, или там может быть одно из
+значений: \fBPOLLERR\fP, \fBPOLLHUP\fP или \fBPOLLNVAL\fP. Эти три битовых флага не
+имеют смысла в поле \fIevents\fP, но будут установлены в поле \fIrevents\fP, если
+соответствующее условие истинно.
+
+Если ни одно из запрошенных событий с файловыми дескрипторами не произошло
+или не возникло ошибок, то \fBpoll\fP() блокируется до их появления.
+
+В аргументе \fItimeout\fP задаётся максимальное количество времени, на которое
+будет заблокирован \fBpoll\fP() (в миллисекундах). Данное значение интервала
+будет округлено до точности системных часов, а из\-за задержки при
+планировании в ядре блокирующий интервал будет немного больше. Отрицательное
+значение в \fItimeout\fP означает бесконечное ожидание. Значение \fItimeout\fP,
+равное нулю, приводит к немедленному завершению \fBpoll\fP(), даже если ни один
+файловый дескриптор не готов.
+
+Вот возможные биты, описанные в \fI<poll.h>\fP, которые могут быть
+установлены/получены в \fIevents\fP и \fIrevents\fP:
+.RS
+.TP 
+\fBPOLLIN\fP
+Есть данные для чтения.
+.TP 
+\fBPOLLPRI\fP
+Есть срочные данные для чтения (например, внеполосные данные в сокете TCP;
+мастер псевдотерминала в пакетном режиме увидел изменение состояния
+подчинённого терминала).
+.TP 
+\fBPOLLOUT\fP
+Теперь запись не приведёт к блокировке.
+.TP 
+\fBPOLLRDHUP\fP (начиная с Linux 2.6.17)
+Удалённая сторона потокового сокета закрыла соединение, или отключила запись
+в одну сторону. Для использования данного определения должен быть определён
+макрос тестирования свойств \fB_GNU_SOURCE\fP (до включения \fIкаких\-либо\fP
+заголовочных файлов).
+.TP 
+\fBPOLLERR\fP
+Состояние ошибки (указывается только как результат).
+.TP 
+\fBPOLLHUP\fP
+Повесили трубку (hang up) (указывается только как результат).
+.TP 
+\fBPOLLNVAL\fP
+Неверный запрос: дескриптор \fIfd\fP не открыт (указывается только как
+результат).
+.RE
+.PP
+При компилировании с установленным \fB_XOPEN_SOURCE\fP также определены
+следующие значения, которые не передают дополнительной информации вне
+упомянутых выше битов:
+.RS
+.TP 
+\fBPOLLRDNORM\fP
+Эквивалентно \fBPOLLIN\fP.
+.TP 
+\fBPOLLRDBAND\fP
+.\" POLLRDBAND is used in the DECnet protocol.
+Доступны для чтения приоритетные внутриполосные данные (в Linux, обычно, не
+используется).
+.TP 
+\fBPOLLWRNORM\fP
+Эквивалентно \fBPOLLOUT\fP.
+.TP 
+\fBPOLLWRBAND\fP
+Можно писать приоритетные данные.
+.RE
+.PP
+В Linux также есть \fBPOLLMSG\fP, но он не используется.
+.SS ppoll()
+Отношения между \fBpoll\fP() и \fBppoll\fP() аналогичны родству \fBselect\fP(2) и
+\fBpselect\fP(2): как \fBpselect\fP(2), \fBppoll\fP() позволяет приложению безопасно
+ждать, пока файловый дескриптор не станет готов или пока не будет получен
+сигнал.
+.PP
+Кроме различия в точности аргумента \fItimeout\fP вызов \fBppoll\fP()
+.nf
+
+    ready = ppoll(&fds, nfds, timeout_ts, &sigmask);
+
+.fi
+эквивалентен \fIатомарному\fP выполнению следующих вызовов:
+.nf
+
+    sigset_t origmask;
+    int timeout;
+
+    timeout = (timeout_ts == NULL) ? \-1 :
+              (timeout_ts.tv_sec * 1000 + timeout_ts.tv_nsec / 1000000);
+    sigprocmask(SIG_SETMASK, &sigmask, &origmask);
+    ready = poll(&fds, nfds, timeout);
+    sigprocmask(SIG_SETMASK, &origmask, NULL);
+.fi
+.PP
+Смотрите в \fBpselect\fP(2) пояснения о необходимости \fBppoll\fP().
+
+Если значение аргумента \fIsigmask\fP равно NULL, то изменение маски сигналов
+не происходит (и поэтому \fBppoll\fP() отличается от \fBpoll\fP() только в
+точности аргумента \fItimeout\fP).
+
+В аргументе \fItimeout_ts\fP указывается верхняя граница промежутка времени, на
+который будет заблокирован \fBppoll\fP(). Этот аргумент представляет собой
+указатель на структуру следующего вида:
+.in +4n
+.nf
+
+struct timespec {
+    long    tv_sec;         /* секунды */
+    long    tv_nsec;        /* наносекунды */
+};
+.fi
+.in
+
+Если значение \fItimeout_ts\fP равно NULL, то \fBppoll\fP() может оставаться
+заблокированным бесконечно.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается положительное значение; оно означает
+количество структур, в которых поля \fIrevents\fP имеют ненулевое значение
+(другими словами, тех дескрипторов, для которых возникли события или
+ошибки). Значение 0 означает, что время ожидания истекло, и нет готовых
+файловых дескрипторов. В случае ошибки возвращается \-1, а \fIerrno\fP
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Указанный аргументом массив содержится вне адресного пространства вызывающей
+программы.
+.TP 
+\fBEINTR\fP
+Получен сигнал раньше какого\-либо запрашиваемого события; смотрите
+\fBsignal\fP(7).
+.TP 
+\fBEINVAL\fP
+Значение \fInfds\fP превышает значение \fBRLIMIT_NOFILE\fP.
+.TP 
+\fBENOMEM\fP
+Нет места под таблицы файловых дескрипторов.
+.SH ВЕРСИИ
+.\" library call was introduced in libc 5.4.28
+Системный вызов \fBpoll\fP() появился в Linux 2.1.23. Для старых ядер, в
+которых этот вызов отсутствует, glibc (и старая Linux libc) предоставляет
+обёрточную функцию \fBpoll\fP(), которая эмулируется с помощью \fBselect\fP(2).
+
+Системный вызов \fBppoll\fP() был добавлен в ядро Linux в версии
+2.6.16. Библиотечный вызов \fBppoll\fP() был добавлен в glibc 2.4.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" NetBSD 3.0 has a pollts() which is like Linux ppoll().
+Вызов \fBpoll\fP() соответствует POSIX.1\-2001. Вызов \fBppoll\fP() есть только в
+Linux.
+.SH ЗАМЕЧАНИЯ
+В некоторых реализациях определена нестандартная константа \fBINFTIM\fP со
+значением \-1 для использования в качестве значения \fItimeout\fP в
+\fBpoll\fP(). Эта константа отсутствует в glibc.
+.SS "Замечания, касающиеся Linux"
+В Linux системный вызов \fBppoll\fP() изменяет свой аргумент
+\fItimeout_ts\fP. Однако, обёрточная функция glibc скрывает это поведение с
+помощью локальной переменной для аргумента timeout, которая передаётся в
+системный вызов. Поэтому glibc функция \fBppoll\fP() не изменяет свой аргумент
+\fItimeout_ts\fP.
+.SH ДЕФЕКТЫ
+Смотрите описание ложных уведомлений о готовности в разделе ДЕФЕКТЫ
+справочной страницы \fBselect\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBselect\fP(2), \fBselect_tut\fP(2), \fBtime\fP(7)

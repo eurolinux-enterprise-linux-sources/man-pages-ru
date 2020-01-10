@@ -1,0 +1,96 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 2006, Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SYMLINKAT 2 2012\-05\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+symlinkat \-  создаёт символьную ссылку, определяемую относительно файлового
+дескриптора каталога
+.SH ОБЗОР
+.nf
+\fB#include <fcntl.h> /* определения констант AT_* */\fP
+\fB#include <unistd.h>\fP
+.sp
+\fBint symlinkat(const char *\fP\fIoldpath\fP\fB, int \fP\fInewdirfd\fP\fB, const char *\fP\fInewpath\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBsymlinkat\fP():
+.PD 0
+.ad l
+.RS 4
+.TP  4
+Начиная с glibc 2.10:
+_XOPEN_SOURCE\ >=\ 700 || _POSIX_C_SOURCE\ >=\ 200809L
+.TP 
+До glibc 2.10:
+_ATFILE_SOURCE
+.RE
+.ad
+.PD
+.SH ОПИСАНИЕ
+Системный вызов \fBsymlinkat\fP() работает также как \fBsymlink\fP(2), за
+исключением описанных, описанных в данной справочной странице.
+
+Если в \fInewpath\fP задан относительный путь, то он считается относительно
+каталога, на который ссылается файловый дескриптор \fInewdirfd\fP (а не
+относительно текущего рабочего каталога вызывающего процесса, как это
+делается в \fBsymlink\fP(2)).
+
+Если в \fInewpath\fP задан относительный путь и \fInewdirfd\fP равно специальному
+значению \fBAT_FDCWD\fP, то \fInewpath\fP рассматривается относительно текущего
+рабочего каталога вызывающего процесса (как \fBsymdlink\fP(2)).
+
+Если в \fInewpath\fP задан абсолютный путь, то \fInewdirfd\fP игнорируется.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBsymlinkat\fP() возвращается 0; при ошибке
+возвращается \-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+В \fBsymlinkat\fP() могут возникнуть те же ошибки, что и в
+\fBsymdlink\fP(2). Также, в \fBsymlinkat\fP() могут возникнуть следующие ошибки:
+.TP 
+\fBEBADF\fP
+\fInewdirfd\fP не является правильным файловым дескриптором.
+.TP 
+\fBENOTDIR\fP
+Значение \fInewpath\fP содержит относительный путь и \fInewdirfd\fP содержит
+файловый дескриптор, указывающий на файл, а не на каталог.
+.SH ВЕРСИИ
+Системный вызов \fBsymlinkat\fP() был добавлен в ядро Linux версии 2.6.16;
+поддержка в glibc доступна с версии 2.4.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2008.
+.SH ЗАМЕЧАНИЯ
+Смотрите в \fBopenat\fP(2) объяснение необходимости \fBsymlinkat\fP().
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBopenat\fP(2), \fBsymlink\fP(2), \fBpath_resolution\fP(7), \fBsymlink\fP(7)

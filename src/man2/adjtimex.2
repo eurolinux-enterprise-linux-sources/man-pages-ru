@@ -1,0 +1,127 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1995 Michael Chastain (mec@shell.portal.com), 15 April 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1997-07-30 by Paul Slootman <paul@wurtel.demon.nl>
+.\" Modified 2004-05-27 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH ADJTIMEX 2 2004\-05\-27 Linux "Руководство программиста Linux"
+.SH ИМЯ
+adjtimex \- тонкая настройка часов в ядре
+.SH ОБЗОР
+\fB#include <sys/timex.h>\fP
+.sp
+\fBint adjtimex(struct timex *\fP\fIbuf\fP\fB);\fP
+.SH ОПИСАНИЕ
+В Linux для подстройки часов используется алгоритм Дэвида Л. Миллса (David
+L. Mills) (см. RFC\ 1305). Системный вызов \fBadjtimex\fP() читает и
+(необязательно) устанавливает параметры подстройки для этого алгоритма. В
+качестве аргумента используется указатель на структуру \fItimex\fP, по
+значениям в полях которой осуществляется обновление параметров ядра и в этой
+же структуре происходит возврат текущих значений параметров ядра. Данная
+структура объявлена так:
+.PP
+.in +4n
+.nf
+.\" FIXME -- what is the scaling unit?  2^16 ?
+struct timex {
+    int modes;           /* выбор режима */
+    long offset;         /* смещение по времени (usec) */
+    long freq;           /* частота смещения (scaled ppm) */
+    long maxerror;       /* максимальная ошибка (usec) */
+    long esterror;       /* ожидаемая ошибка (usec) */
+    int status;          /* команда/состояние для часов */
+    long constant;       /* временная константа pll */
+    long precision;      /* точность часов (usec) (только чтение) */
+    long tolerance;      /* clock frequency tolerance (ppm)
+                            (read\-only) */
+    struct timeval time; /* текущее время (только чтение) */
+    long tick;           /* usecs between clock ticks */
+};
+.fi
+.in
+.PP
+Поле \fImodes\fP определяет какие параметры, если это необходимо,
+устанавливаются.  Значение поля может содержать комбинации (\fIor\fP) битовых
+масок, значения которых следующие:
+.PP
+.in +4n
+.nf
+#define ADJ_OFFSET            0x0001 /* смещение времени */
+#define ADJ_FREQUENCY         0x0002 /* частота смещения */
+#define ADJ_MAXERROR          0x0004 /* максимальная ошибка времени */
+#define ADJ_ESTERROR          0x0008 /* ожидаемая ошибка времени */
+#define ADJ_STATUS            0x0010 /* состояние часов */
+#define ADJ_TIMECONST         0x0020 /* временная константа pll */
+#define ADJ_TICK              0x4000 /* значение тика */
+#define ADJ_OFFSET_SINGLESHOT 0x8001 /* old\-fashioned adjtime() */
+.fi
+.in
+.PP
+Обычные пользователи могут писать в \fImode\fP только ноль. Только
+суперпользователь может задавать любые параметры.
+.br
+.ne 12v
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха, \fBadjtimex\fP() возвращает состояние часов:
+.PP
+.in +4n
+.nf
+#define TIME_OK   0 /* часы синхронизированы */
+#define TIME_INS  1 /* вставлена високосная секунда */
+#define TIME_DEL  2 /* удалена високосная секунда */
+#define TIME_OOP  3 /* идёт високосная секунда */
+#define TIME_WAIT 4 /* закончилась високосная секунда */
+#define TIME_BAD  5 /* часы не синхронизированы */
+.fi
+.in
+.PP
+В случае неудачи, \fBadjtimex\fP() возвращает \-1 и устанавливает \fIerrno\fP.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+\fIbuf\fP не является указателем на доступную для записи область памяти.
+.TP 
+\fBEINVAL\fP
+Попытка установить \fIbuf.offset\fP в значение, выходящее за диапазон от
+\-131071 до +131071, или установить \fIbuf.status\fP в значение отличное от
+перечисленных выше, или установить \fIbuf.tick\fP в значение за пределами
+диапазона от 900000/\fBHZ\fP до 1100000/\fBHZ\fP, где \fBHZ\fP \(em частота
+прерываний системного таймера.
+.TP 
+\fBEPERM\fP
+\fIbuf.mode\fP не ноль, а вызвавший процесс не имеет достаточных прав В Linux
+для этого требуется мандат \fBCAP_SYS_TIME\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+\fBadjtimex\fP() \(em это специфичный для Linux системный вызов и он не должен
+использоваться в программах, которые должны быть переносимыми. Существует
+похожий, более переносимый, более гибкий метод настройки системных часов
+\fBadjtime\fP(3).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBsettimeofday\fP(2), \fBadjtime\fP(3), \fBcapabilities\fP(7), \fBtime\fP(7)

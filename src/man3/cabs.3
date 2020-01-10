@@ -1,0 +1,33 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CABS 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+cabs, cabsf, cabsl \- вычисление абсолютного значения комплексного числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble cabs(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat cabsf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double cabsl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция \fBcabs\fP() возвращает абсолютное значение комплексного числа
+\fIz\fP. Результатом является вещественное число.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH ЗАМЕЧАНИЯ
+Фактически функция является псевдонимом для \fIhypot(a,\ b)\fP (или
+эквивалентному \fIsqrt(a*a\ +\ b*b)\fP).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBabs\fP(3), \fBcimag\fP(3), \fBhypot\fP(3), \fBcomplex\fP(7)

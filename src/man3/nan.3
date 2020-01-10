@@ -1,0 +1,61 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\" Based on glibc infopages
+.\"
+.\" Corrections by aeb
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH NAN 3 2010\-09\-20 GNU "Руководство программиста Linux"
+.SH ИМЯ
+nan, nanf, nanl \- возвращает «Not a Number» (не является числом)
+.SH ОБЗОР
+\fB#include <math.h>\fP
+.sp
+\fBdouble nan(const char *\fP\fItagp\fP\fB);\fP
+.br
+\fBfloat nanf(const char *\fP\fItagp\fP\fB);\fP
+.br
+\fBlong double nanl(const char *\fP\fItagp\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBnan\fP(), \fBnanf\fP(), \fBnanl\fP():
+.RS 4
+_XOPEN_SOURCE\ >=\ 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.ad
+.SH ОПИСАНИЕ
+Данные функции возвращают представление (определённое в \fItagp\fP) тихого
+NaN. Если реализация не поддерживает тихие (quiet) NaN, данные функции
+возвращают ноль.
+.LP
+Вызов \fInan("символьная последовательность")\fP равнозначен следующему:
+.nf
+
+    strtod("NAN(символьная последовательность)", NULL);
+.fi
+.PP
+Вызовы \fBnanf\fP() и \fBnanl\fP() эквивалентны аналогичным вызовам \fBstrtof\fP(3) и
+\fBstrtold\fP(3).
+.PP
+Использование аргумента \fItagp\fP не регламентировано. В системах, совместимых
+с IEEE 754, существует несколько реализаций NaN, и \fItagp\fP используется в
+одной из них. В других системах он может ничего не делать.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99, POSIX.1\-2001. См. также IEC 559 и приложение с рекомендуемыми функциями
+в IEEE 754/IEEE 854.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBisnan\fP(3), \fBstrtod\fP(3), \fBmath_error\fP(7)

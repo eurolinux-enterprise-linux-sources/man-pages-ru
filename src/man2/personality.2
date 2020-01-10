@@ -1,0 +1,62 @@
+.\" Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Created   Sat Aug 21 1995     Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" typo corrected, aeb, 950825
+.\" added layout change from joey, 960722
+.\" changed prototype, documented 0xffffffff, aeb, 030101
+.\" Modified 2004-11-03 patch from Martin Schulze <joey@infodrom.org>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH PERSONALITY 2 2003\-01\-01 Linux "Руководство программиста Linux"
+.SH ИМЯ
+personality \- устанавливает домен исполнения процесса
+.SH ОБЗОР
+\fB#include <sys/personality.h>\fP
+.sp
+\fBint personality(unsigned long \fP\fIpersona\fP\fB);\fP
+.SH ОПИСАНИЕ
+Linux поддерживает несколько видов доменов исполнения процессов или
+специализаций (personalities) для каждого процесса. Среди прочего, домены
+исполнения указывают Linux как связывать номера сигналов с обработчиками
+сигналов. Система доменов исполнения позволяет Linux частично поддерживать
+программы, собранные в других ОС, подобных UNIX.
+
+Эта функция возвращает текущее значение \fBpersonality\fP(), если значение
+\fIpersona\fP равно 0xffffffff. Иначе, она сделает домен исполнения, на который
+ссылается \fIpersona\fP, новым доменом исполнения вызывающего процесса.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При нормальном завершении работы возвращается предыдущее значение
+\fIpersona\fP. При ошибке возвращается \-1, а переменная \fIerrno\fP,
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEINVAL\fP
+Ядру не удалось изменить специализацию.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBpersonality\fP() есть только в Linux, и он не должен использоваться в
+переносимых программах.

@@ -1,0 +1,99 @@
+.\" Copyright (C), 1994, Graeme W. Wilford (Wilf).
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Fri Jul 29th 12:56:44 BST 1994  Wilf. <G.Wilford@ee.surrey.ac.uk>
+.\" Changes inspired by patch from Richard Kettlewell
+.\"   <richard@greenend.org.uk>, aeb 970616.
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SETUID 2 2010\-11\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+setuid \- устанавливает идентификатор пользователя
+.SH ОБЗОР
+\fB#include <sys/types.h>\fP
+.br
+\fB#include <unistd.h>\fP
+.sp
+\fBint setuid(uid_t \fP\fIuid\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBsetuid\fP() устанавливает эффективный идентификатор владельца вызывающего
+процесса. Если эффективный идентификатор вызывающего является
+суперпользователем (root), то также устанавливаются действительный и
+сохранённый идентификаторы.
+.PP
+В Linux \fBsetuid\fP() реализован как и в стандарте POSIX с возможностью
+\fB_POSIX_SAVED_IDS\fP. Это позволяет setuid\-программам (не setuid\-root)
+сбрасывать все привилегии, делать непривилегированную работу, а затем
+безопасным путём возвращать себе исходный эффективный идентификатор
+пользователя.
+.PP
+Если пользователь root или программа установлена как setuid root, при работе
+требуется особая осторожность. Функция \fBsetuid\fP() проверяет эффективный
+идентификатор вызвавшего пользователя и, если это суперпользователь, то все
+устанавливаемые значения идентификаторов равны \fIuid\fP. После этого программа
+уже никаким образом не сможет вернуть права пользователя root.
+.PP
+Таким образом, программа, принадлежащая root и с установленным битом setuid,
+собирающаяся временно сбросить права root и поработать с правами
+непривилегированного пользователя, а затем восстановить права root, не
+сможет использовать \fBsetuid\fP(). Требуемого результата можно достичь с
+помощью вызова \fBseteuid\fP(2).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEAGAIN\fP
+Значение \fIuid\fP не совпадает с текущим uid и \fIuid\fP выводит процесс за его
+ограничение по ресурсу \fBRLIMIT_NPROC\fP.
+.TP 
+\fBEPERM\fP
+Пользователь не является суперпользователем (Linux: нет мандата
+\fBCAP_SETUID\fP), а \fIuid\fP не совпадает с действительным или сохранённым
+идентификатором пользователя вызывающего процесса.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents an additional EINVAL error condition.
+SVr4, POSIX.1\-2001. Этот системный вызов не полностью совместим с 4.4BSD,
+который устанавливает действительный, эффективный и сохранённый
+идентификаторы пользователя.
+.SH ЗАМЕЧАНИЯ
+Linux поддерживает идентификатор пользователя файловой системы, обычно
+совпадающий с эффективным идентификатором. Системный вызов \fBsetuid\fP() также
+устанавливает идентификатор пользователя файловой системы вызывающего
+процесса. См. \fBsetfsuid\fP(2).
+.PP
+Если \fIuid\fP отличается от старого эффективного идентификатора, то процессу
+нельзя будет создавать core\-файлы.
+
+Первоначальная версия системного вызова \fBsetuid\fP() в Linux поддерживала
+только 16\-битные идентификаторы пользователя. Позднее в Linux 2.4 был
+добавлен вызов \fBsetuid32\fP(), поддерживающий 32\-битные идентификаторы. В
+glibc обёрточная функция \fBsetuid\fP() работает одинаково вне зависимости от
+версий ядра.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetuid\fP(2), \fBseteuid\fP(2), \fBsetfsuid\fP(2), \fBsetreuid\fP(2),
+\fBcapabilities\fP(7), \fBcredentials\fP(7)

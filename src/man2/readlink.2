@@ -1,0 +1,186 @@
+.\" Copyright (c) 1983, 1991 The Regents of the University of California.
+.\" And Copyright (C) 2011 Guillem Jover <guillem@hadrons.org>
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"     @(#)readlink.2	6.8 (Berkeley) 3/10/91
+.\"
+.\" Modified Sat Jul 24 00:10:21 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Tue Jul  9 23:55:17 1996 by aeb
+.\" Modified Fri Jan 24 00:26:00 1997 by aeb
+.\" 2011-09-20, Guillem Jover <guillem@hadrons.org>:
+.\"     Added text on dynamically allocating buffer + example program
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH READLINK 2 2011\-09\-20 Linux "Руководство программиста Linux"
+.SH ИМЯ
+readlink \- считывает значение символьной ссылки
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBssize_t readlink(const char *\fP\fIpath\fP\fB, char *\fP\fIbuf\fP\fB, size_t
+\fP\fIbufsiz\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBreadlink\fP():
+.RS 4
+_BSD_SOURCE || _XOPEN_SOURCE\ >=\ 500 || _XOPEN_SOURCE\ &&\ _XOPEN_SOURCE_EXTENDED || _POSIX_C_SOURCE\ >=\ 200112L
+.RE
+.ad b
+.SH ОПИСАНИЕ
+\fBreadlink\fP() помещает содержимое символьной ссылки \fIpath\fP в буфер \fIbuf\fP
+размером \fIbufsiz\fP. \fBreadlink\fP() не добавляет в \fIbuf\fP байт null.Если буфер
+слишком мал для хранения всего содержимого, то содержимое будет урезано (до
+длины в \fIbufsiz\fP символов).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBreadlink\fP() возвращает количество байт, помещённых
+в \fIbuf\fP. В случае ошибки возвращается \-1, а \fIerrno\fP устанавливается в
+соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEACCES\fP
+В одном из каталогов префикса пути не разрешён поиск (см. также
+\fBpath_resolution\fP(7).
+.TP 
+\fBEFAULT\fP
+\fIbuf\fP выходит за пределы адресного пространства, выделенного процессу.
+.TP 
+\fBEINVAL\fP
+.\" At the glibc level, bufsiz is unsigned, so this error can only occur
+.\" if bufsiz==0.  However, the in the kernel syscall, bufsiz is signed,
+.\" and this error can also occur if bufsiz < 0.
+.\" See: http://thread.gmane.org/gmane.linux.man/380
+.\" Subject: [patch 0/3] [RFC] kernel/glibc mismatch of "readlink" syscall?
+Аргумент \fIbufsiz\fP содержит отрицательное значение.
+.TP 
+\fBEINVAL\fP
+Указанный файл не является символьной ссылкой.
+.TP 
+\fBEIO\fP
+При чтении файловой системы произошла ошибка ввода\-вывода.
+.TP 
+\fBELOOP\fP
+Во время определения pathname встретилось слишком много символьных ссылок.
+.TP 
+\fBENAMETOOLONG\fP
+Слишком длинное значение аргумента pathname или его части.
+.TP 
+\fBENOENT\fP
+Указанный файл не существует.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOTDIR\fP
+Компонент в префиксе пути не является каталогом.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD (вызов \fBreadlink\fP() появился в 4.2BSD), POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+В версиях glibc до glibc 2.4 включительно, тип результата \fBreadlink\fP() был
+объявлен как \fIint\fP. В настоящее время типом возвращаемого результата
+является \fIssize_t\fP, как (теперь) это требуется по POSIX.1\-2001.
+
+Буфера с фиксированным размером может не хватить для хранения содержимого
+символьной ссылки. Требуемый размер буфера можно получить как значение
+\fIstat.st_size\fP, возвращаемое на ссылку вызовом \fBlstat\fP(2). Однако,
+количество байт, записанное \fBreadlink\fP(), должно быть проверено, так как
+требуется убедиться, что размер символьной ссылки не увеличился между
+вызовами. Динамическое выделение буфера для \fBreadlink\fP() также поможет
+решить проблему с переносимостью, которая возникает, когда для размера
+буфера используется \fIPATH_MAX\fP, но согласно POSIX для этой константы не
+гарантируется, что она определена , если система не имеет такого
+ограничения.
+.SH ПРИМЕР
+Следующая программа динамически выделяет буфер, необходимый \fBreadlink\fP(),
+из информации, предоставленной \fBlstat\fP() и проверяет, что при работы
+вызовов не возникло состязательности.
+.nf
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int argc, char *argv[])
+{
+    struct stat sb;
+    char *linkname;
+    ssize_t r;
+
+    if (argc != 2) {
+        fprintf(stderr, "Использование: %s <путь>\en", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    if (lstat(argv[1], &sb) == \-1) {
+        perror("lstat");
+        exit(EXIT_FAILURE);
+    }
+
+    linkname = malloc(sb.st_size + 1);
+    if (linkname == NULL) {
+        fprintf(stderr, "недостаточно памяти\en");
+        exit(EXIT_FAILURE);
+    }
+
+    r = readlink(argv[1], linkname, sb.st_size + 1);
+
+    if (r < 0) {
+        perror("lstat");
+        exit(EXIT_FAILURE);
+    }
+
+    if (r > sb.st_size) {
+        fprintf(stderr, "ссылка увеличилась в размере "
+                        "между lstat() и readlink()\en");
+        exit(EXIT_FAILURE);
+    }
+
+    linkname[sb.st_size] = \(aq\e0\(aq;
+
+    printf("\(aq%s\(aq указывает на \(aq%s\(aq\en", argv[1], linkname);
+
+    exit(EXIT_SUCCESS);
+}
+.fi
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBreadlink\fP(1), \fBlstat\fP(2), \fBreadlinkat\fP(2), \fBstat\fP(2), \fBsymlink\fP(2),
+\fBpath_resolution\fP(7), \fBsymlink\fP(7)

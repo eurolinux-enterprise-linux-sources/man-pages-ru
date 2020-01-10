@@ -1,0 +1,151 @@
+
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu) and
+.\" and Copyright 2002 Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Fri Jan 31 16:26:07 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Fri Dec 11 17:57:27 1998 by Jamie Lokier <jamie@imbolc.ucc.ie>
+.\" Modified 24 Apr 2002 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Substantial rewrites and additions
+.\" 2005-05-10 mtk, noted that lock conversions are not atomic.
+.\"
+.\" FIXME: Maybe document LOCK_MAND, LOCK_RW, LOCK_READ, LOCK_WRITE
+.\"        which only have effect for SAMBA.
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FLOCK 2 2009\-07\-25 Linux "Руководство программиста Linux"
+.SH ИМЯ
+flock \- установить или снять консультативную (advisory) блокировку на
+открытый файл
+.SH ОБЗОР
+\fB#include <sys/file.h>\fP
+.sp
+\fBint flock(int \fP\fIfd\fP\fB, int \fP\fIoperation\fP\fB);\fP
+.SH ОПИСАНИЕ
+Устанавливает или снимает консультативную блокировку на открытом файле,
+указанном в \fIfd\fP. Аргумент \fIoperation\fP может содержать одно из следующих
+значений:
+.RS 4
+.TP  9
+\fBLOCK_SH\fP
+Установить общую (shared) блокировку. Общую блокировку на заданный файл
+может удерживать более чем один процесс.
+.TP 
+\fBLOCK_EX\fP
+Установить эксклюзивную (exclusive) блокировку. Только один процесс может
+удерживать эксклюзивную блокировку файла.
+.TP 
+\fBLOCK_UN\fP
+Удалить существующую блокировку, удерживаемую данным процессом.
+.RE
+.PP
+Вызов \fBflock\fP() может быть блокирован, если несовместимый тип блокировки
+уже удерживается другим процессом. Чтобы выполнить неблокирующий запрос,
+добавьте \fBLOCK_NB\fP (через операцию ИЛИ) к одному из вышеописанных значений.
+
+Один файл не может иметь одновременно и общую и эксклюзивную блокировку.
+
+Блокировки, созданные \fBflock\fP(), ассоциируются с записью в таблице открытых
+файлов. Это означает, что дублирующие файловые дескрипторы (созданные,
+например, вызовами \fBfork\fP(2) или \fBdup\fP(2)) указывают на одну блокировку, и
+эта блокировка может быть изменена или снята при использовании любого из
+этих дескрипторов. Таким образом, блокировка освобождается либо через явное
+выполнение операции \fBLOCK_UN\fP на одном из дублирующих дескрипторов, либо
+когда все такие дескрипторы будут закрыты.
+
+Если процесс использует \fBopen\fP(2) (или подобный вызов) для получения более
+одного дескриптора на один и тот же файл, то эти файловые дескрипторы
+считаются \fBflock\fP() независимыми. Попытка заблокировать файл с помощью
+одного из этих файловых дескрипторов может быть пресечена из\-за блокировки,
+которую вызывающий процесс уже установил через другой файловый дескриптор.
+
+Процесс может удерживать на файле только один из типов блокировки (общую или
+эксклюзивную). Последующие вызовы \fBflock\fP() на уже заблокированный файл
+будут преобразовывать текущую блокировку к новому заданному режиму
+блокировки.
+
+Блокировки, созданные \fBflock\fP(), сохраняются при выполнении \fBexecve\fP(2).
+
+Общая или эксклюзивная блокировка может быть установлена на файл вне
+зависимости от режима, в котором этот файл был открыт.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+\fIfd\fP не является открытым файловым дескриптором.
+.TP 
+\fBEINTR\fP
+При ожидании получения блокировки вызов был прерван сигналом, пришедшим в
+обработчик; см. \fBsignal\fP(7).
+.TP 
+\fBEINVAL\fP
+Неверное значение \fIoperation\fP.
+.TP 
+\fBENOLCK\fP
+Ядру не хватило памяти для создания записи блокировки.
+.TP 
+\fBEWOULDBLOCK\fP
+Файл блокирован и был указан флаг \fBLOCK_NB\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD (впервые вызов \fBflock\fP() появился в 4.2BSD). Вызов \fBflock\fP() есть в
+большинстве систем UNIX, возможно реализованный с помощью \fBfcntl\fP(2).
+.SH ЗАМЕЧАНИЯ
+\fBflock\fP() не блокирует файлы на NFS. Используйте вместо этого вызов
+\fBfcntl\fP(2), который работает на NFS, а также наиболее свежую версию Linux и
+сервер, который поддерживает блокировки.
+.PP
+Начиная с версии ядра 2.0, \fBflock\fP() реализован как самостоятельный
+системный вызов, а не как эмуляция в библиотеке GNU C с помощью
+\fBfcntl\fP(2). Он повторяет настоящую семантику BSD: не существует никакого
+взаимодействия между типами блокировок, устанавливаемыми \fBflock\fP() и
+\fBfcntl\fP(2), и \fBflock\fP() не обнаруживает взаимные блокировки.
+.PP
+\fBflock\fP() устанавливает только консультативные блокировки; имея
+соответствующие права на файл, процесс может игнорировать использование
+\fBflock\fP() и выполнять над файлом операции ввода/вывода.
+.PP
+\fBflock\fP() и \fBfcntl\fP(2) имеют разную семантику для порождённых процессов и
+\fBdup\fP(2). В системах, где реализован \fBflock\fP() с помощью \fBfcntl\fP(2),
+семантика \fBflock\fP() будет отличаться от описанной в данной справочной
+странице.
+.PP
+.\" Kernel 2.5.21 changed things a little: during lock conversion
+.\" it is now the highest priority process that will get the lock -- mtk
+При преобразовании блокировки (общую в эксклюзивную или наоборот) не
+гарантируется атомарность операции: сначала существующая блокировка
+удаляется, а затем устанавливается новая. Между этими двумя действиями
+другой процесс, ожидающий запрос на блокировку,  может получить на неё
+разрешение, в следствие чего преобразование или заблокируется, или
+завершится неудачно, если был указан флаг \fBLOCK_NB\fP. (Это оригинальное
+поведение BSD встречается во многих других реализациях.)
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclose\fP(2), \fBdup\fP(2), \fBexecve\fP(2), \fBfcntl\fP(2), \fBfork\fP(2), \fBopen\fP(2),
+\fBlockf\fP(3)
+
+Смотрите также файл \fIDocumentation/filesystem/locks.txt\fP в исходном коде
+ядра (в старых ядрах \(em \fIDocumentation/locks.txt\fP).

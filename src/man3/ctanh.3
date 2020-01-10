@@ -1,0 +1,35 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CTANH 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+ctanh, ctanhf, ctanhl \- вычисление гиперболического тангенса комплексного
+числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex ctanh(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex ctanhf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex ctanhl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция гиперболического тангенса комплексного числа математически
+определена как:
+.nf
+
+    ctanh(z) = csinh(z) / ccosh(z)
+.fi
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBcatanh\fP(3), \fBccosh\fP(3), \fBcsinh\fP(3), \fBcomplex\fP(7)

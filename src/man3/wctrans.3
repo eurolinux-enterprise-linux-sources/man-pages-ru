@@ -1,0 +1,50 @@
+.\" Copyright (c) Bruno Haible <haible@clisp.cons.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" References consulted:
+.\"   GNU glibc-2 source code and manual
+.\"   Dinkumware C library reference http://www.dinkumware.com/
+.\"   OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+.\"   ISO/IEC 9899:1999
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH WCTRANS 3 1999\-07\-25 GNU "Руководство программиста Linux"
+.SH ИМЯ
+wctrans \- преобразование широких символов
+.SH ОБЗОР
+.nf
+\fB#include <wctype.h>\fP
+.sp
+\fBwctrans_t wctrans(const char *\fP\fIname\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Типом \fIwctrans_t\fP задаётся способ преобразования одного широкого символа в
+другой широкий символ. Свойства данной функции зависят от её реализации, но
+специальное значение \fI(wctrans_t)\ 0\fP всегда указывает на неверное
+преобразование. Для выполнения преобразований функции \fBtowctrans\fP(3) может
+быть передана ненулевая величина \fIwctrans_t\fP.
+.PP
+Функция \fBwctrans\fP() возвращает преобразование, обозначенное соответствующим
+именем. Набор корректных имён зависит от категории \fBLC_CTYPE\fP текущей
+локали, но следующие имена корректны для всех локалей:
+.nf
+  «tolower» — осуществляет преобразование \fBtolower\fP(3)
+  «toupper» — осуществляет преобразование \fBtoupper\fP(3)
+.fi
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBwctrans\fP() возвращает описатель преобразования, если имя \fIname\fP
+корректно. Иначе возвращается \fI(wctrans_t) 0\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH ЗАМЕЧАНИЯ
+Поведение \fBwctrans\fP() зависит от категории \fBLC_CTYPE\fP текущей локали.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBtowctrans\fP(3)

@@ -1,0 +1,108 @@
+.\" Hey emacs, this is -*- nroff -*-
+.\"
+.\" This file is part of locale(1) which displays the settings of the
+.\" current locale.
+.\" Copyright (C) 1994  Jochen Hein (Hein@Student.TU-Clausthal.de)
+.\"
+.\" This program is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 2 of the License, or
+.\" (at your option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software
+.\" Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111, USA.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CHARMAP 5 1994\-11\-28 "" "Руководство пользователя Linux"
+.SH ИМЯ
+charmap \- набор символов для задания кодировки символов
+.SH ОПИСАНИЕ
+.\" Not true anymore:
+.\" The portable character set is defined in the file
+.\" .I /usr/lib/nls/charmap/POSIX
+.\" .I /usr/share/i18n/charmap/POSIX
+.\" for reference purposes.
+Описание набора символов (charmap) определяет набор из доступных символов, а
+также их кодировки. Все поддерживаемые наборы символов должны иметь своим
+подмножеством \fBпереносимый набор символов\fP.
+.SS СИНТАКСИС
+Файл с набором символов начинается с заголовка, который может содержать
+следующие ключевые слова:
+.TP 
+\fI<codeset>\fP
+за которым следует имя кодировки.
+.TP 
+\fI<mb_cur_max>\fP
+за которым следует максимальное число байтов для многобайтного
+символа. Многобайтные символы в данный момент не поддерживаются. По
+умолчанию это число равно 1.
+.TP 
+\fI<mb_cur_min>\fP
+за которым следует минимальное число байтов на символ. Данное значение
+должно быть меньше или равно \fBmb_cur_max\fP. Если оно не задано, то по
+умолчанию принимается значение \fBmb_cur_max\fP.
+.TP 
+\fI<escape_char>\fP
+за которым следует символ, который должен использоваться как символ
+экранирования (escape) во всех нижеследующих строках, чтобы выделять
+символы, которые должны интерпретироваться специальным образом. По умолчанию
+таким символом является обратная косая черта ( \fB\e\fP ).
+.TP 
+\fI<comment_char>\fP
+за которым следует символ, который будет использоваться в качестве символа
+комментария во всех нижеследующих строках. По умолчанию таким символом
+является решетка ( \fB#\fP ).
+.PP
+Само определение набора символов начинается с ключевого слова \fBCHARMAP\fP в
+первом знакоместе.
+
+Последующие строки могут иметь два формата, предназначенных для задания
+кодировки символов:
+.TP 
+\fI<символьное\-имя> <кодировка> <комментарии>\fP
+В таком виде задаётся только один символ и его кодировка.
+.TP 
+\fI<символьное\-имя>...<символьное\-имя> <кодировка> <комментарии>\fP
+В таком виде задаётся несколько символов. Это полезна только для
+многобайтных символов, но в данный момент это не реализовано.
+.PP
+Последняя строка в файле определения набора символов должна содержать \fBEND
+CHARMAP.\fP
+.SS "СИМВОЛЬНЫЕ ИМЕНА"
+A \fBСимвольное имя\fP символа содержит только символы из \fBпереносимого набора
+символов.\fP Само имя заключается в угловые скобками. Символы, которые следуют
+за \fB<escape_char>\fP теряют специальное значение и интерпретируются
+как сами эти символы; например, последовательность \fB<\e\e\e>>\fP
+представляет собой символьное имя \fB\e>\fP, заключенное в угловые скобки.
+.SS "СИМВОЛЬНАЯ КОДИРОВКА"
+Кодировка может быть в любой из трех следующих форм:
+.TP 
+\fI<escape_char>d<число>\fP
+с десятичным числом
+.TP 
+\fI<escape_char>x<число>\fP
+с шестнадцатеричным числом
+.TP 
+\fI<escape_char><число>\fP
+.\" FIXME comments
+.\" FIXME char ... char
+с восьмеричным числом
+.SH ФАЙЛЫ
+.\" .SH AUTHOR
+.\" Jochen Hein (jochen.hein@delphi.central.de)
+\fI/usr/share/i18n/charmaps/*\fP
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.2.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBlocale\fP(1), \fBlocaledef\fP(1), \fBlocaleconv\fP(3), \fBsetlocale\fP(3),
+\fBlocale\fP(5)

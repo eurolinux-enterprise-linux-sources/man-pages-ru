@@ -1,0 +1,35 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CSINH 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+csinh, csinhf, csinhl \- вычисление гиперболического синуса комплексного
+числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex csinh(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex csinhf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex csinhl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция вычисления гиперболического синуса комплексного числа определена
+формулой:
+.nf
+
+    csinh(z) = (exp(z)\-exp(\-z))/2
+.fi
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBcasinh\fP(3), \fBccosh\fP(3), \fBctanh\fP(3), \fBcomplex\fP(7)

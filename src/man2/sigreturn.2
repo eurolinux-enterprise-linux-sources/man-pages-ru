@@ -1,0 +1,63 @@
+.\" Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Created   Sat Aug 21 1995     Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\" Modified Tue Oct 22 22:09:03 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" 2008-06-26, mtk, added some more detail on the work done by sigreturn()
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SIGRETURN 2 2008\-06\-26 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sigreturn \- возвращается из обработчика сигнала и очищает кадр стека
+.SH ОБЗОР
+\fBint sigreturn(unsigned long \fP\fI__unused\fP\fB);\fP
+.SH ОПИСАНИЕ
+При создании кадра стека для обработчика сигнала ядро Linux посылает в этот
+стек вызов функции \fBsigreturn\fP() таким образом, чтобы при возвращении
+вызова из обработчика право управления было передано \fBsigreturn\fP().
+
+Вызов \fBsigreturn\fP() очищает всё что накопилось \(em изменяет маску сигнала
+процесса, переключает стеки (см. \fBsigaltstack\fP(2))\(em порядок вызова
+обработчиков сигнала: он восстанавливает маску сигнала процесса, переключает
+стеки и восстанавливает контекст процесса (регистры, флаги процессора), так
+что процесс непосредственно возобновляет исполнение с точки где был прерван
+сигналом.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+\fBsigreturn\fP() не возвращает значений. 
+.SH ФАЙЛЫ
+/usr/src/linux/arch/i386/kernel/signal.c
+.br
+/usr/src/linux/arch/alpha/kernel/entry.S
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBsigreturn\fP() есть только в Linux. Не рекомендуется использовать ее в
+программах, переносимых в другие системы.
+.SH ЗАМЕЧАНИЯ
+Вызов \fBsigreturn\fP() используется ядром для реализации обработчиков
+сигнала. Его ни в коем случае нельзя вызывать непосредственно. Более того,
+значение и способ использования аргумента \fI__unused\fP зависит от
+архитектуры.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBkill\fP(2), \fBsigaltstack\fP(2), \fBsignal\fP(2), \fBsignal\fP(7)

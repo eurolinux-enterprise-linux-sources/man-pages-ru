@@ -1,0 +1,58 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETGID 2 2010\-11\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+getgid, getegid \- получить идентификатор группы процесса
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.br
+\fB#include <sys/types.h>\fP
+.sp
+\fBgid_t getgid(void);\fP
+.br
+\fBgid_t getegid(void);\fP
+.SH ОПИСАНИЕ
+\fBgetgid\fP() возвращает действительный идентификатор группы вызывающего
+процесса.
+
+\fBgetegid\fP() возвращает эффективный идентификатор группы вызывающего
+процесса.
+.SH ОШИБКИ
+Функции всегда завершаются успешно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001, 4.3BSD.
+.SH ЗАМЕЧАНИЯ
+Первоначальные версии системных вызовов \fBgetgid\fP() и \fBgetegid\fP() в Linux
+поддерживали только 16\-битные идентификаторы групп. Позднее в Linux 2.4 были
+добавлены вызовы \fBgetgid32\fP() и \fBgetegid32\fP(), поддерживающие 32\-битные
+идентификаторы. В glibc обёрточные функции \fBgetgid\fP() и \fBgetegid\fP()
+работают одинаково вне зависимости от версий ядра.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetresgid\fP(2), \fBsetgid\fP(2), \fBsetregid\fP(2), \fBcredentials\fP(7)

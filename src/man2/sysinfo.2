@@ -1,0 +1,98 @@
+.\" -*- nroff -*-
+.\"
+.\" Copyright (C) 1993 by Dan Miner (dminer@nyx.cs.du.edu)
+.\"
+.\"  Permission is granted to freely distribute or modify this file
+.\"  for the purpose of improving Linux or its documentation efforts.
+.\"  If you modify this file, please put a date stamp and HOW you
+.\"  changed this file.  Thanks.   -DM
+.\"
+.\" Modified Sat Jul 24 12:35:12 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Tue Oct 22 22:29:51 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Mon Aug 25 16:06:11 1997 by Nicol�s Lichtmaier <nick@debian.org>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SYSINFO 2 2012\-05\-05 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sysinfo \- возвращает общесистемную статистику
+.SH ОБЗОР
+\fB#include <sys/sysinfo.h>\fP
+.sp
+\fBint sysinfo(struct sysinfo *\fP\fIinfo\fP\fB);\fP
+.SH ОПИСАНИЕ
+В ядрах Linux версий, более ранних, чем 2.3.16, \fBsysinfo\fP() возвращал
+следующую структуру:
+
+.nf
+.in +4n
+struct sysinfo {
+    long uptime;             /* Количество секунд, прошедшее
+                                с загрузки системы */
+    unsigned long loads[3];  /* средняя 1, 5 и 15\-минутная загруженность
+                                системы */
+    unsigned long totalram;  /* Общий объём доступной оперативной памяти */
+    unsigned long freeram;   /* Объём свободной памяти */
+    unsigned long sharedram; /* Объём общей памяти */
+    unsigned long bufferram; /* Объём памяти, использованной под буферы */
+    unsigned long totalswap; /* Общий объём области подкачки */
+    unsigned long freeswap;  /* Объём свободного пространства в области
+                                подкачки */
+    unsigned short procs;    /* Текущее количество процессов */
+    char _f[22];             /* Дополнение структуры до 64 байтов */
+};
+.in
+.fi
+.PP
+все размеры считаются в байтах.
+
+Начиная с ядра версии 2.3.23 (i386), 2.3.48 (остальные архитектуры),
+структура стала следующей:
+
+.nf
+.in +4n
+struct sysinfo {
+    long uptime;             /* Количество секунд, прошедшее с загрузки
+                                системы */
+    unsigned long loads[3];  /* средняя 1,  и 15\-минутная загруженность
+                                системы */
+    unsigned long totalram;  /* Общий объём доступной оперативной памяти */
+    unsigned long freeram;   /* Объём свободной памяти */
+    unsigned long sharedram; /* Объём общей памяти */
+    unsigned long bufferram; /* Объём памяти, использованной под буферы */
+    unsigned long totalswap; /* Общий объём области подкачки */
+    unsigned long freeswap;  /* Объём свободного пространства в области
+                                подкачки */
+    unsigned short procs;    /* Текущее количество процессов */
+    unsigned long totalhigh; /* Общий объём дальней (high) памяти */
+    unsigned long freehigh;  /* Объём свободной дальней памяти */
+    unsigned int mem_unit;   /* Размер элемента памяти в байтах */
+    char _f[20\-2*sizeof(long)\-sizeof(int)]; /* Дополнение до 64 байт */
+};
+.in
+.fi
+.PP
+для получения размеров в байтах их надо умножить на \fImem_unit\fP.
+
+\fBsysinfo\fP() предоставляет простой способ получения общесистемной
+статистики. Это более переносимый способ по сравнению с чтением
+\fI/dev/kmem\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Недопустимый указатель на \fIstruct\ sysinfo\fP
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данная функция есть только в Linux и не должна использоваться в программах,
+которые задуманы как переносимые.
+.sp
+Системный вызов \fBsysinfo\fP() есть в ядре Linux начиная с версии 0.98.pl6. В
+Linux libc функция \fBsysinfo\fP() появилась в версии 5.3.5, а в glibc начиная
+с 1.90.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBproc\fP(5)

@@ -1,0 +1,90 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Mon Mar 29 22:39:41 1993, David Metcalfe
+.\" Modified Sat Jul 24 21:38:42 1993, Rik Faith (faith@cs.unc.edu)
+.\" Modified Sun Dec 17 18:35:06 2000, Joseph S. Myers
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH ATOI 3 2010\-09\-20 GNU "Руководство программиста Linux"
+.SH ИМЯ
+atoi, atol, atoll, atoq \- преобразовывает строку в целое число
+.SH ОБЗОР
+.nf
+\fB#include <stdlib.h>\fP
+.sp
+\fBint atoi(const char *\fP\fInptr\fP\fB);\fP
+.br
+\fBlong atol(const char *\fP\fInptr\fP\fB);\fP
+.br
+\fBlong long atoll(const char *\fP\fInptr\fP\fB);\fP
+.br
+\fBlong long atoq(const char *\fP\fInptr\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBatoll\fP():
+.RS 4
+_BSD_SOURCE || _SVID_SOURCE || _XOPEN_SOURCE\ >=\ 600 || _ISOC99_SOURCE
+|| _POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.ad
+.SH ОПИСАНИЕ
+Функция \fBatoi\fP() преобразовывает начальную часть строки, на которую
+указывает \fInptr\fP, к типу \fIint\fP. Она действует также как
+.sp
+.in +4n
+strtol(nptr, (char **) NULL, 10);
+.in
+.sp
+однако \fBatoi\fP() не определяет ошибки.
+.PP
+Функции \fBatol\fP() и \fBatoll\fP() ведут себя так же, как и \fBatoi\fP(), за
+исключением того факта, что начальная часть строки приводится к типу \fIlong\fP
+или \fIlong long\fP. \fBatoq\fP() является устаревшим именем для \fBatoll\fP().
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Преобразованное значение.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1\-2001, 4.3BSD, C99. В C89 и POSIX.1\-1996 включены только
+функции \fBatoi\fP() и \fBatol\fP(). \fBatoq\fP() является расширением GNU.
+.SH ЗАМЕЧАНИЯ
+Нестандартная функция \fBatoq\fP() отсутствует в libc 4.6.27 или glibc 2, но
+присутствует в libc5 и libc 4.7 (хотя только в виде встроенной функции в
+\fI<stdlib.h>\fP до libc 5.4.44). Функция \fBatoll\fP() присутствует в
+glibc 2 начиная с версии 2.0.2, но отсутствует в libc4 и libc5.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBatof\fP(3), \fBstrtod\fP(3), \fBstrtol\fP(3), \fBstrtoul\fP(3)

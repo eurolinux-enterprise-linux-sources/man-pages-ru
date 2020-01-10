@@ -1,0 +1,53 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" and Copyright 2008, Linux Foundation, written by Michael Kerrisk
+.\"     <mtk.manpages@gmail.com>
+.\" Distributed under GPL
+.\" Based on glibc infopages, copyright Free Software Foundation
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SIGNBIT 3 2010\-09\-20 GNU "Руководство программиста Linux"
+.SH ИМЯ
+signbit \- проверка знака вещественного числа с плавающей точкой
+.SH ОБЗОР
+\fB#include <math.h>\fP
+.sp
+\fBint signbit(\fP\fIx\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBsignbit\fP():
+.RS 4
+_XOPEN_SOURCE\ >=\ 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.ad
+.SH ОПИСАНИЕ
+Функция \fBsignbit\fP() является общим макросом, который может работать со всем
+типами вещественных чисел с плавающей точкой. Она возвращает ненулевое
+значение, если у \fIx\fP установлен бит знака.
+.PP
+Это не подходит для \fIx < 0.0\fP, так как, согласно IEEE 754, спецификация
+плавающей точки допускает, что ноль может иметь знак. Сравнение \fI\-0.0 <
+0.0\fP будет ложным, однако \fIsignbit(\-0.0)\fP вернет ненулевое значение.
+
+Значение NaN и бесконечностей имеют бит знака.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Макрос \fBsignbit\fP() возвращает ненулевое значение, если знак \fIx\fP
+отрицателен, иначе он возвращает ноль.
+.SH ОШИБКИ
+Ошибки не возникают.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99, POSIX.1\-2001. Данная функция определена в IEC 559 (и в приложении с
+рекомендуемыми функциями в IEEE 754/IEEE 854).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcopysign\fP(3)

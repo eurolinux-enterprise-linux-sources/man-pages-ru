@@ -1,0 +1,279 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 2001 David G�mez <davidge@jazzfree.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Based on comments from mm/filemap.c. Last modified on 10-06-2001
+.\" Modified, 25 Feb 2002, Michael Kerrisk, <mtk.manpages@gmail.com>
+.\"	Added notes on MADV_DONTNEED
+.\" 2010-06-19, mtk, Added documentation of MADV_MERGEABLE and
+.\"     MADV_UNMERGEABLE
+.\" 2010-06-15, Andi Kleen, Add documentation of MADV_HWPOISON.
+.\" 2010-06-19, Andi Kleen, Add documentation of MADV_SOFT_OFFLINE.
+.\" 2011-09-18, Doug Goldstein <cardoe@cardoe.com>
+.\"     Document MADV_HUGEPAGE and MADV_NOHUGEPAGE
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH MADVISE 2 2012\-04\-28 Linux "Руководство программиста Linux"
+.SH ИМЯ
+madvise \- выдаёт предложения по использованию памяти
+.SH ОБЗОР
+\fB#include <sys/mman.h>\fP
+.sp
+\fBint madvise(void *\fP\fIaddr\fP\fB, size_t \fP\fIlength\fP\fB, int \fP\fIadvice\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBmadvise\fP(): _BSD_SOURCE
+.SH ОПИСАНИЕ
+Системный вызов \fBmadvise\fP() выдает предложения ядру об использовании
+постраничного ввода/вывода в диапазоне адресов, начинающегося с \fIaddr\fP и
+размером \fIlength\fP байтов. Это позволяет приложению передавать ядру
+информацию об ожидаемом использовании отображённой или общей области памяти
+так, чтобы ядро само могло выбрать оптимальный метод упреждающего чтения и
+технологию кэширования. Этот вызов не влияет на семантику приложения
+(исключая случай \fBMADV_DONTNEED\fP), но может повлиять на его
+производительность. Ядро может и проигнорировать эти предложения.
+.LP
+Предложение указывается в аргументе \fIadvice\fP; оно может принимать следующие
+значения:
+.TP 
+\fBMADV_NORMAL\fP
+Нет никаких специальных указаний. Используется по умолчанию.
+.TP 
+\fBMADV_RANDOM\fP
+Ожидать обращение к страницам в случайном порядке (здесь упреждающее чтение
+может быть менее эффективным).
+.TP 
+\fBMADV_SEQUENTIAL\fP
+Ожидать последовательного обращения к страницам (здесь к страницам в
+заданном диапазоне можно применить агрессивное упреждающее чтение и быстро
+высвободить их сразу после доступа).
+.TP 
+\fBMADV_WILLNEED\fP
+Ожидать доступа в ближайшем будущем (здесь можно применить упреждающее
+чтение нескольких страниц).
+.TP 
+\fBMADV_DONTNEED\fP
+Не ожидать доступа в ближайшем будущем (в настоящее время приложение
+завершает работу с данной областью, так что ядро может освободить ресурсы,
+связываемые с ней). Последующий доступ к страницам в этом диапазоне будет
+успешным, но приведёт к перезагрузке содержимого памяти из соответствующего
+отображённого файла (см. \fBmmap\fP(2)) или заполняемых нулями по требованию
+страниц для отображения без соответствующего файла.
+.TP 
+\fBMADV_REMOVE\fP (начиная с Linux 2.6.16)
+.\" 2.6.18-rc5
+.\" Databases want to use this feature to drop a section of their
+.\" bufferpool (shared memory segments) - without writing back to
+.\" disk/swap space.  This feature is also useful for supporting
+.\" hot-plug memory on UML.
+Освободить данный диапазон страниц и связанный с ним носитель (backing
+store). В настоящее время это поддерживается только в файловых системах
+shmfs/tmpfs; остальные файловые системы возвращают ошибку \fBENOSYS\fP.
+.TP 
+\fBMADV_DONTFORK\fP (начиная с Linux 2.6.16)
+.\" See http://lwn.net/Articles/171941/
+.\" [PATCH] madvise MADV_DONTFORK/MADV_DOFORK
+.\" Currently, copy-on-write may change the physical address of
+.\" a page even if the user requested that the page is pinned in
+.\" memory (either by mlock or by get_user_pages).  This happens
+.\" if the process forks meanwhile, and the parent writes to that
+.\" page.  As a result, the page is orphaned: in case of
+.\" get_user_pages, the application will never see any data hardware
+.\" DMA's into this page after the COW.  In case of mlock'd memory,
+.\" the parent is not getting the realtime/security benefits of mlock.
+.\"
+.\" In particular, this affects the Infiniband modules which do DMA from
+.\" and into user pages all the time.
+.\"
+.\" This patch adds madvise options to control whether memory range is
+.\" inherited across fork. Useful e.g. for when hardware is doing DMA
+.\" from/into these pages.  Could also be useful to an application
+.\" wanting to speed up its forks by cutting large areas out of
+.\" consideration.
+.\"
+.\" SEE ALSO: http://lwn.net/Articles/171941/
+.\" "Tweaks to madvise() and posix_fadvise()", 14 Feb 2006
+Сделать недоступными страницы в указанном диапазоне для потомка после
+\fBfork\fP(2). Это полезно для предотвращения изменения физического
+расположения страницы копирования\-при\-записи, если родитель будет изменять
+её после \fBfork\fP(2). (Перемещение таких страниц вызывает проблемы с
+оборудованием, которые выполняют DMA (прямой доступ к памяти) к этим
+страницам.)
+.TP 
+\fBMADV_DOFORK\fP (начиная с Linux 2.6.16)
+Отменить действие \fBMADV_DONTFORK\fP, восстановить поведение по умолчанию, в
+силу чего происходит наследование отображения после \fBfork\fP(2).
+.TP 
+\fBMADV_HWPOISON\fP (начиная с Linux 2.6.32)
+Испортить страницу и обработать её как будто произошло аппаратное
+повреждение памяти. Эта операция доступна только для привилегированных
+(\fBCAP_SYS_ADMIN\fP) процессов. Эта операция может привести к тому, что
+вызывающий процесс получит сигнал \fBSIGBUS\fP и страница станет
+неотображённой. Данная возможность предназначена для тестирования кода для
+обработки ошибок памяти; она доступна, только если ядро было собрано с
+включённым параметром \fBCONFIG_MEMORY_FAILURE\fP.
+.TP 
+\fBMADV_SOFT_OFFLINE\fP (начиная с Linux 2.6.33)
+Программно отключить страницы в диапазоне, указанном \fIaddr\fP и
+\fIlength\fP. Память каждой страницы в указанном диапазоне сохраняется (т.е.,
+при следующем доступе будет выдано то же содержимое, но в новых физических
+границах страницы) и первоначальная страница отключается (т.е., больше не
+используется и не участвует при обычном управлении памятью). Эффект операции
+\fBMADV_SOFT_OFFLINE\fP обычно незаметен (т.е., не изменяет семантику) для
+вызывающего процесса. Данная возможность предназначена для тестирования кода
+для обработки ошибок памяти; она доступна только, если ядро было собрано с
+включённым параметром \fBCONFIG_MEMORY_FAILURE\fP.
+.TP 
+\fBMADV_MERGEABLE\fP (начиная с Linux 2.6.32)
+Включить слияние одинаковых страниц ядра (Kernel Samepage Merging, KSM) для
+страниц в диапазоне, указанном \fIaddr\fP и \fIlength\fP. Ядро периодически
+сканирует области пользовательской памяти, которые были помечены для
+слияния, разыскивая станицы с одинаковым содержимым. Такие страницы
+заменяются единственной страницей, защищённой от записи (которая
+автоматически копируется, если позднее процесс захочет изменить содержимое
+страницы). При KSM слияние выполняется только для частных анонимных страниц
+(см. \fBmmap\fP(2)). Возможность KSM предназначена для приложений, которые
+генерируют много экземпляров одинаковых данных (например, для систем
+виртуализации, таких как KVM). Эта возможность может нагрузить процессор;
+используйте осторожно. Дополнительную информацию можно найти в файле
+исходного кода ядра \fIDocumentation/vm/ksm.txt\fP. Операции \fBMADV_MERGEABLE\fP
+и \fBMADV_UNMERGEABLE\fP доступны только, если ядро было собрано с включённым
+параметром \fBCONFIG_KSM\fP.
+.TP 
+\fBMADV_UNMERGEABLE\fP (начиная с Linux 2.6.32)
+Отменить действие ранее применённой операции \fBMADV_MERGEABLE\fP для
+указанного диапазона; KSM разделяет ранее объединённые страницы в диапазоне,
+заданном \fIaddr\fP и \fIlength\fP.
+.TP 
+\fBMADV_HUGEPAGE\fP (начиная с Linux 2.6.38)
+.\" http://lwn.net/Articles/358904/
+.\" https://lwn.net/Articles/423584/
+Включает прозрачность огромных страниц (Transparent Huge Pages, THP) для
+страниц диапазона, указанного \fIaddr\fP и \fIlength\fP. В настоящий момент, THP
+работает только для закрытых (private) анонимных страниц
+(см. \fBmmap\fP(2)). Ядро будет периодически сканировать области, помеченные
+как кандидаты в огромные страницы, для замены их огромными страницами. Ядро
+также будет непосредственно выделять огромные страницы, если область
+выравнена на размер огромной страницы при создании (naturally)
+(см. \fBposix_memalign\fP(2)). В основном, эта возможность предназначена для
+приложений, которые используют большие отображения данных и доступ к большим
+областям этой памяти за один приём (например, системы виртуализации, такие
+как QEMU). С её помощью можно очень легко занять память (например, на 2МБ
+отображение, из которого нужен только 1 байт, будет потрачено 2МБ реальной
+памяти вместо одной 4КБ страницы). Дополнительную информацию смотрите в
+файле \fIDocumentation/vm/transhuge.txt\fP из исходного кода ядра. Операции
+\fBMADV_HUGEPAGE\fP и \fBMADV_NOHUGEPAGE\fP доступны, только если при сборке ядра
+указан параметр \fBCONFIG_TRANSPARENT_HUGEPAGE\fP.
+.TP 
+\fBMADV_NOHUGEPAGE\fP (начиная с Linux 2.6.38)
+Проверить, что память адресного пространства, указанного в \fIaddr\fP и
+\fIlength\fP, не будет свёрнута в огромные страницы.
+.TP 
+\fBMADV_DONTDUMP\fP (начиная с Linux 3.4)
+Исключить из дампа памяти страницы диапазона, задаваемого значениями \fIaddr\fP
+и \fIlength\fP. Это полезно в приложениях, которые занимают большие области в
+памяти, про которые известно, что они ничем не помогут будучи в дампе
+памяти. Действие \fBMADV_DONTDUMP\fP имеет преимущество над битовой маской,
+которая устанавливается в файле \fI/proc/PID/coredump_filter\fP (смотрите
+\fBcore\fP(5)).
+.TP 
+\fBMADV_DODUMP\fP (начиная с Linux 3.4)
+Отменяет действие, установленное ранее \fBMADV_DONTDUMP\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При нормальном завершении работы \fBmadvise\fP() возвращает ноль. При ошибке
+возвращается \-1, а переменной \fIerrno\fP присваивается соответствующее
+значение.
+.SH ОШИБКИ
+.TP 
+\fBEAGAIN\fP
+Ресурс ядра временно недоступен.
+.TP 
+\fBEBADF\fP
+Отображение существует, то область отображения не является файловой.
+.TP 
+\fBEINVAL\fP
+Эта ошибка возникает по следующим причинам:
+.RS
+.IP * 3
+.\" .I len
+.\" is zero,
+Значение \fIlen\fP отрицательно.
+.IP *
+Значение \fIaddr\fP не выровнено по границе страницы.
+.IP *
+Значение \fIadvice\fP недопустимо.
+.IP *
+Приложение пытается освободить заблокированные или общие страницы (с помощью
+\fBMADV_DONTNEED\fP).
+.IP *
+В \fIadvice\fP указано \fBMADV_MERGEABLE\fP или \fBMADV_UNMERGEABLE\fP, но ядро было
+собрано без параметра \fBCONFIG_KSM\fP.
+.RE
+.TP 
+\fBEIO\fP
+(для \fBMADV_WILLNEED\fP) Выделение страницы в данной области превысило бы
+максимальный размер постоянно находящихся в памяти страниц для процесса
+(rss).
+.TP 
+\fBENOMEM\fP
+(для \fBMADV_WILLNEED\fP) Недостаточно памяти: не удалось выделить страницу
+.TP 
+\fBENOMEM\fP
+Адреса в указанном диапазоне в настоящее время не отображены, или лежит вне
+адресного пространства процесса.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" FIXME . Write a posix_madvise(3) page.
+POSIX.1b. В POSIX.1\-2001 описана функция \fBposix_madvise\fP(3) с константами
+\fBPOSIX_MADV_NORMAL\fP и т.д., и её поведение похоже на описываемое здесь. Для
+файлового доступа есть похожий вызов \fBposix_fadvise\fP(2).
+
+\fBMADV_REMOVE\fP, \fBMADV_DONTFORK\fP, \fBMADV_DOFORK\fP, \fBMADV_HWPOISON\fP,
+\fBMADV_MERGEABLE\fP и \fBMADV_UNMERGEABLE\fP есть только в Linux.
+.SH ЗАМЕЧАНИЯ
+.SS "Замечания, касающиеся Linux"
+.LP
+Системный вызов текущей реализации (2.4.0) в Linux больше похож на команду,
+которая предлагает, и следовательно может завершиться с ошибкой, если
+невозможно сделать то, что предлагается. (Смотрите раздел ОШИБКИ выше.) Это
+нестандартное поведение.
+.LP
+.\" .SH HISTORY
+.\" The
+.\" .BR madvise ()
+.\" function first appeared in 4.4BSD.
+Для реализации Linux требуется, чтобы адрес \fIaddr\fP был выровнен на границу
+страницы, а значение \fIlength\fP может быть нулевым. Если какие\-то части
+указанного адресного диапазона не отображены, то версия Linux \fBmadvise\fP()
+игнорирует их и вызов применяется к оставшейся области (но возвращается
+значение \fBENOMEM\fP, как и должно).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetrlimit\fP(2), \fBmincore\fP(2), \fBmmap\fP(2), \fBmprotect\fP(2), \fBmsync\fP(2),
+\fBmunmap\fP(2), \fBcore\fP(5)

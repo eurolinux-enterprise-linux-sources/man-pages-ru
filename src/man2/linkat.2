@@ -1,0 +1,109 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 2006, Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" FIXME: Linux 2.6.39 added AT_EMPTY_PATH
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH LINKAT 2 2012\-05\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+linkat \- создаёт файловую ссылку относительно файловых дескрипторов
+каталогов
+.SH ОБЗОР
+.nf
+\fB#include <fcntl.h> /* определения констант AT_* */\fP
+\fB#include <unistd.h>\fP
+.sp
+\fBint linkat(int \fP\fIolddirfd\fP\fB, const char *\fP\fIoldpath\fP\fB,\fP
+\fB           int \fP\fInewdirfd\fP\fB, const char *\fP\fInewpath\fP\fB, int \fP\fIflags\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBlinkat\fP():
+.PD 0
+.ad l
+.RS 4
+.TP  4
+Начиная с glibc 2.10:
+_XOPEN_SOURCE\ >=\ 700 || _POSIX_C_SOURCE\ >=\ 200809L
+.TP 
+До glibc 2.10:
+_ATFILE_SOURCE
+.RE
+.ad
+.PD
+.SH ОПИСАНИЕ
+Системный вызов \fBlinkat\fP() работает также как системный вызов \fBlink\fP(2),
+за исключением случаев, описанных в данной справочной странице.
+
+Если в \fIoldpath\fP задан относительный путь, то он считается относительно
+каталога, на который ссылается файловый дескриптор \fIolddirfd\fP (а не
+относительно текущего рабочего каталога вызывающего процесса, как это
+делается в \fBlink\fP(2)).
+
+Если в \fIoldpath\fP задан относительный путь и \fIolddirfd\fP равно специальному
+значению \fBAT_FDCWD\fP, то \fIoldpath\fP рассматривается относительно текущего
+рабочего каталога вызывающего процесса (как \fBlink\fP(2)).
+
+Если в \fIoldpath\fP задан абсолютный путь, то \fIolddirfd\fP игнорируется.
+
+Значение \fInewpath\fP интерпретируется как \fIoldpath\fP, за исключением того,
+что относительный путь интерпретируется относительно каталога, на который
+ссылается файловый дескриптор \fInewdirfd\fP.
+
+По умолчанию, \fBlinkat\fP() не разыменовывает \fIoldpath\fP, если это символьная
+ссылка (подобно \fBlink\fP(2)). Начиная с Linux 2.6.18 в \fIflags\fP можно указать
+\fBAT_SYMLINK_FOLLOW\fP, и тогда значение \fIoldpath\fP будет разыменовано, если
+это символьная ссылка. До ядра 2.6.18 аргумент \fIflags\fP не использовался и
+должен был быть равен 0.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBlinkat\fP() возвращается 0. При ошибке возвращается
+\-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+В \fBlinkat\fP() могут возникнуть те же ошибки, что и в \fBlink\fP(2). Также, в
+\fBlinkat\fP() могут возникнуть следующие ошибки:
+.TP 
+\fBEBADF\fP
+\fIolddirfd\fP или \fInewdirfd\fP не является правильным файловым дескриптором.
+.TP 
+\fBENOTDIR\fP
+Значение \fIoldpath\fP содержит относительный путь и \fIolddirfd\fP содержит
+файловый дескриптор, указывающий на файл, а не на каталог; или произошло
+тоже самое с \fInewpath\fP и \fInewdirfd\fP.
+.SH ВЕРСИИ
+Вызов \fBlinkat\fP() был добавлен в ядро Linux версии 2.6.16; поддержка в glibc
+доступна с версии 2.4.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2008.
+.SH ЗАМЕЧАНИЯ
+Смотрите в \fBopenat\fP(2) объяснение необходимости \fBlinkat\fP().
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBlink\fP(2), \fBopenat\fP(2), \fBpath_resolution\fP(7), \fBsymlink\fP(7)

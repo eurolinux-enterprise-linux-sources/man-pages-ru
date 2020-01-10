@@ -1,0 +1,108 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1995 Michael Chastain (mec@duracef.shout.net), 22 July 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH MODIFY_LDT 2 2007\-06\-01 Linux "Руководство программиста Linux"
+.SH ИМЯ
+modify_ldt \- получает или устанавливает ldt
+.SH ОБЗОР
+.nf
+\fB#include <sys/types.h>\fP
+.sp
+\fBint modify_ldt(int \fP\fIfunc\fP\fB, void *\fP\fIptr\fP\fB, unsigned long \fP\fIbytecount\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBmodify_ldt\fP() читает или записывает локальную таблицу дескрипторов
+(ldt) процесса. Ldt \(em это таблица управления памятью процесса,
+используемая в процессорах i386. Подробнее о содержимом этой таблицы читайте
+в руководствах по процессору Intel 386.
+.PP
+Если значение \fIfunc\fP равно 0, то \fBmodify_ldt\fP() читает ldt в память по
+адресу \fIptr\fP. Количество прочитанных байт меньше \fIbytecount\fP и равно
+реальному размеру ldt.
+.PP
+.\"
+.\" FIXME ? say something about func == 2 and func == 0x11?
+.\" In Linux 2.4, func == 2 returned "the default ldt"
+.\" In Linux 2.6, func == 2 is a nop, returning a zeroed out structure.
+.\" Linux 2.4 and 2.6 implement an operation for func == 0x11
+Если значение \fIfunc\fP равно 1, то \fBmodify_ldt\fP() изменяет элемент
+ldt. Значение \fIptr\fP указывает на структуру \fIuser_desc\fP, а \fIbytecount\fP
+должно быть равно размеру этой структуры.
+
+Структура \fIuser_desc\fP определена в \fI<asm/ldt.h>\fP следующим
+образом:
+.in +4n
+.nf
+
+struct user_desc {
+    unsigned int  entry_number;
+    unsigned long base_addr;
+    unsigned int  limit;
+    unsigned int  seg_32bit:1;
+    unsigned int  contents:2;
+    unsigned int  read_exec_only:1;
+    unsigned int  limit_in_pages:1;
+    unsigned int  seg_not_present:1;
+    unsigned int  useable:1;
+};
+.fi
+.in
+.PP
+.\" .PP
+.\" The ldt is specific for the calling process. Any attempts to change
+.\" the ldt to include the address space of another process or the kernel
+.\" will result in a segmentation violation when trying to access the memory
+.\" outside of the process address space. The memory protection is enforced
+.\" at the paging layer.
+В Linux версии 2.4 и более ранних эта структура называлась
+\fImodify_ldt_ldt_s\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBmodify_ldt\fP() возвращается реальное количество
+прочитанных байт (при чтении) или 0 (при записи). При ошибке \fBmodify_ldt\fP()
+возвращает \-1, а \fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Значение \fIptr\fP указывает за пределы адресного пространства.
+.TP 
+\fBEINVAL\fP
+Значение \fIptr\fP равно 0, или \fIfunc\fP равно 1, а \fIbytecount\fP не равно
+размеру структуры \fImodify_ldt_ldt_s\fP, или \fIfunc\fP равно 1, а новая запись
+ldt содержит неправильные значения.
+.TP 
+\fBENOSYS\fP
+Значение \fIfunc\fP не равно 0 или 1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов есть только в Linux и не должен использоваться в программах,
+которые должны быть переносимыми.
+.SH ЗАМЕЧАНИЯ
+В glibc нет обёртки для данного системного вызова; запускайте его с помощью
+\fBsyscall\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBvm86\fP(2)

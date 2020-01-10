@@ -1,0 +1,138 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 1993-07-24 by Rik Faith
+.\" Modified 1996-04-26 by Nick Duffek <nsd@bbc.com>
+.\" Modified 1996-11-06 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SYMLINK 2 2010\-09\-20 Linux "Руководство программиста Linux"
+.SH ИМЯ
+symlink \- создать новое имя для файла
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBint symlink(const char *\fP\fIoldpath\fP\fB, const char *\fP\fInewpath\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBsymlink\fP():
+.RS 4
+_BSD_SOURCE || _XOPEN_SOURCE\ >=\ 500 || _XOPEN_SOURCE\ &&\ _XOPEN_SOURCE_EXTENDED || _POSIX_C_SOURCE\ >=\ 200112L
+.RE
+.ad b
+.SH ОПИСАНИЕ
+\fBsymlink\fP() создает символьную ссылку с именем \fInewpath\fP, которая содержит
+строку \fIoldpath\fP.
+
+Символьные ссылки интерпретируются «на лету», как\-будто бы содержимое ссылки
+было подставлено вместо пути, по которому идёт поиск файла или каталога.
+
+Символьные ссылки могут содержать компоненты пути \fI..\fP, которые (если
+используются в начале ссылки) ссылаются на родительский каталог того
+каталога, в котором находится ссылка.
+
+Символьная ссылка (также известная как «мягкая ссылка») может указывать как
+на существующий, так и на несуществующий файлы; в последнем случае такая
+ссылка называется повисшей (dangling).
+
+Права доступа символьной ссылки не имеют значения; принадлежность
+определённому владельцу игнорируется при переходе по ссылке, но проверяется
+при удалении или переименовании ссылки, а также ссылки в каталог с
+установленным закрепляющим (sticky) битом (\fBS_ISVTX\fP).
+
+Если \fInewpath\fP существует, то он \fIне\fP будет перезаписан.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEACCES\fP
+Нет прав на запись в каталог, содержащийся в \fInewpath\fP, или в одном из
+каталогов в \fInewpath\fP не разрешён поиск (см. также \fBpath_resolution\fP(7)).
+.TP 
+\fBEEXIST\fP
+\fInewpath\fP уже существует.
+.TP 
+\fBEFAULT\fP
+Значения \fIoldpath\fP и \fInewpath\fP указывают за пределы доступного адресного
+пространства.
+.TP 
+\fBEIO\fP
+Произошла ошибка ввода\-вывода.
+.TP 
+\fBELOOP\fP
+Во время определения \fInewpath\fP встретилось слишком много символьных ссылок.
+.TP 
+\fBENAMETOOLONG\fP
+Слишком длинное значение аргумента \fIoldpath\fP или \fInewpath\fP.
+.TP 
+\fBENOENT\fP
+Компонент пути \fInewpath\fP не существует или является повисшей символьной
+ссылкой.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOSPC\fP
+На устройстве, содержащем файл, нет места для создания нового элемента
+каталога.
+.TP 
+\fBENOTDIR\fP
+Компонент пути, использованный как каталог в \fInewpath\fP, в действительности
+таковым не является.
+.TP 
+\fBEPERM\fP
+Файловая система, содержащая \fInewpath\fP, не поддерживает создание символьных
+ссылок.
+.TP 
+\fBEROFS\fP
+\fInewpath\fP находится на файловой системе, доступной только для чтения.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents additional error codes EDQUOT and ENOSYS.
+.\" See
+.\" .BR open (2)
+.\" re multiple files with the same name, and NFS.
+SVr4, 4.3BSD, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Не выполняется проверка \fIoldpath\fP.
+
+При удаление имени, на который ссылается символьная ссылка, произойдёт
+удаление файла (если только у него нет других жёстких ссылок). Если такое
+поведение нежелательно, используйте \fBlink\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBln\fP(1), \fBlchown\fP(2), \fBlink\fP(2), \fBlstat\fP(2), \fBopen\fP(2), \fBreadlink\fP(2),
+\fBrename\fP(2), \fBsymlinkat\fP(2), \fBunlink\fP(2), \fBpath_resolution\fP(7),
+\fBsymlink\fP(7)

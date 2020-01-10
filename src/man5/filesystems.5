@@ -1,0 +1,165 @@
+.\" Copyright 1996 Daniel Quinlan (Daniel.Quinlan@linux.org)
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" 2007-12-14 mtk Added Reiserfs, XFS, JFS.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FILESYSTEMS 5 2010\-05\-24 Linux "Руководство программиста Linux"
+.nh
+.SH ИМЯ
+filesystems \- типы файловых систем Linux: minix, ext, ext2, ext3, ext4,
+Reiserfs, XFS, JFS, xia, msdos, umsdos, vfat, ntfs, proc, nfs, iso9660,
+hpfs, sysv, smb, ncpfs
+.SH ОПИСАНИЕ
+Если, как обычно, файловая система \fBproc\fP смонтирована в \fI/proc\fP, то в
+файле \fI/proc/filesystems\fP можно найти список типов файловых систем, которые
+поддерживаются ядром системы. Если вам нужен дополнительный тип, то вы
+можете загрузить соответствующий модуль или пересобрать ядро с его
+поддержкой.
+
+Чтобы использовать файловую систему, её нужно \fIсмонтировать\fP; смотрите
+\fBmount\fP(8).
+
+Далее приводится краткое описание некоторых доступных типов файловых систем.
+.TP  10
+\fBminix\fP
+Файловая система, использующаяся в операционной системе Minix, первая, на
+которой заработал Linux. Имеет несколько недостатков: максимальный размер
+раздела 64МБ, короткие имена файлов, одна временная метка и т.д. Осталась
+полезной для дискет и RAM дисков.
+.TP 
+\fBext\fP
+Доработанное расширение файловой системы \fBminix\fP. Полностью вытеснена
+второй версией расширенной файловой системой (\fBext2\fP) и была удалена из
+ядра (в 2.1.21).
+.TP 
+\fBext2\fP
+Высокопроизводительная дисковая файловая система Linux для жёстких дисков, а
+также сменных носителей. Вторая версия расширенной файловой системы
+разрабатывалась как расширение расширенной файловой системы (\fBext\fP). У
+\fBext2\fP лучшая производительность (по скорости и использованию ЦП) среди
+файловых систем, поддерживаемых Linux.
+.TP 
+\fBext3\fP
+Журналируемая версия файловой системы ext2. Очень легко переключиться с ext3
+обратно на работу с ext2.
+.TP 
+\fBext4\fP
+Обновлённая версия ext3, включающая существенное увеличение
+производительности и надёжности, размеров границ томов, файлов и каталогов.
+.TP 
+\fBReiserfs\fP
+Журналируемая файловая система, разработанная Гансом Рейзером (Hans Reiser),
+была добавлена в Linux начиная с ядра версии 2.4.1.
+.TP 
+\fBXFS\fP
+Журналируемая файловая система, разработанная SGI, была добавлена в Linux
+начиная с ядра версии 2.4.20.
+.TP 
+\fBJFS\fP
+Журналируемая файловая система, разработанная IBM, была добавлена в Linux
+начиная с ядра версии 2.4.24.
+.TP 
+\fBxiafs\fP
+Разработана и реализована как стабильная надёжная файловая система
+посредством расширения кода файловой системы Minix. Предоставляет основные
+часто запрашиваемые возможности без неоправданной сложности. Файловая
+система \fBxia\fP больше активно не разрабатывается или сопровождается. Была
+удалена из ядра 2.1.21.
+.TP 
+\fBmsdos\fP
+Файловая система, используемая в DOS, Windows и на некоторых компьютерах с
+OS/2. Имена файлов в \fBmsdos\fP не могут быть более 8 символов с
+необязательным расширением из 3 символов, отделённого точкой.
+.TP 
+\fBumsdos\fP
+Расширенная файловая система DOS, используемая в Linux. Была добавлена
+поддержка длинных имён файлов, UID/GID, права доступа POSIX и специальные
+файлы (устройства, именованные каналы и т.д.) без ухудшения совместимости с
+DOS.
+.TP 
+\fBvfat\fP
+Расширенная файловая система DOS, используемая в Microsoft Windows95 и
+Windows NT. В VFAT добавлена поддержка длинных имён файлов в файловую
+систему MSDOS.
+.TP 
+\fBntfs\fP
+Замена для файловых систем Microsoft Window FAT (VFAT, FAT32). Улучшена
+надёжность, производительность и использование пространства и добавлены
+такие возможности как списки контроля, журналирование, шифрование и т.д.
+.TP 
+\fBproc\fP
+Ненастоящая файловая система, используется как интерфейс к структурам данных
+ядра вместо прямого чтения из \fI/dev/kmem\fP. В частности, её файлы не
+занимают пространство на диске. Смотрите \fBproc\fP(5).
+.TP 
+\fBiso9660\fP
+Файловая система для CD\-ROM, соответствующая стандарту ISO 9660.
+.RS
+.TP 
+\fBHigh Sierra\fP
+В Linux есть поддержка стандарта High Sierra, предшественника стандарта ISO
+9660 для файловых систем CD\-ROM. High Sierra автоматически распознается при
+включении в Linux поддержки файловой системы \fBiso9660\fP.
+.TP 
+\fBRock Ridge\fP
+В Linux также есть поддержка записей System Use Sharing Protocol, которые
+определены в протоколе обмена Rock Ridge. Они используются для подробного
+описания файлов в файловой системе \fBiso9660\fP для машин UNIX и предоставляют
+информацию о длинных именах файлов, UID/GID, правах доступа к файлам по
+стандарту POSIX и файлах устройств. Rock Ridge автоматически распознаётся
+при включении в Linux поддержки файловой системы \fBiso9660\fP.
+.RE
+.TP 
+\fBhpfs\fP
+Высокопроизводительная файловая система (High Performance Filesystem),
+используемая в OS/2. Данная файловая система доступна под Linux только для
+чтения из\-за отсутствия документации.
+.TP 
+\fBsysv\fP
+Реализация файловой системы SystemV/Coherent для Linux. Поддерживает
+файловые системы из Xenix, SystemV/386 и Coherent.
+.TP 
+\fBnfs\fP
+Сетевая файловая система, используемая для доступа к дискам, расположенным
+на других компьютерах в сети.
+.TP 
+\fBsmb\fP
+Сетевая файловая система, которая поддерживает протокол SMB, используемый в
+Windows for Workgroups, Windows NT и Lan Manager.
+.sp
+Для использования файловой системы \fBsmb\fP необходима специальная программа
+mount, которую можно найти в пакете ksmbfs, расположенном по адресу
+\fIftp://sunsite.unc.edu/pub/Linux/system/Filesystems/smbfs\fP.
+.TP 
+\fBncpfs\fP
+Сетевая файловая система, которая поддерживает протокол NCP, используемый в
+Novell NetWare.
+.sp
+Для использования \fBncpfs\fP необходимы специальные программы, которые можно
+найти по адресу \fIftp://linux01.gwdg.de/pub/ncpfs\fP.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBproc\fP(5), \fBfsck\fP(8), \fBmkfs\fP(8), \fBmount\fP(8)

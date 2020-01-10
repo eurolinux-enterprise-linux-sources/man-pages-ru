@@ -1,0 +1,26 @@
+.\" This page was taken from the 4.4BSD-Lite CDROM (BSD license)
+.\"
+.\" @(#)getrpcport.3r	2.2 88/08/02 4.0 RPCSRC; from 1.12 88/02/26 SMI
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETRPCPORT 3 2007\-12\-23 "" "Руководство программиста Linux"
+.SH ИМЯ
+getrpcport \- получение номера порта RPC
+.SH ОБЗОР
+.nf
+\fBint getrpcport(char *\fP\fIhost\fP\fB, int \fP\fIprognum\fP\fB, int \fP\fIversnum\fP\fB, int \fP\fIproto\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBgetrpcport\fP() возвращает номер порта для версии \fIversnum\fP
+RPC\-программы \fIprognum\fP, работающей на \fIhost\fP и использующей протокол
+\fIproto\fP. Она возвращает 0, если не может связаться с portmapper или если
+\fIprognum\fP не зарегистрирована. Если же \fIprognum\fP зарегистрирована, но не с
+версией \fIversnum\fP, она все равно будет возвращать номер порта (с версией
+программы), указывая на то, что программа действительно
+зарегистрирована. Несоответствие версий будет зарегистрировано при первой
+попытке вызвать службу.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Нет в POSIX.1\-2001. Присутствует в BSD, Solaris и многих других системах.

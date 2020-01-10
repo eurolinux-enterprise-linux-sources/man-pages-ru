@@ -1,0 +1,183 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 2003 Nick Clifford (zaf@nrc.co.nz), Jan 25, 2003
+.\" Copyright (c) 2003 Andries Brouwer (aeb@cwi.nl), Aug 24, 2003
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" 2003-08-23 Martin Schulze <joey@infodrom.org> improvements
+.\" 2003-08-24 aeb, large parts rewritten
+.\" 2004-08-06 Christoph Lameter <clameter@sgi.com>, SMP note
+.\"
+.\" FIXME: Linux 2.6.39 adds CLOCK_BOOTTIME
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CLOCK_GETRES 2 2012\-04\-30 "" "Руководство программиста Linux"
+.SH ИМЯ
+clock_getres, clock_gettime, clock_settime \- функции часов и времени
+.SH ОБЗОР
+\fB#include <time.h>\fP
+.sp
+\fBint clock_getres(clockid_t \fP\fIclk_id\fP\fB, struct timespec *\fP\fIres\fP\fB);\fP
+
+\fBint clock_gettime(clockid_t \fP\fIclk_id\fP\fB, struct timespec *\fP\fItp\fP\fB);\fP
+
+\fBint clock_settime(clockid_t \fP\fIclk_id\fP\fB, const struct timespec
+*\fP\fItp\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lrt\fP.
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBclock_getres\fP(), \fBclock_gettime\fP(), \fBclock_settime\fP():
+.RS
+_POSIX_C_SOURCE\ >=\ 199309L
+.RE
+.ad b
+.SH ОПИСАНИЕ
+Функция \fBclock_getres\fP() определяет разрешающую способность (точность)
+заданных в \fIclk_id\fP часов, и, если \fIres\fP не равно NULL, сохраняет её в
+\fIstruct timespec\fP, указанную в \fIres\fP. Точность часов зависит от реализации
+и не может быть настроена определённым процессом. Если значение времени,
+указанное в аргументе \fItp\fP функции \fBclock_settime\fP(), не кратно \fIres\fP, то
+оно усекается до кратного \fIres\fP.
+.PP
+Функции \fBclock_gettime\fP() и \fBclock_settime\fP() получают и устанавливают
+время указанных часов \fIclk_id\fP.
+.PP
+Аргументы \fIres\fP и \fItp\fP представляют структуру \fItimespec\fP, определённую в
+\fI<time.h>\fP:
+.sp
+.in +4n
+.nf
+struct timespec {
+    time_t   tv_sec;        /* секунды */
+    long     tv_nsec;       /* наносекунды */
+};
+.fi
+.in
+.PP
+Аргумент \fIclk_id\fP представляет идентификатор определённых часов, над
+которыми производится действие. Часы могут использоваться системой в целом и
+поэтому видимы всем процессам или конкретного процессу, если они отсчитывают
+время только в пределах одного процесса.
+.LP
+Все реализации поддерживают системные часы реального времени, которые имеют
+идентификатор \fBCLOCK_REALTIME\fP. Их время представляется в секундах и
+наносекундах с начала Эпохи. Когда их время изменяется, на таймеры с
+относительными интервалами это никак не влияет, но таймеры с абсолютной
+точкой во времени учитывают это.
+.LP
+Может быть реализовано много часов. Представление соответствующих значений
+времени и влияние на таймеры не определено.
+.LP
+В последних версиях glibc и ядра Linux поддерживаются следующие часы:
+.TP 
+\fBCLOCK_REALTIME\fP
+Часы системы, отсчитывающие реальное (т. е., бытовое) время. Для настройки
+этих часов требуются соответствующие права. Данные часы подвержены скачкам
+системного времени (например, если системный администратор вручную изменяет
+время) и  постепенной подгонке, выполняемой \fBadjtime\fP(3) и NTP.
+.TP 
+\fBCLOCK_MONOTONIC\fP
+Часы, которые не могут быть настроены и показывают монотонный ход времени
+отсчитываемой с некой неопределённой начальной точки. Эти часы не подвержены
+скачкам системного времени (например, системный администратор вручную
+изменил время), но на них влияет постепенная подгонка, выполняемая
+\fBadjtime\fP(3) и NTP.
+.TP 
+\fBCLOCK_MONOTONIC_RAW\fP (начиная с Linux 2.6.28; есть только в Linux)
+.\" Added in commit 2d42244ae71d6c7b0884b5664cf2eda30fb2ae68, John Stultz
+Похожи на \fBCLOCK_MONOTONIC\fP, но предоставляют прямой доступ к аппаратным
+часам, которые не подводятся NTP или постепенной подгонкой, выполняемой
+\fBadjtime\fP(3).
+.TP 
+\fBCLOCK_PROCESS_CPUTIME_ID\fP
+Таймер высокого разрешения, работающий на ЦП, на каждый процесс.
+.TP 
+\fBCLOCK_THREAD_CPUTIME_ID\fP
+Часы, работающие на ЦП, для каждой нити.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении функции \fBclock_gettime\fP(), \fBclock_settime\fP() и
+\fBclock_getres\fP() возвращают 0, или \-1 в случае ошибки (\fIerrno\fP
+устанавливается в соответствующее значение).
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+\fItp\fP указывает за пределы доступного адресного пространства.
+.TP 
+\fBEINVAL\fP
+.\" Linux also gives this error on attempts to set CLOCK_PROCESS_CPUTIME_ID
+.\" and CLOCK_THREAD_CPUTIME_ID, when probably the proper error should be
+.\" EPERM.
+Заданное в \fIclk_id\fP значение не поддерживается на этой системе.
+.TP 
+\fBEPERM\fP
+Для установки указанных часов с помощью \fBclock_settime\fP() недостаточно
+прав.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SUSv2, POSIX.1\-2001.
+.SH ДОСТУПНОСТЬ
+На POSIX\-системах, в которых доступны эти функции, символ \fB_POSIX_TIMERS\fP,
+определённый в \fI<unistd.h>\fP, имеет значение больше 0. Символами
+\fB_POSIX_MONOTONIC_CLOCK\fP, \fB_POSIX_CPUTIME\fP, \fB_POSIX_THREAD_CPUTIME\fP
+показывается, что доступны \fBCLOCK_MONOTONIC\fP, \fBCLOCK_PROCESS_CPUTIME_ID\fP,
+\fBCLOCK_THREAD_CPUTIME_ID\fP. (см. также \fBsysconf\fP(3).)
+.SH ЗАМЕЧАНИЯ
+.SS "Замечание для многопроцессорных систем"
+Часы \fBCLOCK_PROCESS_CPUTIME_ID\fP и \fBCLOCK_THREAD_CPUTIME_ID\fP реализованы на
+многих платформах с помощью таймеров ЦП (TSC на i386, AR.ITC на
+Itanium). Эти регистры могут отличаться между ЦП и, как следствие, эти часы
+могут возвращать \fBподдельные результаты\fP, если выполнение процесса
+переходит на другой ЦП.
+.PP
+Если процессоры в многопроцессорных системах используют разные источники
+времени, то нет способа поддерживать сверку между регистрами таймера, так
+как каждый ЦП будет работать со слегка отличающейся частотой. В этом случае
+\fIclock_getcpuclockid(0)\fP вернёт \fBENOENT\fP, чтобы указать на это
+состояние. Двое часов в этом случае будут полезны, только если можно
+убедиться, что процесс остался на определённом ЦП.
+.PP
+Процессоры в многопроцессорных системах не приступают к работе одновременно
+и поэтому регистры таймера обычно работают со смещением. Некоторые
+архитектуры содержат код, который пытается сократить это смещение при
+загрузке системы. Однако код не может гарантировать точную подстройку
+смещений. В glibc нет средств для работы с этими смещениями (в отличие от
+ядра Linux). Обычно, эти смещения малы и поэтому, в большинстве случаев, их
+влияние незначительно.
+.SH ДЕФЕКТЫ
+.\" See http://bugzilla.kernel.org/show_bug.cgi?id=11972
+Согласно POSIX.1\-2001, процесс с «соответствующими правами» может настроить
+часы \fBCLOCK_PROCESS_CPUTIME_ID\fP и \fBCLOCK_THREAD_CPUTIME_ID\fP с помощью
+\fBclock_settime\fP(). В Linux эти часы не допускают настройку (т. е., процесс
+не может иметь «соответствующие права»).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBdate\fP(1), \fBgettimeofday\fP(2), \fBsettimeofday\fP(2), \fBtime\fP(2),
+\fBadjtime\fP(3), \fBclock_getcpuclockid\fP(3), \fBctime\fP(3), \fBftime\fP(3),
+\fBpthread_getcpuclockid\fP(3), \fBsysconf\fP(3), \fBtime\fP(7)

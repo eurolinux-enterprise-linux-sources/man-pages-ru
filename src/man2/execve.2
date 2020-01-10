@@ -1,0 +1,497 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\" and Copyright (c) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified 1993-07-21 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1994-08-21 by Michael Chastain <mec@shell.portal.com>:
+.\" Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1999-11-12 by Urs Thuermann <urs@isnogud.escape.de>
+.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\" 2006-09-04 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added list of process attributes that are not preserved on exec().
+.\" 2007-09-14 Ollie Wild <aaw@google.com>, mtk
+.\"     Add text describing limits on command-line arguments + environment
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH EXECVE 2 2012\-05\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+execve \- выполнить программу
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBint execve(const char *\fP\fIfilename\fP\fB, char *const \fP\fIargv\fP\fB[], \fP
+.br
+\fB char *const \fP\fIenvp\fP\fB[]);\fP
+.SH ОПИСАНИЕ
+\fBexecve\fP() выполняет программу, задаваемую аргументом \fIfilename\fP. В
+\fIfilename\fP должно быть указано имя двоичного исполняемого файла или
+сценарий, начинающийся со строки вида:
+
+.in +4n
+.nf
+\fB#!\fP \fIинтерпретатор \fP[необязательные параметры]
+.fi
+.in
+
+Подробней о сценариях написано далее в "Интерпретируемые сценарии".
+
+\fIargv\fP \(em это массив строковых параметров, передаваемых новой
+программе. По соглашению, в первой строке должно содержаться имя файла,
+относящееся к запускаемой программе. \fIenvp\fP \(em это массив строк в формате
+\fBключ=значение\fP, которые передаются новой программе в качестве окружения
+(environment). Оба массива \fIargv\fP и \fIenvp\fP завершаются указателем NULL. К
+массиву параметров и окружению можно обратиться из вызываемой программой
+функции main, если она определена как:
+
+.in +4n
+.nf
+int main(int argc, char *argv[], char *envp[])
+.fi
+.in
+
+При успешном выполнении \fBexecve\fP() управление не возвращается, а код,
+данные, bss и стек вызвавшего процесса перезаписываются загруженной
+программой.
+
+Если текущая программа выполнялась под управлением ptrace, то после
+успешного вызова \fBexecve\fP() ей посылается сигнал \fBSIGTRAP\fP.
+
+Если у файла программы, указанного в \fIfilename\fP, установлен бит set\-user\-ID
+и файловая система, в которой он хранится, не смонтирована с параметром
+\fInosuid\fP (флаг \fBMS_NOSUID\fP у \fBmount\fP(2)), и вызывающий процесс не
+выполняется под управлением ptrace, то фактический идентификатор
+пользователя вызывающего процесса меняется на идентификатор владельца файла
+программы. Точно также, если на файле программы установлен бит set\-group\-ID,
+то фактический идентификатор группы вызывающего процесса становится равным
+группе, которой принадлежит файл программы.
+
+Фактический идентификатор пользователя процесса копируется в сохранённый
+идентификатор пользователя (set\-user\-ID), также фактический идентификатор
+группы копируется в сохранённый идентификатор группы (set\-group\-ID). Это
+копирование выполняется после изменения любого фактического идентификатора,
+которое происходит из\-за выставленных бит прав set\-user\-ID и set\-group\-ID.
+
+Если исполняемый файл является динамически\-скомпонованным файлом в формате
+a.out, содержащим заглушки для динамических библиотек, то в начале
+выполнения этого файла вызывается динамический компоновщик Linux \(em
+\fBld.so\fP(8), который загружает библиотеки в память и компонует их с
+исполняемым файлом.
+
+Если исполняемый файл является динамически\-скомпонованным файлом в формате
+ELF, то для загрузки необходимых динамических библиотек используется
+интерпретатор, указанный в сегменте PT_INTERP. Обычно, это
+\fI/lib/ld\-linux.so.2\fP для программ, скомпонованных с glibc 2. (для программ,
+скомпонованных со старой Linux libc5, обычно это \fI/lib/ld\-linux.so.1\fP).
+
+При вызове \fBexecve\fP() сохраняются все свойства процесса, за исключением:
+.IP * 3
+Значения обработчиков всех захватываемых сигналов сбрасываются в значения по
+умолчанию (\fBsignal\fP(7)).
+.IP *
+Любой альтернативный стек сигнала не сохраняется (\fBsigaltstack\fP(2)).
+.IP *
+Проецирование памяти не сохраняется (\fBmmap\fP(2)).
+.IP *
+Подключённые общие сегменты памяти System V отключаются (\fBshmat\fP(2)).
+.IP *
+Области общей памяти POSIX становятся неспроецированными (\fBshm_open\fP(3)).
+.IP *
+Открытые дескрипторы в очереди сообщений POSIX закрываются
+(\fBmq_overview\fP(7)).
+.IP *
+Все открытые именные семафоры POSIX закрываются (\fBsem_overview\fP(7)).
+.IP *
+Таймеры POSIX не сохраняются (\fBtimer_create\fP(2)).
+.IP *
+Все открытые потоки каталогов (directory streams) закрываются
+(\fBopendir\fP(3)).
+.IP *
+Блокировки памяти не сохраняются (\fBmlock\fP(2), \fBmlockall\fP(2)).
+.IP *
+Обработчики завершения работы (exit handlers) не сохраняются (\fBatexit\fP(3),
+\fBon_exit\fP(3)).
+.IP *
+Окружения плавающей точки сбрасываются в настройки по умолчанию
+(\fBfenv\fP(3)).
+.PP
+В POSIX.1\-2001 определён список сохраняемых свойств процесса. Следующие
+свойства процесса, имеющиеся только в Linux, также не сохраняются при
+\fBexecve\fP():
+.IP * 3
+Устанавливается флаг \fBPR_SET_DUMPABLE\fP (\fBprctl\fP(2)), если выполняемая
+программа не имеет установленных бит set\-user\-ID или set\-group\-ID; в
+противном случае он очищается.
+.IP *
+Флаг \fBPR_SET_KEEPCAPS\fP (\fBprctl\fP(2)) очищается.
+.IP *
+Имя процесса, установленное через \fBprctl\fP(2) \fBPR_SET_NAME\fP (и отображаемое
+\fIps\ \-o comm\fP), изменяется на имя нового исполняемого файла.
+.IP *
+Сигнал завершения (termination signal) устанавливается в \fBSIGCHLD\fP
+(\fBclone\fP(2)).
+.PP
+Также стоит учитывать следующее:
+.IP * 3
+Все нити (threads), отличные от вызывающей, уничтожаются
+\fBexecve\fP(). Мьютексы, условные переменные и другие объекты pthreads не
+сохраняются.
+.IP *
+При запуске программы выполняется эквивалент \fIsetlocale(LC_ALL, "C")\fP.
+.IP *
+В POSIX.1\-2001 указано, что действия по отношению к любым игнорируемым или
+имеющим настройку по умолчанию сигналам, остаются неизменными. В
+POSIX.1\-2001 есть одно исключение: если \fBSIGCHLD\fP игнорируется, то
+реализация может оставить обработку сигнала (disposition) неизменной или
+вернуть настройку по умолчанию; в Linux используется первое.
+.IP *
+Все ожидающие выполнения асинхронные операции ввода\-вывод отменяются
+(\fBaio_read\fP(3), \fBaio_write\fP(3)).
+.IP *
+Как происходит обработка мандатов (capabilities) при вызове \fBexecve\fP(),
+см. \fBcapabilities\fP(7).
+.IP *
+.\" On Linux it appears that these file descriptors are
+.\" always open after an execve(), and it looks like
+.\" Solaris 8 and FreeBSD 6.1 are the same. -- mtk, 30 Apr 2007
+По умолчанию, файловые дескрипторы остаются открытыми после
+\fBexecve\fP(). Файловые дескрипторы, помеченные как close\-on\-exec (закрывать
+при запуске), закрываются; см. описание \fBFD_CLOEXEC\fP в \fBfcntl\fP(2). (Если
+файловый дескриптор закрыт, это приводит к освобождению всех имеющихся
+блокировок, полученных на соответствующий файл данным процессом. Подробней
+см. \fBfcntl\fP(2).) В POSIX.1\-2001 сказано, что если бы файловые дескрипторы
+0, 1 и 2 были закрыты после успешного вызова \fBexecve\fP(), и процесс получил
+бы привилегии из\-за установленных битов set\-user_ID или set\-group_ID на
+исполняемом файле, то система смогла бы открыть произвольный файл для
+каждого из этих дескрипторов. Считается, что переносимая программа, с
+привилегиями или без, не может рассчитывать, что эти три файловых
+дескриптора будут оставаться закрытыми после \fBexecve\fP().
+.SS "Интерпретируемые сценарии"
+Интерпретируемый сценарий \(em это текстовый файл, у которого установлен бит
+выполнения и первая строка имеет вид:
+
+.in +4n
+.nf
+\fB#!\fP \fIинтерпретатор \fP[необязательные параметры]
+.fi
+.in
+
+В поле \fIинтерпретатор\fP должно быть указано имя файла запуска, это не имя
+самого файла сценария. Если в аргументе \fIfilename\fP для \fBexecve\fP() указан
+интерпретируемый сценарий, то \fIинтерпретатор\fP будет вызван со следующими
+параметрами:
+
+.in +4n
+.nf
+\fIинтерпретатор\fP [необязательный параметр] \fIимя файла\fP параметр...
+.fi
+.in
+
+где \fIпараметр...\fP \(em последовательность слов, указываемых аргументом
+\fIargv\fP в \fBexecve\fP().
+
+В целях переносимости, \fIнеобязательный параметр\fP должен быть или пустым,
+или задаваться одним словом (т.е., не должен содержать пробельных символов);
+см. ЗАМЕЧАНИЯ далее.
+.SS "Ограничения на размер параметров и окружения"
+Большинство реализаций UNIX накладывает некоторые ограничения на полный
+размер параметра командной строки (\fIargv\fP) и окружения (\fIenvp\fP), которые
+можно передать новой программе. POSIX.1 позволяет реализации объявить это
+ограничение через константу \fBARG_MAX\fP (определённую в \fI<limits.h>\fP
+или сделать её доступной во время выполнения через вызов
+\fIsysconf(_SC_ARG_MAX)\fP).
+
+В ядре Linux до версии 2.6.23 размер памяти, используемый для хранения
+окружения и строк параметров, был ограничен 32 страницами (определялся
+ядерной константой \fBMAX_ARG_PAGES\fP). На архитектурах с 4\-КиБ размером
+страницы это давало максимальный размер в 128 КиБ.
+
+.\" For some background on the changes to ARG_MAX in kernels 2.6.23 and
+.\" 2.6.25, see:
+.\"     http://sourceware.org/bugzilla/show_bug.cgi?id=5786
+.\"     http://bugzilla.kernel.org/show_bug.cgi?id=10095
+.\"     http://thread.gmane.org/gmane.linux.kernel/646709/focus=648101,
+.\"     checked into 2.6.25 as commit a64e715fc74b1a7dcc5944f848acc38b2c4d4ee2.
+.\" Ollie: That doesn't include the lists of pointers, though,
+.\" so the actual usage is a bit higher (1 pointer per argument).
+Начиная с ядра версии 2.6.23, большинство архитектур поддерживают предельный
+размер, высчитываемый от мягкого ограничения ресурса \fBRLIMIT_STACK\fP
+(см. \fBgetrlimit\fP(2)), который действует во время вызова
+\fBexecve\fP(). (Исключение составляют архитектуры без механизма управления
+памятью: в них ограничение рассчитывается как и до версии 2.6.23.) Это
+изменение позволяет программам иметь больший список параметров и/или
+окружения. Для этих архитектур полный размер ограничен до 1/4 разрешённого
+размера стека. (Накладываемое ограничение в 1/4 позволяет новой программе
+всегда иметь некоторое пространство под стек.) Начиная с Linux версии
+2.6.25, ядро отводит нижние 32 страницы для этого предельного размера,
+поэтому, даже когда \fBRLIMIT_STACK\fP задан слишком низко, приложения
+гарантированно получат, по крайней мере, столько же пространства под
+параметры и окружение, сколько бы они получили при работе с Linux 2.6.23 и
+ранее. (Это гарантия не обеспечивалась в Linux 2.6.23 и 2.6.24.) Также,
+размер строки ограничен 32 страницами (ядерная константа \fBMAX_ARG_STRLEN\fP),
+а максимальное число строк может быть 0x7FFFFFFF.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBexecve\fP() не возвращает управление. В случае
+ошибки возвращается \-1, а \fIerrno\fP устанавливается в соответствующее
+значение.
+.SH ОШИБКИ
+.TP 
+\fBE2BIG\fP
+Слишком большое общее количество байт для окружения (\fIenvp\fP) и списка
+параметров (\fIargv\fP).
+.TP 
+\fBEACCES\fP
+В одном из каталогов префикса \fIfilename\fP или интерпретатора не разрешён
+поиск. (см. также \fBpath_resolution\fP(7))
+.TP 
+\fBEACCES\fP
+Файл или интерпретатор не являются обычным файлом.
+.TP 
+\fBEACCES\fP
+Не установлен бит выполнения на файле или сценарии или интерпретаторе ELF.
+.TP 
+\fBEACCES\fP
+Файловая система смонтирована с \fInoexec\fP.
+.TP 
+\fBEFAULT\fP
+Аргумент \fIfilename\fP указывает за пределы доступного адресного пространства.
+.TP 
+\fBEINVAL\fP
+Исполняемый ELF\-файл содержит более одного сегмента PT_INTERP (т.е., в нём
+указано более одного интерпретатора).
+.TP 
+\fBEIO\fP
+Произошла ошибка ввода\-вывода.
+.TP 
+\fBEISDIR\fP
+Интерпретатор ELF является каталогом.
+.TP 
+\fBELIBBAD\fP
+Не распознан формат интерпретатора ELF.
+.TP 
+\fBELOOP\fP
+Во время определения \fIfilename\fP, имени сценария или интерпретатора ELF
+встретилось слишком много символьных ссылок.
+.TP 
+\fBEMFILE\fP
+Было достигнуто ограничение по открытым файловым дескрипторам на процесс.
+.TP 
+\fBENAMETOOLONG\fP
+Слишком длинное значение аргумента \fIfilename\fP.
+.TP 
+\fBENFILE\fP
+Достигнуто максимальное количество открытых файлов в системе.
+.TP 
+\fBENOENT\fP
+Файл \fIfilename\fP, сценарий или интерпретатор ELF не существует, или не
+найдена динамическая библиотека, необходимая для файлового интерпретатора.
+.TP 
+\fBENOEXEC\fP
+Не распознан формат исполняемого файла, он не подходит для архитектуры, или
+имеет ошибки в формате, из\-за чего не может быть выполнен.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOTDIR\fP
+Компонент пути в \fIfilename\fP, сценарии или интерпретаторе ELF в
+действительности не является каталогом.
+.TP 
+\fBEPERM\fP
+Файловая система смонтирована с \fInosuid\fP, пользователь не имеет прав
+суперпользователя, а у файла установлен бит set\-user\-ID или set\-group\-ID.
+.TP 
+\fBEPERM\fP
+Над процессом выполняется трассировка, пользователь не имеет прав
+суперпользователя, а у файла установлен бит set\-user\-ID или set\-group\-ID.
+.TP 
+\fBETXTBSY\fP
+Исполняемый файл был открыт на запись одним или более процессов.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents additional error
+.\" conditions EAGAIN, EINTR, ELIBACC, ENOLINK, EMULTIHOP; POSIX does not
+.\" document ETXTBSY, EPERM, EFAULT, ELOOP, EIO, ENFILE, EMFILE, EINVAL,
+.\" EISDIR or ELIBBAD error conditions.
+SVr4, 4.3BSD, POSIX.1\-2001. В POSIX.1\-2001 не описано поведение #!, но в
+остальном совместимость есть.
+.SH ЗАМЕЧАНИЯ
+Над процессами с установленными set\-user\-ID и set\-group\-ID не может
+выполняться \fBptrace\fP(2).
+
+В Linux игнорируются биты set\-user\-ID и set\-group\-ID на файлах со
+сценариями.
+
+Результат работы при монтировании файловой системы с параметром \fInosuid\fP
+различается в разных версиях ядра Linux: некоторые будут отказывать в
+запуске исполняемых файлов с установленными битами set\-user\-ID и
+set\-group\-ID, если это дало бы пользователю больше прав чем уже есть (и
+возвращать \fBEPERM\fP), другие просто проигнорируют биты set\-user\-ID и
+set\-group\-ID и успешно выполнят \fBexec\fP().
+
+При указании интерпретатора сценариев в #! максимальная длина строки равна
+127 символов.
+
+.\" e.g., Solaris 8
+.\" e.g., FreeBSD before 6.0, but not FreeBSD 6.0 onward
+Семантика \fIнеобязательного параметра\fP интерпретатора сценариев различна в
+разных реализациях. В Linux, вся строка после имени \fIинтерпретатора\fP
+передаётся интерпретатору как единый параметр, и эта строка может содержать
+пробельные символы. Однако, такое поведение отличается от других
+систем. Некоторые системы используют первый пробел в качестве признака
+окончания \fIнеобязательного параметра\fP. В других системах, интерпретатор
+сценариев может иметь несколько параметров, и пробелы в \fIнеобязательном
+параметре\fP используются для их разграничения.
+
+.\" e.g., EFAULT on Solaris 8 and FreeBSD 6.1; but
+.\" HP-UX 11 is like Linux -- mtk, Apr 2007
+.\" Bug filed 30 Apr 2007: http://bugzilla.kernel.org/show_bug.cgi?id=8408
+.\" Bug rejected (because fix would constitute an ABI change).
+.\"
+В Linux аргумент \fIargv\fP может быть задан значением NULL, что приводит к
+тому же результату, как если бы этот аргумент указывал бы на список,
+содержащий единственный указатель на NULL. \fBНе используйте мнимые
+преимущества данного свойства!\fP Это нестандартное поведение и не переносимо:
+в большинстве других систем UNIX это приводит к ошибке (\fBEFAULT\fP).
+
+.\"
+.\" .SH BUGS
+.\" Some Linux versions have failed to check permissions on ELF
+.\" interpreters.  This is a security hole, because it allows users to
+.\" open any file, such as a rewinding tape device, for reading.  Some
+.\" Linux versions have also had other security holes in
+.\" .BR execve ()
+.\" that could be exploited for denial of service by a suitably crafted
+.\" ELF binary. There are no known problems with 2.0.34 or 2.2.15.
+В POSIX.1\-2001 указано, что значения, возвращаемые \fBsysconf\fP(3), должны
+быть неизменны в течении существования процесса. Однако, начиная с версии
+Linux 2.6.23, если изменяется ограничение ресурса \fBRLIMIT_STACK\fP, то
+значение, возвращаемое для \fB_SC_ARG_MAX\fP, также будет изменено, чтобы
+отразить, что ограничение на пространство для хранения параметров командной
+строки и окружения было изменено.
+.SS "Историческая справка"
+В UNIX V6 список аргументов вызова \fBexec\fP() заканчивался 0, а список
+аргументов \fImain\fP заканчивался \-1. Поэтому, этот список аргументов не мог
+быть использован напрямую в последующем вызове \fBexec\fP(). Начиная с UNIX V7
+оба списка стали оканчиваться NULL.
+.SH ПРИМЕР
+Данная программа запускается второй программой, представленной ниже. Она
+просто выводит свои параметры командной строки по одному на строку.
+
+.in +4n
+.nf
+/* myecho.c */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int
+main(int argc, char *argv[])
+{
+    int j;
+
+    for (j = 0; j < argc; j++)
+        printf("argv[%d]: %s\en", j, argv[j]);
+
+    exit(EXIT_SUCCESS);
+}
+.fi
+.in
+
+Эта программа может использоваться для запуска программы, чьё имя указано в
+параметре командной строки.
+.in +4n
+.nf
+
+/* execve.c */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int argc, char *argv[])
+{
+    char *newargv[] = { NULL, "hello", "world", NULL };
+    char *newenviron[] = { NULL };
+
+    if (argc != 2) {
+	fprintf(stderr, "Использование: %s <запускаемый_файл>\en", argv[0]);
+	exit(EXIT_FAILURE);
+    }
+
+    newargv[0] = argv[1];
+
+    execve(argv[1], newargv, newenviron);
+    perror("execve");   /* execve() возвращается только при ошибке */
+    exit(EXIT_FAILURE);
+}
+.fi
+.in
+
+Мы можем использовать вторую программу для запуска первой:
+
+.in +4n
+.nf
+$\fB cc myecho.c \-o myecho\fP
+$\fB cc execve.c \-o execve\fP
+$\fB ./execve ./myecho\fP
+argv[0]: ./myecho
+argv[1]: hello
+argv[2]: world
+.fi
+.in
+
+Также мы можем использовать эти программы для демонстрации использования
+интерпретатора сценариев. Для этого создадим сценарий, чей "интерпретатор"
+указывает на нашу программу \fImyecho\fP:
+
+.in +4n
+.nf
+$\fB cat > script.sh\fP
+\fB#! ./myecho script\-arg\fP
+\fB^D\fP
+$\fB chmod +x script.sh\fP
+.fi
+.in
+
+Теперь мы можем использовать нашу программу для запуска сценария:
+
+.in +4n
+.nf
+$\fB ./execve ./script.sh\fP
+argv[0]: ./myecho
+argv[1]: script\-arg
+argv[2]: ./script.sh
+argv[3]: hello
+argv[4]: world
+.fi
+.in
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBchmod\fP(2), \fBfork\fP(2), \fBptrace\fP(2), \fBexecl\fP(3), \fBfexecve\fP(3),
+\fBgetopt\fP(3), \fBcredentials\fP(7), \fBenviron\fP(7), \fBpath_resolution\fP(7),
+\fBld.so\fP(8)

@@ -1,0 +1,62 @@
+.\" Copyright (c) 1993 Michael Haardt (michael@moria.de),
+.\"     Fri Apr  2 11:32:09 MET DST 1993
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Sat Jul 24 17:06:03 1993 by Rik Faith (faith@cs.unc.edu)
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GROUP 5 2010\-10\-21 Linux "Руководство программиста Linux"
+.SH ИМЯ
+group \- файл групп пользователей
+.SH ОПИСАНИЕ
+В текстовом файле \fI/etc/group\fP описаны группы в системе. В каждой строке
+файла содержится одна запись следующего формата:
+.sp
+.RS
+group_name:password:GID:user_list
+.RE
+.sp
+Поля:
+.TP  12
+\fIgroup_name\fP
+имя группы
+.TP 
+\fIpassword\fP
+пароль группы (в зашифрованном виде). Если это поле пустое, то пароль не
+нужен.
+.TP 
+\fIGID\fP
+числовой идентификатор (ID) группы.
+.TP 
+\fIuser_list\fP
+разделённые запятыми имена всех пользователей, которые являются членами
+данной группы.
+.SH ФАЙЛЫ
+/etc/group
+.SH ДЕФЕКТЫ
+Согласно справочной странице 4.2BSD \fBinitgroups\fP(3): похоже, никто не
+поддерживает актуальность \fI/etc/group\fP.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBlogin\fP(1), \fBnewgrp\fP(1), \fBgetgrent\fP(3), \fBgetgrnam\fP(3), \fBpasswd\fP(5)

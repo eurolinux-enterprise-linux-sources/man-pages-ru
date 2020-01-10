@@ -1,0 +1,167 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 2006 Michael Kerrisk <mtk.manpages@gmail.com>
+.\" A few fragments remain from an earlier (1992) page by
+.\" Drew Eckhardt (drew@cs.colorado.edu),
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt (michael@moria.de)
+.\" Modified Sat Jul 24 13:22:07 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified 21 Aug 1994 by Michael Chastain (mec@shell.portal.com):
+.\"   Referenced 'clone(2)'.
+.\" Modified 1995-06-10, 1996-04-18, 1999-11-01, 2000-12-24
+.\"   by Andries Brouwer (aeb@cwi.nl)
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\" 2006-09-04, Michael Kerrisk
+.\"     Greatly expanded, to describe all attributes that differ
+.\"	parent and child.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FORK 2 2012\-05\-01 Linux "Руководство программиста Linux"
+.SH ИМЯ
+fork \- создаёт дочерний процесс
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBpid_t fork(void);\fP
+.SH ОПИСАНИЕ
+Вызов \fBfork\fP() создает новый процесс посредством копирования вызывающего
+процесса. Новый процесс, называемый \fIпотомком\fP, является точной копией
+вызывающего процесса, который называется \fIродительским\fP, за исключением
+следующих моментов:
+.IP * 3
+Потомок имеет свой уникальный идентификатор процесса, и этот PID
+(идентификатор процесса) не совпадает ни с одним существующим
+идентификатором группы процессов (\fBsetpgid\fP(2)).
+.IP *
+Идентификатор родительского процесса у потомка равен идентификатору
+родительского процесса.
+.IP *
+Потомок не наследует блокировки памяти родителя (\fBmlock\fP(2),
+\fBmlockall\fP(2)).
+.IP *
+Счётчики использования ресурсов (\fBgetrusage\fP(2)) и времени ЦП у потомка
+сброшены в 0.
+.IP *
+Набор ожидающих сигналов потомка изначально пуст (\fBsigpending\fP(2)).
+.IP *
+Потомок не наследует значения семафоров родителя (\fBsemop\fP(2)).
+.IP *
+Потомок не наследует блокировочные записи родителя (\fBfcntl\fP(2)).
+.IP *
+Потомок не наследует таймеры родителя (\fBsetitimer\fP(2), \fBalarm\fP(2),
+\fBtimer_create\fP(2)).
+.IP *
+Потомок не наследует ожидающие выполнения операции асинхронного ввода\-вывода
+(\fBaio_read\fP(3), \fBaio_write\fP(3)) и контексты асинхронного ввода\-вывода
+родителя (см. \fBio_setup\fP(2)).
+.PP
+Все перечисленные атрибуты указаны в POSIX.1\-2001. Родитель и потомок также
+отличаются по следующим атрибутам процесса, которые есть только в Linux:
+.IP * 3
+Потомок не наследует уведомления об изменении каталога (dnotify) родителя
+(смотрите описание \fBF_NOTIFY\fP в \fBfcntl\fP(2)).
+.IP *
+Настройка \fBPR_SET_PDEATHSIG\fP у \fBprctl\fP(2) сбрасывается, и поэтому потомок
+не принимает сигнал о завершении работы родителя.
+.IP *
+Отображение памяти, помеченное с помощью флага \fBMADV_DONTFORK\fP через
+\fBmadvise\fP(2), при \fBfork\fP() не наследуется.
+.IP *
+Сигнал завершения работы потомка всегда \fBSIGCHLD\fP (см. \fBclone\fP(2)).
+.PP
+Также стоит учитывать следующее:
+.IP * 3
+Процесс потомка создаётся с одиночной нитью — той, которая вызвала
+\fBfork\fP(). Всё виртуальное адресное пространство родителя копируется в
+потомок, включая состояние мьютексов, условных переменных и других объектов
+pthreads; в случае проблем с этим может помочь \fBpthread_atfork\fP(3).
+.IP *
+Потомок наследует копии набора открытых файловых дескрипторов
+родителя. Каждый файловый дескриптор в потомке ссылается на то же описание
+файла что и родитель (см. \fBopen\fP(2)). Это означает, что два дескриптора
+совместно используют флаги состояния открытого файла, текущее смещение файла
+и атрибуты ввода\-вывода, управляемые сигналами (смотрите описание
+\fBF_SETOWN\fP и \fBF_SETSIG\fP в \fBfcntl\fP(2)).
+.IP *
+Потомок наследует копии набора дескрипторов открытых очередей сообщений
+родителя (см. \fBmq_overview\fP(7)). Каждый дескриптор в потомке ссылается на
+то же описание открытой очереди сообщений что и родитель. Это означает, что
+два дескриптора совместно используют флаги (\fImq_flags\fP).
+.IP *
+Потомок наследует копии набора потоков открытых каталогов родителя
+(см. \fBopendir\fP(3)). В POSIX.1\-2001 сказано, что соответствующие потоки
+каталогов в родителе и потомке \fIмогут\fP совместно использовать позицию в
+потоке каталога; в Linux/glibc они не могут этого делать.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении родителю возвращается PID процесса\-потомка, а
+процессу\-потомку возвращается 0. При ошибке родительскому процессу
+возвращается \-1, процесс\-потомок не создаётся, а значение \fIerrno\fP
+устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEAGAIN\fP
+Вызов \fBfork\fP() завершился с ошибкой из\-за невозможности выделить достаточно
+памяти для копирования таблиц страниц родителя и для выделения структуры
+описания процесса\-потомка.
+.TP 
+\fBEAGAIN\fP
+Невозможно создать новый процесс, так как вызывающий исчерпал ресурс
+\fBRLIMIT_NPROC\fP. Чтобы превысить этот предел, процесс должен иметь мандат
+\fBCAP_SYS_ADMIN\fP или \fBCAP_SYS_RESOURCE\fP.
+.TP 
+\fBENOMEM\fP
+Вызов \fBfork\fP() завершился с ошибкой из\-за невозможности разместить
+необходимые структуры ядра, потому что слишком мало памяти.
+.TP 
+\fBENOSYS\fP
+.\" e.g., arm (optionally), blackfin, c6x, frv, h8300, microblaze, xtensa
+Вызов \fBfork\fP() не поддерживается на этой платформе (например, из\-за того,
+что аппаратное обеспечение не содержит блока управления памятью (MMU)).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.3BSD, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+.PP
+В Linux, \fBfork\fP() реализован с помощью «копирования страниц при записи»
+(copy\-on\-write, COW), поэтому расходы на вызов состоят из времени и памяти,
+требуемой на копирование страничных таблиц родителя и создания уникальной
+структуры, описывающей задачу.
+
+.\" nptl/sysdeps/unix/sysv/linux/fork.c
+.\" and does some magic to ensure that getpid(2) returns the right value.
+Начиная с версии 2.3.3, вместо того, чтобы вызывать системный вызов
+\fBfork\fP(), обёрточная функция \fBfork\fP() в glibc, как часть реализации нитей
+NPTL, вызывает \fBclone\fP(2) с флагами, которые обеспечивают поведение
+традиционного системного вызова (вызов \fBfork\fP() эквивалентен вызову
+\fBclone\fP(2), если значение равно \fIflags\fP \fBSIGCHLD\fP). Обёртка в glibc
+вызывает все обработчики при ветвлении (fork), которые были зарегистрированы
+с помощью \fBpthread_atfork\fP(3).
+.SH ПРИМЕР
+Смотрите \fBpipe\fP(2) и \fBwait\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclone\fP(2), \fBexecve\fP(2), \fBsetrlimit\fP(2), \fBunshare\fP(2), \fBvfork\fP(2),
+\fBwait\fP(2), \fBdaemon\fP(3), \fBcapabilities\fP(7), \fBcredentials\fP(7)

@@ -1,0 +1,195 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified 1993-07-21 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1997-01-12 by Michael Haardt
+.\"   <michael@cantor.informatik.rwth-aachen.de>: NFS details
+.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CHMOD 2 2010\-09\-26 Linux "Руководство программиста Linux"
+.SH ИМЯ
+chmod, fchmod \- изменить права доступа к файлу
+.SH ОБЗОР
+\fB#include <sys/stat.h>\fP
+.sp
+\fBint chmod(const char *\fP\fIpath\fP\fB, mode_t \fP\fImode\fP\fB);\fP
+.br
+\fBint fchmod(int \fP\fIfd\fP\fB, mode_t \fP\fImode\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+.PD 0
+\fBfchmod\fP():
+.RS 4
+_BSD_SOURCE || _XOPEN_SOURCE\ >=\ 500 || _XOPEN_SOURCE\ &&\ _XOPEN_SOURCE_EXTENDED
+.br
+|| /* начиная с glibc 2.12: */ _POSIX_C_SOURCE\ >=\ 200809L
+.RE
+.PD
+.ad
+.SH ОПИСАНИЕ
+Данные системные вызовы изменяют права доступа к файлу. Они отличаются
+только тем, как задан файл:
+.IP * 2
+\fBchmod\fP() изменяет права доступа к файлу, заданному параметром \fIpath\fP,
+который разыменовывается, если является символьной ссылкой.
+.IP *
+\fBfchmod\fP() изменяет права доступа к файлу, на который указывает открытый
+файловый дескриптор \fIfd\fP.
+.PP
+Новые права файла задаются в переменной \fImode\fP, которая представляет собой
+битовую маску, создаваемую побитовым сложением нуля или более следующих
+констант:
+.TP  18
+\fBS_ISUID\fP (04000)
+set\-user\-ID (установить эффективный  идентификатор пользователя процесса при
+\fBexecve\fP(2))
+.TP 
+\fBS_ISGID\fP (02000)
+set\-group\-ID (установить эффективный идентификатор группы процесса при
+\fBexecve\fP(2); обязательная блокировка, описывается в \fBfcntl\fP(2); выбрать
+новую группу файла от родительского каталога, описывается в \fBchown\fP(2) и
+\fBmkdir\fP(2))
+.TP 
+\fBS_ISVTX\fP (01000)
+закрепляющий бит (ограничительный флаг удаления, описывается в \fBunlink\fP(2))
+.TP 
+\fBS_IRUSR\fP (00400)
+владелец может читать
+.TP 
+\fBS_IWUSR\fP (00200)
+владелец может писать
+.TP 
+\fBS_IXUSR\fP (00100)
+владелец может выполнять файл или искать в каталоге  ("поиск" применим к
+каталогам и означает, что к элементам внутри каталога есть доступ)
+.TP 
+\fBS_IRGRP\fP (00040)
+группа\-владелец может читать
+.TP 
+\fBS_IWGRP\fP (00020)
+группа\-владелец может писать
+.TP 
+\fBS_IXGRP\fP (00010)
+группа\-владелец может выполнять файл или искать в каталоге
+.TP 
+\fBS_IROTH\fP (00004)
+все остальные могут читать
+.TP 
+\fBS_IWOTH\fP (00002)
+все остальные могут писать
+.TP 
+\fBS_IXOTH\fP (00001)
+все остальные могут выполнять файл или искать в каталоге
+.PP
+Эффективный идентификатор пользователя (UID) вызывающего процесса должен
+совпадать с UID владельца файла или процесс должен быть привилегированным
+(Linux: у него должен быть мандат \fBCAP_FOWNER\fP).
+
+Если вызывающий процесс не является привилегированным (Linux: не имеет
+мандата \fBCAP_FSETID\fP), а группа\-владелец файла не совпадает с эффективным
+групповым ID процесса или одним из его дополнительных групповых
+идентификаторов, то бит \fBS_ISGID\fP будет сброшен, но ошибки при этом не
+возникнет.
+
+В зависимости от файловой системы в целях безопасности биты выполнения
+set\-user\-ID и set\-group\-ID могут сбрасываться при записи в файл. (В Linux
+это происходит, если записывающий процесс не имеет мандата \fBCAP_FSETID\fP.) В
+некоторых файловых системах только суперпользователь может устанавливать
+закрепляющий бит, который может иметь специальное назначение. Значения
+закрепляющего бита, set\-user\-ID и set\-group\-ID для каталогов смотрите в
+\fBstat\fP(2).
+
+В файловых системах NFS ограничивающие права сразу начинают действовать даже
+уже на открытые файлы, так как контроль доступа выполняется сервером, но
+открытые файлы находятся в ведении клиента.  Распространение прав может
+откладываться для других клиентов, если у них установлен атрибут
+кэширования.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+В зависимости от файловой системы могут также появиться другие ошибки. Общий
+набор ошибок для \fBchmod\fP() таков:
+.TP 
+\fBEACCES\fP
+Поиск запрещён из\-за одного из частей префикса пути (См. также
+\fBpath_resolution\fP(7).)
+.TP 
+\fBEFAULT\fP
+Аргумент \fIpath\fP указывает за пределы доступного адресного пространства.
+.TP 
+\fBEIO\fP
+Произошла ошибка ввода\-вывода.
+.TP 
+\fBELOOP\fP
+Во время определения \fIpath\fP встретилось слишком много символьных ссылок.
+.TP 
+\fBENAMETOOLONG\fP
+\fIpath\fP слишком длинен.
+.TP 
+\fBENOENT\fP
+Файл не существует.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOTDIR\fP
+Компонент в префиксе пути не является каталогом.
+.TP 
+\fBEPERM\fP
+Эффективный UID не совпадает с идентификатором владельца файла, а процесс не
+является привилегированным (Linux: не имеет мандата \fBCAP_FOWNER\fP).
+.TP 
+\fBEROFS\fP
+Файл находится на файловой системе, смонтированной только для чтения.
+.PP
+Общий набор ошибок для \fBfchmod\fP() таков:
+.TP 
+\fBEBADF\fP
+Файловый дескриптор \fIfd\fP не действителен.
+.TP 
+\fBEIO\fP
+См. выше.
+.TP 
+\fBEPERM\fP
+См. выше.
+.TP 
+\fBEROFS\fP
+См. выше.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.4BSD, SVr4, POSIX.1\-2001.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBchown\fP(2), \fBexecve\fP(2), \fBfchmodat\fP(2), \fBopen\fP(2), \fBstat\fP(2),
+\fBpath_resolution\fP(7)

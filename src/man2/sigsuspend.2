@@ -1,0 +1,87 @@
+.\" Copyright (c) 2005 Michael Kerrisk
+.\" based on earlier work by faith@cs.unc.edu and
+.\" Mike Battersby <mib@deakin.edu.au>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" 2005-09-15, mtk, Created new page by splitting off from sigaction.2
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SIGSUSPEND 2 2008\-08\-29 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sigsuspend \- ожидает сигнала
+.SH ОБЗОР
+\fB#include <signal.h>\fP
+.sp
+\fBint sigsuspend(const sigset_t *\fP\fImask\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBsigsuspend\fP(): _POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE ||
+_POSIX_SOURCE
+.ad b
+.SH ОПИСАНИЕ
+Вызов \fBsigsuspend\fP() временно заменяет маску сигналов вызывающего процесса
+маской, указанной в \fImask\fP, и затем приостанавливает процесс до тех пор,
+пока не поступит сигнал, для которого запустится обработчик сигнала или это
+приведёт к завершению процесса.
+
+Если по сигналу процесс завершается, то вызов \fBsigsuspend\fP() не возвращает
+управление обратно в программу. Если сигнал пойман, то возврат из
+\fBsigsuspend\fP() произойдёт после завершения выполнения обработчика, и маска
+сигналов восстановится в значение, которое было до вызова \fBsigsuspend\fP().
+
+Сигналы \fBSIGKILL\fP и \fBSIGSTOP\fP невозможно заблокировать; указание этих этих
+сигналов в \fImask\fP не влияет на маску сигналов процесса.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Вызов \fBsigsuspend\fP() всегда возвращает \-1, обычно с ошибкой \fBEINTR\fP.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Аргумент \fImask\fP указывает на память в недопустимой части адресного
+пространства процесса.
+.TP 
+\fBEINTR\fP
+Вызов был прерван сигналом.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+.PP
+Обычно, \fBsigsuspend\fP() используется вместе с \fBsigprocmask\fP(2), чтобы
+предотвратить доставку сигнала при выполнении критического участка
+кода. Сначала вызывающий блокирует сигналы с помощью
+\fBsigprocmask\fP(2). Когда критический участок выполнен, вызывающий начинает
+ждать сигналов с помощью вызова \fBsigsuspend\fP(), указав маску, значение
+которой было возвращено вызовом \fBsigprocmask\fP(2) (в аргументе \fIoldset\fP).
+.PP
+Подробная информация о работе с наборами сигналов есть на странице
+\fBsigsetops\fP(3).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBkill\fP(2), \fBpause\fP(2), \fBsigaction\fP(2), \fBsignal\fP(2), \fBsigprocmask\fP(2),
+\fBsigwaitinfo\fP(2), \fBsigsetops\fP(3), \fBsigwait\fP(3), \fBsignal\fP(7)

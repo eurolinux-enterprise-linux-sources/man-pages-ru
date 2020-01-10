@@ -1,0 +1,134 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\" Based on glibc infopages
+.\" and Copyright 2008, Linux Foundation, written by Michael Kerrisk
+.\"     <mtk.manpages@gmail.com>
+.\" Modified 2004-11-15, fixed error noted by Fabian Kreutz
+.\"	 <kreutz@dbs.uni-hannover.de>
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH TGAMMA 3 2010\-09\-20 GNU "Руководство программиста Linux"
+.SH ИМЯ
+tgamma, tgammaf, tgammal \- вычисление настоящей гамма\-функции
+.SH ОБЗОР
+\fB#include <math.h>\fP
+.sp
+\fBdouble tgamma(double \fP\fIx\fP\fB);\fP
+.br
+\fBfloat tgammaf(float \fP\fIx\fP\fB);\fP
+.br
+\fBlong double tgammal(long double \fP\fIx\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBtgamma\fP(), \fBtgammaf\fP(), \fBtgammal\fP():
+.RS 4
+_XOPEN_SOURCE\ >=\ 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE\ >=\ 200112L;
+.br
+или \fIcc\ \-std=c99\fP
+.RE
+.ad
+.SH ОПИСАНИЕ
+Гамма\-функция определяется так:
+.sp
+    Gamma(x) = integral from 0 to infinity of t^(x\-1) e^\-t dt
+.sp
+Она определена для всех действительных чисел кроме не положительных
+целых. Для не положительных интеграл \fIm\fP получим
+.sp
+    Gamma(m+1) = m!
+.sp
+и, в общем случае, для всех \fIx\fP:
+.sp
+    Gamma(x+1) = x * Gamma(x)
+.sp
+Кроме это, допустимы все значения \fIx\fP вне особых точек:
+.sp
+    Gamma(x) * Gamma(1 \- x) = PI / sin(PI * x)
+.PP
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении данные функции возвращают Gamma(x).
+
+Если \fIx\fP равно NaN, то будет возвращено NaN.
+
+Если \fIx\fP стремится к плюс бесконечности, то будет возвращена плюс
+бесконечность.
+
+Если \fIx\fP отрицательное целое или стремится к минус бесконечности, то будет
+сгенерирована ошибка выхода за пределы области, а в качестве результата
+будет возвращено NaN.
+
+Если происходит переполнение результата, возникает ошибка диапазона, а
+функция возвращает \fBHUGE_VAL\fP, \fBHUGE_VALF\fP или \fBHUGE_VALL\fP,
+соответственно, с математически правильным знаком.
+
+Если происходит потеря разрядов, то возникает ошибка диапазона, а функция
+возвращает 0 с математически правильным знаком.
+
+Если \fIx\fP равно \-0 или +0, то генерируется ошибка особой точки, а функции
+возвращают \fBHUGE_VAL\fP, \fBHUGE_VALF\fP или \fBHUGE_VALL\fP, соответственно, с тем
+же знаком что и 0.
+.SH ОШИБКИ
+Смотрите \fBmath_error\fP(7), чтобы определить, какие ошибки могут возникать
+при вызове этих функций.
+.PP
+Могут возникать следующие ошибки:
+.TP 
+Ошибка области: \fIx\fP отрицательное целое или стремится к минус бесконечности
+.\" FIXME . errno is not set to EDOM for x == -inf
+.\" Bug raised: http://sources.redhat.com/bugzilla/show_bug.cgi?id=6809
+\fIerrno\fP устанавливается в \fBEDOM\fP. Вызывается исключение неправильной
+плавающей запятой (\fBFE_INVALID\fP)).
+.TP 
+Ошибка особой точки: \fIx\fP равно +0 или \-0
+\fIerrno\fP устанавливается в \fBERANGE\fP. Возникает исключение деления плавающей
+точки на ноль (\fBFE_DIVBYZERO\fP).
+.TP 
+Ошибка диапазона: результат превысил разрядность
+Значение \fIerrno\fP устанавливается в \fBERANGE\fP. Возникает исключение
+переполнения плавающей запятой (\fBFE_OVERFLOW\fP).
+.PP
+В glibc также возникает следующая ошибка, которая не определена в C99 или
+POSIX.1\-2001:
+.TP 
+Ошибка диапазона: результат потерял разрядность
+.\" e.g., tgamma(-172.5) on glibc 2.8/x86-32
+.\" .I errno
+.\" is set to
+.\" .BR ERANGE .
+Возникает исключение исчезновение порядка плавающей запятой
+(\fBFE_UNDERFLOW\fP).
+.IP
+.\" FIXME . Is it intentional that errno is not set:
+.\" Bug raised: http://sources.redhat.com/bugzilla/show_bug.cgi?id=6810
+.\"
+.\" glibc (as at 2.8) also supports and an inexact
+.\" exception for various cases.
+В данном случае \fIerrno\fP не изменяется.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Эта функция называется «настоящей гамма\-функцией» (true gamma function), так
+как уже есть функция \fBgamma\fP(3), возвращающая совершенно другое значение
+(смотрите \fBgamma\fP(3)).
+.SH ДЕФЕКТЫ
+.\" Bug raised: http://sources.redhat.com/bugzilla/show_bug.cgi?id=6809
+Если \fIx\fP равно минус бесконечности, то \fIerrno\fP не изменяется (должно было
+быть присвоено значение \fBEDOM\fP).
+
+В glibc версии 2.3.3 и старее при значении +0 или \-0 некорректно возникает
+ошибка области (\fIerrno\fP присваивается \fBEDOM\fP и возникает исключение
+\fBFE_INVALID\fP), а не ошибка особой точки.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgamma\fP(3), \fBlgamma\fP(3)

@@ -1,0 +1,186 @@
+.\" Copyright 1993 Giorgio Ciucci (giorgio@crcc.it)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Tue Oct 22 17:54:56 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1 Jan 2002, Martin Schulze <joey@infodrom.org>
+.\" Modified 4 Jan 2002, Michael Kerrisk <mtk.manpages@gmail.com>
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\" Modified, 11 Nov 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Language and formatting clean-ups
+.\"	Added notes on /proc files
+.\"	Rewrote BUGS note about semget()'s failure to initialize
+.\"		semaphore values
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SEMGET 2 2012\-05\-31 Linux "Руководство программиста Linux"
+.SH ИМЯ
+semget \- считывает идентификатор набора семафоров
+.SH ОБЗОР
+.nf
+\fB#include <sys/types.h>\fP
+\fB#include <sys/ipc.h>\fP
+\fB#include <sys/sem.h>\fP
+.fi
+.sp
+\fBint semget(key_t \fP\fIkey\fP\fB,\fP \fBint \fP\fInsems\fP\fB,\fP \fBint \fP\fIsemflg\fP\fB);\fP
+.SH ОПИСАНИЕ
+Системный вызов \fBsemget\fP() возвращает идентификатор набора семафоров,
+связанный с аргументом \fIkey\fP. Если значение \fIkey\fP равно \fBIPC_PRIVATE\fP или
+с ключом \fIkey\fP не связано ни одного существующего набора семафора, а в
+\fIsemflg\fP задано \fBIPC_CREAT\fP, создаётся новый набор из \fInsems\fP семафоров.
+.PP
+Если в \fIsemflg\fP одновременно указаны \fBIPC_CREAT\fP и \fBIPC_EXCL\fP и набор
+семафоров для \fIkey\fP уже существует, то \fBsemget\fP() завершается с ошибкой и
+\fIerrno\fP присваивается значение \fBEEXIST\fP (такой же результат как с
+\fBO_CREAT | O_EXCL\fP у \fBopen\fP(2)).
+.PP
+При создании в 9 начальных битах аргумента \fIsemflg\fP указываются права
+(владелец, группа и др.) на набор семафоров. Формат значения битов совпадает
+с аргументом \fImode\fP вызова \fBopen\fP(2) (но права на выполнение для семафоров
+ничего не означают, а права на запись означают право изменять значения
+семафоров).
+.PP
+.\" In truth, every one of the many implementations that I've tested sets
+.\" the values to zero, but I suppose there is/was some obscure
+.\" implementation out there that does not.
+После создания значения семафоров не определено (в соответствии с
+POSIX.1\-2001). Но в Linux, как и многих других реализациях, значения
+семафоров инициализируются 0, переносимые приложения не могут полагаться на
+это: они должны явно присваивать семафорам желаемое начальное значение.
+.PP
+При создании нового набора семафоров \fBsemget\fP() инициализирует связанную с
+семафором структуру данных \fIsemid_ds\fP (см. \fBsemctl\fP(2)) следующим образом:
+.IP
+Полям \fIsem_perm.cuid\fP и \fIsem_perm.uid\fP присваиваются значения эффективного
+идентификатора пользователя вызывающего процесса.
+.IP
+Полям \fIsem_perm.cgid\fP и \fIsem_perm.gid\fP присваиваются значения эффективного
+идентификатора группы вызывающего процесса.
+.IP
+Младшим 9 битам \fIsem_perm.mode\fP присваивается значение младших 9 бит
+\fIsemflg\fP.
+.IP
+Полю \fIsem_nsems\fP присваивается значение \fInsems\fP.
+.IP
+Полю \fIsem_otime\fP присваивается значение 0.
+.IP
+Полю \fIsem_ctime\fP присваивается значение текущего времени.
+.PP
+Если набор семафоров не создаётся, то аргумент \fInsems\fP может быть равен 0
+(не учитывать). Иначе аргумент \fInsems\fP должен быть больше 0 и меньше или
+равен максимальному количеству семафоров в наборе (\fBSEMMSL\fP).
+.PP
+.\" and a check is made to see if it is marked for destruction.
+Если набор семафоров уже существует, то проверяются права доступа.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается идентификатор набора семафоров
+(неотрицательное целое), иначе возвращается \-1, а переменной \fIerrno\fP
+присваивается номер ошибки.
+.SH ОШИБКИ
+При ошибке \fIerrno\fP присваиваются следующие значения:
+.TP 
+\fBEACCES\fP
+Набор семафоров для ключа \fIkey\fP существует, но вызывающий процесс не имеет
+прав доступа к нему и не имеет мандата \fBCAP_IPC_OWNER\fP.
+.TP 
+\fBEEXIST\fP
+.\" .TP
+.\" .B EIDRM
+.\" The semaphore set is marked to be deleted.
+Набор семафоров для ключа \fIkey\fP существует, но в \fIsemflg\fP заданы флаги
+\fBIPC_CREAT\fP и \fBIPC_EXCL\fP.
+.TP 
+\fBEINVAL\fP
+Значение \fInsems\fP меньше 0 или больше максимально возможного для набора
+количества семафоров (\fBSEMMSL\fP), или набор семафоров, соответствующий
+\fIkey\fP, уже существует и \fInsems\fP больше, чем количество семафоров в этом
+наборе.
+.TP 
+\fBENOENT\fP
+Для ключа \fIkey\fP не существует набора семафоров и в \fIsemflg\fP нет флага
+\fBIPC_CREAT\fP.
+.TP 
+\fBENOMEM\fP
+Набор семафоров должен быть создан, но в системе не хватает памяти для
+хранения новой структуры данных.
+.TP 
+\fBENOSPC\fP
+Набор семафоров должен быть создан, но при этом будет превышен системный
+лимит на количество наборов семафоров (\fBSEMMNI\fP) или системный лимит на
+количество семафоров (\fBSEMMNS\fP).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents additional error conditions EFBIG, E2BIG, EAGAIN,
+.\" ERANGE, EFAULT.
+SVr4, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+.\" Like Linux, the FreeBSD man pages still document
+.\" the inclusion of these header files.
+Включение файлов \fI<sys/types.h>\fP и \fI<sys/ipc.h>\fP не
+требуется в Linux или любых версий POSIX. Однако, некоторые старые
+реализации требуют включения данных заголовочных файлов, и это также
+требуется по SVID. В приложениях, которые нужно перенести на такие старые
+системы, может потребоваться включить данных заголовочные файлы.
+
+\fBIPC_PRIVATE\fP не поле флага, а тип \fIkey_t\fP. Если \fIkey\fP равно этому
+значению, то системный вызов игнорирует всё кроме 9\-ти младших битов
+\fIsemflg\fP и создаёт новый набор семафоров (при успешном выполнении).
+.PP
+Ниже приведены ограничения на ресурсы набора семафоров, оказывающие влияние
+на вызов \fBsemget\fP():
+.TP 
+\fBSEMMNI\fP
+.\" This /proc file is not available in Linux 2.2 and earlier -- MTK
+Максимальное количество наборов семафоров в системе: зависит от политики (в
+Linux это ограничение можно получать и изменять через четвёртое поле
+\fI/proc/sys/kernel/sem\fP).
+.TP 
+\fBSEMMSL\fP
+Максимальное количество семафоров в semid: зависит от реализации (в Linux
+это ограничение можно получать и изменять через первое поле
+\fI/proc/sys/kernel/sem\fP).
+.TP 
+\fBSEMMNS\fP
+Максимальное количество семафоров в системе: зависит от политики (в Linux
+это ограничение можно получать и изменять через второе поле
+\fI/proc/sys/kernel/sem\fP). Значения больше чем \fBSEMMSL * SEMMNI\fP считаются
+некорректными.
+.SH ДЕФЕКТЫ
+Имя \fBIPC_PRIVATE\fP, возможно, было выбрано неудачно, \fBIPC_NEW\fP отражает
+смысл действия более ясно.
+.LP
+.\" In fact they are initialized to zero on Linux, but POSIX.1-2001
+.\" does not specify this, and we can't portably rely on it.
+Семафоры в наборе не инициализируются вызовом \fBsemget\fP(). Для того, чтобы
+их инициализировать, нужно использовать вызов \fBsemctl\fP(2), чтобы выполнить
+операцию \fBSETVAL\fP или \fBSETALL\fP над набором семафоров (если не понятно
+какой семафор нужно иницилизировать первым, для предотвращения
+состязательности проверяется ненулевое значение \fIsem_otime\fP в связанной
+структуре данных, получаемой с помощью вызова \fBsemctl\fP(2) с операцией
+\fBIPC_STAT\fP).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBsemctl\fP(2), \fBsemop\fP(2), \fBftok\fP(3), \fBcapabilities\fP(7),
+\fBsem_overview\fP(7), \fBsvipc\fP(7)

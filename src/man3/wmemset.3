@@ -1,0 +1,38 @@
+.\" Copyright (c) Bruno Haible <haible@clisp.cons.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" References consulted:
+.\"   GNU glibc-2 source code and manual
+.\"   Dinkumware C library reference http://www.dinkumware.com/
+.\"   OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+.\"   ISO/IEC 9899:1999
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH WMEMSET 3 1999\-07\-25 GNU "Руководство программиста Linux"
+.SH ИМЯ
+wmemset \- заполнение элементов массива широких символов постоянным широким
+символом.
+.SH ОБЗОР
+.nf
+\fB#include <wchar.h>\fP
+.sp
+\fBwchar_t *wmemset(wchar_t *\fP\fIwcs\fP\fB, wchar_t \fP\fIwc\fP\fB, size_t \fP\fIn\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBwmemset\fP() является широкосимвольным аналогом функции
+\fBmemset\fP(3). Она заполняет массив из \fIn\fP широких символов, начиная с
+\fIwcs\fP, копируя в него \fIn\fP широких символов \fIwc\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+\fBwmemset\fP() возвращает \fIwcs\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBmemset\fP(3)

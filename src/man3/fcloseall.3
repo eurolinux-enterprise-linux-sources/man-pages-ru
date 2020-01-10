@@ -1,0 +1,51 @@
+.\" Copyright (c) 2006 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" License.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FCLOSEALL 3 2006\-12\-27 GNU "Руководство программиста Linux"
+.SH ИМЯ
+fcloseall \- закрытие всех открытых потоков
+.SH ОБЗОР
+.nf
+\fB#define _GNU_SOURCE\fP         /* см. feature_test_macros(7) */
+\fB#include <stdio.h>\fP
+.sp
+\fBint fcloseall(void);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBfcloseall\fP() закрывает все открытые потоки вызвавшего
+процесса. Перед закрытием буферизированный вывод каждого потока записывается
+(как с \fBfflush\fP(3)), а буферизированный ввод отбрасывается.
+
+Стандартные потоки, \fIstdin\fP, \fIstdout\fP и \fIstderr\fP, также закрываются.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Данная функция возвращает 0, если все файлы успешно закрыты, и \fBEOF\fP в
+случае ошибки.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция является расширением GNU.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclose\fP(2), \fBfclose\fP(3), \fBfflush\fP(3), \fBfopen\fP(3), \fBsetbuf\fP(3)

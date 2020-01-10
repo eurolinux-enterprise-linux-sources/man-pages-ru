@@ -1,0 +1,164 @@
+.\"
+.\"  epoll by Davide Libenzi ( efficient event notification retrieval )
+.\"  Copyright (C) 2003  Davide Libenzi
+.\"
+.\"  This program is free software; you can redistribute it and/or modify
+.\"  it under the terms of the GNU General Public License as published by
+.\"  the Free Software Foundation; either version 2 of the License, or
+.\"  (at your option) any later version.
+.\"
+.\"  This program is distributed in the hope that it will be useful,
+.\"  but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\"  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\"  GNU General Public License for more details.
+.\"
+.\"  You should have received a copy of the GNU General Public License
+.\"  along with this program; if not, write to the Free Software
+.\"  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+.\"
+.\"  Davide Libenzi <davidel@xmailserver.org>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH EPOLL_CTL 2 2012\-04\-15 Linux "Руководство программиста Linux"
+.SH ИМЯ
+epoll_ctl \- интерфейс управления дескриптором epoll
+.SH ОБЗОР
+\fB#include <sys/epoll.h>\fP
+.sp
+\fBint epoll_ctl(int \fP\fIepfd\fP\fB, int \fP\fIop\fP\fB, int \fP\fIfd\fP\fB, struct
+epoll_event *\fP\fIevent\fP\fB);\fP
+.SH ОПИСАНИЕ
+Данный системный вызов выполняет операции управления экземпляром
+\fBepoll\fP(7), на который указывает файловый дескриптор \fIepfd\fP. Он
+запрашивает выполнение операции \fIop\fP для файлового дескриптора назначения
+\fIfd\fP.
+
+Допустимые значения аргумента \fIop\fP:
+.TP 
+\fBEPOLL_CTL_ADD\fP
+Зарегистрировать файловый дескриптор назначения \fIfd\fP в экземпляре \fBepoll\fP,
+на который указывает файловый дескриптор \fIepfd\fP, и связать событие \fIevent\fP
+с внутренним файлом, указывающим на \fIfd\fP.
+.TP 
+\fBEPOLL_CTL_MOD\fP
+Изменить событие \fIevent\fP, связанное с файловым дескриптором назначения
+\fIfd\fP.
+.TP 
+\fBEPOLL_CTL_DEL\fP
+Удалить (отменить регистрацию) файлового дескриптора назначения \fIfd\fP из
+экземпляра \fBepoll\fP, на который указывает \fIepfd\fP. Значение \fIevent\fP
+игнорируется и может быть NULL (но см. ДЕФЕКТЫ далее).
+.PP
+Аргумент \fIevent\fP описывает объект, связанный с файловым дескриптором
+\fIfd\fP. Структура \fIstruct epoll_event\fP определена так:
+.sp
+.in +4n
+.nf
+typedef union epoll_data {
+    void        *ptr;
+    int          fd;
+    uint32_t     u32;
+    uint64_t     u64;
+} epoll_data_t;
+
+struct epoll_event {
+    uint32_t     events;      /* События epoll */
+    epoll_data_t data;        /* Переменная для данных пользователя */
+};
+.fi
+.in
+
+Поле \fIevents\fP является набором битов, составляемое из следующих возможных
+типов событий:
+.TP 
+\fBEPOLLIN\fP
+Связанный файл доступен для чтения с помощью \fBread\fP(2).
+.TP 
+\fBEPOLLOUT\fP
+Связанный файл доступен для записи с помощью \fBwrite\fP(2).
+.TP 
+\fBEPOLLRDHUP\fP (начиная с Linux 2.6.17)
+Одна из сторон потокового сокета закрыла соединение, или выключила
+записывающую часть соединения. (Этот флаг особенно полезен при написании
+простого кода для обнаружения отключения стороны с помощью слежения Edge
+Triggered.)
+.TP 
+\fBEPOLLPRI\fP
+Для операций \fBread\fP(2) есть срочные данные.
+.TP 
+\fBEPOLLERR\fP
+Произошла ошибка со связанным файловым дескриптором. \fBepoll_wait\fP(2) всегда
+будет ждать этого события; его не нужно устанавливать в \fIevents\fP.
+.TP 
+\fBEPOLLHUP\fP
+Произошло зависание связанного файлового дескриптора. Вызов \fBepoll_wait\fP(2)
+будет всегда ждать этого события; его не нужно указывать в \fIevents\fP.
+.TP 
+\fBEPOLLET\fP
+Установить поведение Edge Triggered для связанного файлового
+дескриптора. Поведение по умолчанию для \fBepoll\fP равно Level
+Triggered. Более подробное описание архитектуры распределения событий Edge и
+Level Triggered смотрите в \fBepoll\fP(7).
+.TP 
+\fBEPOLLONESHOT\fP (начиная с Linux 2.6.2)
+Установить однократное получение для связанного файлового дескриптора. Это
+означает, что после извлечения события с помощью \fBepoll_wait\fP(2) со
+связанным дескриптором приём отключается и о других событиях интерфейс
+\fBepoll\fP сообщать не будет. Пользователь должен вызвать \fBepoll_ctl\fP() с
+операцией \fBEPOLL_CTL_MOD\fP для переустановки новой маски событий для
+файлового дескриптора.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBepoll_ctl\fP() возвращается ноль. При возникновении
+ошибок \fBepoll_ctl\fP() возвращает \-1 и устанавливает \fIerrno\fP в
+соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+\fIepfd\fP или \fIfd\fP не является правильным файловым дескриптором.
+.TP 
+\fBEEXIST\fP
+Значение \fIop\fP равно \fBEPOLL_CTL_ADD\fP, и указанный файловый дескриптор \fIfd\fP
+уже зарегистрирован в данном экземпляре epoll.
+.TP 
+\fBEINVAL\fP
+Значение \fIepfd\fP не является файловым дескриптором \fBepoll\fP, или значение
+\fIfd\fP равно \fIepfd\fP, или запрашиваемая операция \fIop\fP не поддерживается
+данным интерфейсом.
+.TP 
+\fBENOENT\fP
+В \fIop\fP было указано \fBEPOLL_CTL_MOD\fP или \fBEPOLL_CTL_DEL\fP, а \fIfd\fP не было
+зарегистрировано в данном экземпляре epoll.
+.TP 
+\fBENOMEM\fP
+Недостаточно памяти для обработки запрошенной управляющей операции \fIop\fP.
+.TP 
+\fBENOSPC\fP
+При попытке регистрации (\fBEPOLL_CTL_ADD\fP) нового файлового дескриптора в
+экземпляре достигнут предел, накладываемый
+\fI/proc/sys/fs/epoll/max_user_watches\fP. Подробней см. в \fBepoll\fP(7).
+.TP 
+\fBEPERM\fP
+Файл назначения \fIfd\fP не поддерживает \fBepoll\fP.
+.SH ВЕРСИИ
+.\" To be precise: kernel 2.5.44.
+.\" The interface should be finalized by Linux kernel 2.5.66.
+Системный вызов \fBepoll_ctl\fP() был добавлен в ядро версии 2.6.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBepoll_ctl\fP() есть только в Linux. В glibc соответствующая функция
+появилась в версии 2.3.2.
+.SH ЗАМЕЧАНИЯ
+Интерфейс \fBepoll\fP поддерживает все файловые дескрипторы, которые
+поддерживает \fBpoll\fP(2).
+.SH ДЕФЕКТЫ
+В ядрах до версии 2.6.9 для операции \fBEPOLL_CTL_DEL\fP в \fIevent\fP требовался
+указатель со значением не равным NULL, хотя этот аргумент
+игнорировался. Начиная с Linux 2.6.9, при \fBEPOLL_CTL_DEL\fP в \fIevent\fP можно
+указывать NULL. В переносимых приложениях, которые должны быть
+работоспособными в системах на ядрах до 2.6.9, в \fIevent\fP нужно указывать
+указатель со значением не равным NULL.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBepoll_create\fP(2), \fBepoll_wait\fP(2), \fBpoll\fP(2), \fBepoll\fP(7)

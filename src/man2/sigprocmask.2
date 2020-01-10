@@ -1,0 +1,108 @@
+.\" Copyright (c) 2005 Michael Kerrisk
+.\" based on earlier work by faith@cs.unc.edu and
+.\" Mike Battersby <mib@deakin.edu.au>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" 2005-09-15, mtk, Created new page by splitting off from sigaction.2
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SIGPROCMASK 2 2012\-04\-15 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sigprocmask \- проверяет и изменяет блокировку сигналов
+.SH ОБЗОР
+\fB#include <signal.h>\fP
+.sp
+\fBint sigprocmask(int \fP\fIhow\fP\fB, const sigset_t *\fP\fIset\fP\fB,\fP \fBsigset_t
+*\fP\fIoldset\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBsigprocmask\fP(): _POSIX_C_SOURCE\ >=\ 1 || _XOPEN_SOURCE ||
+_POSIX_SOURCE
+.ad b
+.SH ОПИСАНИЕ
+Вызов \fBsigprocmask\fP() используется для выборки и/или изменения маски
+сигналов вызывающей нити. Маска сигналов представляет собой набор сигналов,
+чья доставка в настоящее время заблокирована вызывающим (подробнее об этом
+смотрите также в \fBsignal\fP(7)).
+
+Работа вызова зависит от значения \fIhow\fP:
+.TP 
+\fBSIG_BLOCK\fP
+Набор блокируемых сигналов — объединение текущего набора и аргумента \fIset\fP.
+.TP 
+\fBSIG_UNBLOCK\fP
+Сигналы в \fIset\fP удаляются из списка блокируемых сигналов. Допускается
+разблокировать незаблокированные сигналы.
+.TP 
+\fBSIG_SETMASK\fP
+Набор блокируемых сигналов приравнивается к аргументу \fIset\fP.
+.PP
+Если значение \fIoldset\fP не равно NULL, то предыдущее значение маски сигналов
+записывается в \fIoldset\fP.
+
+Если значение \fIset\fP равно NULL, то маска сигналов не изменяется (т.е.,
+значение \fIhow\fP игнорируется), но текущее значение маски сигналов всё же
+возвращается в \fIoldset\fP (если его значение не равно NULL).
+
+Использование \fBsigprocmask\fP() в многотивых процессах не определено;
+смотрите \fBpthread_sigmask\fP(3).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении вызова \fBsigprocmask\fP() возвращается 0 и \-1 при
+ошибке.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+аргумент \fIset\fP или \fIoldset\fP указывает за пределы выделенного адресного
+пространства процесса.
+.TP 
+\fBEINVAL\fP
+Неверное значение в \fIhow\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Невозможно заблокировать \fBSIGKILL\fP или \fBSIGSTOP\fP. Попытка выполнить это
+просто игнорируется.
+
+Каждая нить процесса имеют свою маску сигналов.
+
+Потомок, создаваемый с помощью \fBfork\fP(2), наследует копию родительской
+маски сигналов; маска сигналов сохраняется при вызове \fBexecve\fP(2).
+
+Если генерируется сигнал \fBSIGBUS\fP, \fBSIGFPE\fP, \fBSIGILL\fP или \fBSIGSEGV\fP, а
+он заблокирован, то результат не определён, если сигнал был сгенерирован не
+из \fBkill\fP(3), \fBsigqueue\fP(3) или \fBraise\fP(3).
+.PP
+Подробная информация о работе с наборами сигналов есть на странице
+\fBsigsetops\fP(3).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBkill\fP(2), \fBpause\fP(2), \fBsigaction\fP(2), \fBsignal\fP(2), \fBsigpending\fP(2),
+\fBsigsuspend\fP(2), \fBpthread_sigmask\fP(3), \fBsigqueue\fP(3), \fBsigsetops\fP(3),
+\fBsignal\fP(7)

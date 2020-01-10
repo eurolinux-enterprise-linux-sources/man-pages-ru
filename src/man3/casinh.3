@@ -1,0 +1,38 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CASINH 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+casinh, casinhf, casinhl \- вычисление гиперболического арксинуса
+комплексного числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex casinh(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex casinhf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex casinhl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция \fBcasinh\fP() вычисляет гиперболический арксинус комплексного числа
+\fIz\fP. Если \fIy\ =\ casinh(z)\fP, то \fIz\ =\ csinh(y)\fP. Мнимая часть \fIy\fP лежит
+в интервале [\-pi/2,pi/2].
+.LP
+Формула вычисления:
+.nf
+
+    casinh(z) = clog(z + csqrt(z * z + 1))
+.fi
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBasinh\fP(3), \fBcabs\fP(3), \fBcimag\fP(3), \fBcsinh\fP(3), \fBcomplex\fP(7)

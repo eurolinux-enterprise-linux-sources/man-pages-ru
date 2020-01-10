@@ -1,0 +1,88 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETPID 2 2008\-09\-23 Linux "Руководство программиста Linux"
+.SH ИМЯ
+getpid, getppid \- получение идентификатора процесса
+.SH ОБЗОР
+\fB#include <sys/types.h>\fP
+.br
+\fB#include <unistd.h>\fP
+.sp
+\fBpid_t getpid(void);\fP
+.br
+\fBpid_t getppid(void);\fP
+.SH ОПИСАНИЕ
+\fBgetpid\fP() возвращает идентификатор вызвавшего процесса. (Часто
+используется функциями, которые генерируют уникальные имена временных
+файлов.)
+
+\fBgetppid\fP() возвращает идентификатор процесса, являющегося родительским по
+отношению к вызвавшему процессу.
+.SH ОШИБКИ
+Функции всегда завершаются успешно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001, 4.3BSD, SVr4.
+.SH ЗАМЕЧАНИЯ
+.\" The following program demonstrates this "feature":
+.\"
+.\" #define _GNU_SOURCE
+.\" #include <sys/syscall.h>
+.\" #include <sys/wait.h>
+.\" #include <stdio.h>
+.\" #include <stdlib.h>
+.\" #include <unistd.h>
+.\"
+.\" int
+.\" main(int argc, char *argv[])
+.\" {
+.\"    /* The following statement fills the getpid() cache */
+.\"
+.\"    printf("parent PID = %ld\n", (long) getpid());
+.\"
+.\"    if (syscall(SYS_fork) == 0) {
+.\"        if (getpid() != syscall(SYS_getpid))
+.\"            printf("child getpid() mismatch: getpid()=%ld; "
+.\"                    "syscall(SYS_getpid)=%ld\n",
+.\"                    (long) getpid(), (long) syscall(SYS_getpid));
+.\"        exit(EXIT_SUCCESS);
+.\"    }
+.\"    wait(NULL);
+.\"}
+Начиная с glibc версии 2.3.4, обёрточная функция glibc для \fBgetpid\fP()
+кэширует PID, чтобы избежать дополнительных системных вызовов, если процесс
+постоянно вызывает \fBgetpid\fP(). Обычно это кэширование проходит незаметно,
+но его правильная работа полагается на поддержку обёрточных функций для
+\fBfork\fP(2), \fBvfork\fP(2) и \fBclone\fP(2): если приложение не использует
+обёрточные функции glibc для этих системных вызовов и использует вместо них
+\fBsyscall\fP(2), то вызов \fBgetpid\fP() в потомке вернёт неправильное значение
+(точнее, вернёт PID родительского процесса). Смотрите также в \fBclone\fP(2)
+обсуждение случая, когда \fBgetpid\fP() может вернуть неправильное значение
+даже когда \fBclone\fP(2) вызывается через обёрточную функцию glibc.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclone\fP(2), \fBfork\fP(2), \fBkill\fP(2), \fBexec\fP(3), \fBmkstemp\fP(3),
+\fBtempnam\fP(3), \fBtmpfile\fP(3), \fBtmpnam\fP(3), \fBcredentials\fP(7)

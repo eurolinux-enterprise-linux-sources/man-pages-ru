@@ -1,0 +1,134 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright 1993 Rickard E. Faith (faith@cs.unc.edu)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Thu Oct 31 12:04:29 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\" 2008-05-03, mtk, expanded and rewrote parts of DESCRIPTION and RETURN
+.\"     VALUE, made style of page more consistent with man-pages style.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETGROUPS 2 2010\-11\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+getgroups, setgroups \- получить/установить список дополнительных
+идентификаторов групп
+.SH ОБЗОР
+\fB#include <sys/types.h>\fP
+.br
+\fB#include <unistd.h>\fP
+.sp
+\fBint getgroups(int \fP\fIsize\fP\fB, gid_t \fP\fIlist\fP\fB[]);\fP
+.sp
+\fB#include <grp.h>\fP
+.sp
+\fBint setgroups(size_t \fP\fIsize\fP\fB, const gid_t *\fP\fIlist\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBsetgroups\fP(): _BSD_SOURCE
+.SH ОПИСАНИЕ
+.PP
+Вызов \fBgetgroups\fP() возвращает идентификаторы дополнительных групп
+вызывающего процесса в списке \fIlist\fP. В аргументе \fIsize\fP должно быть
+указано максимальное количество элементов, которые можно сохранить в буфер,
+указанный \fIlist\fP. Если вызывающий процесс является членом в более чем
+\fIsize\fP дополнительных групп, то возвращается ошибка. an error results. Для
+него не определено, будет ли в этот список включён эффективный идентификатор
+группы вызывающего процесса. (То есть приложение также должно вызвать
+\fBgetegid\fP(2) и добавить или удалить полученное значение.)
+
+Если размер \fIsize\fP равен нулю, то список \fIlist\fP не изменяется, а просто
+возвращается общее количество идентификаторов дополнительных групп
+процесса. Это позволяет вызывающему определить размер динамически
+выделяемого списка \fIlist\fP, который будет использоваться при повторном
+вызове \fBgetgroups\fP().
+.PP
+Вызов \fBsetgroups\fP() устанавливает идентификаторы дополнительных групп для
+вызывающего процесса. Для работы требуются привилегии (Linux: мандат
+\fBCAP_SETGID\fP). В аргументе \fIsize\fP задаётся количество дополнительных
+идентификаторов групп в буфере, указанном \fIlist\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBgetgroups\fP() возвращается количество
+дополнительных идентификаторов. В случае ошибки возвращается \-1, а \fIerrno\fP
+устанавливается в соответствующее значение.
+
+При успешном выполнении \fBsetgroups\fP() возвращается 0. В случае ошибки
+возвращается \-1, а \fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Значение \fIlist\fP является неправильным адресом.
+.PP
+Вызов \fBgetgroups\fP() также может завершиться со следующей ошибкой:
+.TP 
+\fBEINVAL\fP
+Значение \fIsize\fP меньше чем количество дополнительных идентификаторов групп,
+но не ноль.
+.PP
+Вызов \fBsetgroups\fP() также может завершиться со следующими ошибками:
+.TP 
+\fBEINVAL\fP
+Значение \fIsize\fP больше чем \fBNGROUPS_MAX\fP (32, до Linux 2.6.4; 65536,
+начиная с Linux 2.6.4).
+.TP 
+\fBENOMEM\fP
+Не хватает памяти.
+.TP 
+\fBEPERM\fP
+Вызывающий процесс не имеет достаточно прав.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.3BSD. Функции \fBgetgroups\fP() нет в POSIX.1\-2001. Так как вызов
+\fBsetgroups\fP() требует привилегий, он не описан в POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Процесс может иметь как минимум \fBNGROUPS_MAX\fP дополнительных
+идентификаторов групп в дополнении к эффективному идентификатору
+группы. Список дополнительных идентификаторов групп наследуется из
+родительского процесса и сохраняется при вызове \fBexecve\fP(2).
+
+Максимальное количество дополнительных идентификаторов групп можно выяснить
+с помощью sysconf(3):
+.nf
+
+    long ngroups_max;
+    ngroups_max = sysconf(_SC_NGROUPS_MAX);
+
+.fi
+Максимальное значение, возвращаемое \fBgetgroups\fP(), не может быть больше чем
+на единицу значения, полученного данным способом.
+
+Первоначальная версия системного вызова \fBgetgroups\fP() в Linux поддерживала
+только 16\-битные идентификаторы групп. Позднее в Linux 2.4 был добавлен
+вызов \fBgetgroups32\fP(), поддерживающий 32\-битные идентификаторы. В glibc
+обёрточная функция \fBgetgroups\fP() работает одинаково вне зависимости от
+версий ядра.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetgid\fP(2), \fBsetgid\fP(2), \fBgetgrouplist\fP(3), \fBinitgroups\fP(3),
+\fBcapabilities\fP(7), \fBcredentials\fP(7)

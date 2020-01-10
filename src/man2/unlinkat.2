@@ -1,0 +1,109 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 2006, Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH UNLINKAT 2 2012\-05\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+unlinkat \- удаляет элемент каталога, определяемый относительно файлового
+дескриптора каталога
+.SH ОБЗОР
+.nf
+\fB#include <fcntl.h> /* определения констант AT_* */\fP
+\fB#include <unistd.h>\fP
+.sp
+\fBint unlinkat(int \fP\fIdirfd\fP\fB, const char *\fP\fIpathname\fP\fB, int \fP\fIflags\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBunlinkat\fP():
+.PD 0
+.ad l
+.RS 4
+.TP  4
+Начиная с glibc 2.10:
+_XOPEN_SOURCE\ >=\ 700 || _POSIX_C_SOURCE\ >=\ 200809L
+.TP 
+До glibc 2.10:
+_ATFILE_SOURCE
+.RE
+.ad
+.PD
+.SH ОПИСАНИЕ
+Системный вызов \fBunlinkat\fP() работает также как \fBunlink\fP(2) или
+\fBrmdir\fP(2) (в зависимости от того, есть ли флаг \fBAT_REMOVEDIR\fP во
+\fIflags\fP), за исключением случаев, описанных в данной справочной странице.
+
+Если в \fIpathname\fP задан относительный путь, то он считается относительно
+каталога, на который ссылается файловый дескриптор \fIdirfd\fP (а не
+относительно текущего рабочего каталога вызывающего процесса, как это
+делается в \fBunlink\fP(2) и \fBrmdir\fP(2)).
+
+Если в \fIpathname\fP задан относительный путь и \fIdirfd\fP равно специальному
+значению \fBAT_FDCWD\fP, то \fIpathname\fP рассматривается относительно текущего
+рабочего каталога вызывающего процесса (как \fBunlink\fP(2) и \fBrmdir\fP(2)).
+
+Если в \fIpathname\fP задан абсолютный путь, то \fIdirfd\fP игнорируется.
+
+Аргумент \fIflags\fP представляет собой битовую маску, значение которой может
+быть 0, или объединённым значением флагов с помощью OR, определяющих
+операцию \fBunlinkat\fP(). В настоящее время определены следующие флаги:
+.TP 
+\fBAT_REMOVEDIR\fP
+По умолчанию, \fBunlinkat\fP() выполняет действие, эквивалентное \fBunlink\fP(2) с
+параметром \fIpathname\fP. Если указан флаг \fBAT_REMOVEDIR\fP, то выполняется
+действие, эквивалентное \fBrmdir\fP(2) с параметром \fIpathname\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBunlinkat\fP() возвращается 0. При ошибке
+возвращается \-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+В \fBunlinkat\fP() могут возникнуть те же ошибки, что и в \fBunlink\fP(2) и
+\fBrmdir\fP(2). Также, в \fBunlinkat\fP() могут возникнуть следующие ошибки:
+.TP 
+\fBEBADF\fP
+\fIdirfd\fP не является правильным файловым дескриптором.
+.TP 
+\fBEINVAL\fP
+В \fIflags\fP указано неверное значение флага.
+.TP 
+\fBENOTDIR\fP
+Значение \fIpathname\fP содержит относительный путь и \fIdirfd\fP содержит
+файловый дескриптор, указывающий на файл, а не на каталог.
+.SH ВЕРСИИ
+Системный вызов \fBunlinkat\fP() был добавлен в ядро Linux версии 2.6.16;
+поддержка в glibc доступна с версии 2.4.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2008. Подобный системный вызов есть в Solaris.
+.SH ЗАМЕЧАНИЯ
+Смотрите в \fBopenat\fP(2) объяснение необходимости \fBunlinkat\fP().
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBopenat\fP(2), \fBrmdir\fP(2), \fBunlink\fP(2), \fBpath_resolution\fP(7)

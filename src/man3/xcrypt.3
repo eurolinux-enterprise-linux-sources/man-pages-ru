@@ -1,0 +1,49 @@
+.\"  Copyright 2003 walter harms (walter.harms@informatik.uni-oldenburg.de)
+.\"  Distributed under GPL
+.\"  this is the 3rd type of interface for cryptographic routines
+.\"  1. encrypt() expects a bit field
+.\"  2. cbc_crypt() byte values
+.\"  3. xencrypt() a hexstring
+.\"  to bad to be true :(
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH XCRYPT 3 2003\-04\-04 "" "Руководство программиста Linux"
+.SH ИМЯ
+xencrypt, xdecrypt, passwd2des \- шифрование пароля RFS
+.SH ОБЗОР
+\fB#include <rpc/des_crypt.h>\fP
+.sp
+\fBvoid passwd2des(char \fP\fI*passwd\fP\fB, char *\fP\fIkey\fP\fB);\fP
+.sp
+\fBint xencrypt(char *\fP\fIsecret\fP\fB, char *\fP\fIpasswd\fP\fB);\fP
+.sp
+\fBint xdecrypt(char *\fP\fIsecret\fP\fB, char *\fP\fIpasswd\fP\fB);\fP
+.SH ОПИСАНИЕ
+Функция \fBpasswd2des\fP() принимает строку символов \fIpasswd\fP заданной длины и
+заполняет массив символов \fIkey\fP с 8 элементами, который подходит для
+использования в качестве ключа DES. Для каждого байта выставляется нулевой
+бит нечетности. Остальные две описанные здесь функции используют эту функцию
+для преобразования своего аргумента \fIpasswd\fP в ключ DES.
+.LP
+.\" (over the alphabet 0123456789abcdefABCDEF),
+.\" (over the alphabet 0123456789abcdef)
+Функция \fBxencrypt\fP() принимает строку из ASCII\-символов \fIsecret\fP в виде
+шестнадцатеричной последовательности, длина которой должна быть кратна 16,
+шифрует её с помощью ключа DES, полученного из \fIpasswd\fP с помощью функции
+\fBpasswd2des\fP() и выводит результат снова в \fIsecret\fP в виде
+шестнадцатеричной строки той же длины.
+.LP
+Функция \fBxdecrypt\fP() выполняет противоположную операцию.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении функции \fBxencrypt\fP() и \fBxdecrypt\fP() возвращают 1 и
+0 при ошибке.
+.SH ВЕРСИИ
+Данные функции присутствуют в libc 4.6.27 и выше и в glibc 2.1 и выше.
+.SH ДЕФЕКТЫ
+В упомянутом выше заголовочном файле отсутствуют прототипы.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcbc_crypt\fP(3)

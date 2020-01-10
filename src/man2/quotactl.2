@@ -1,0 +1,324 @@
+.\" Copyright (c) 2010, Jan Kara
+.\" A few pieces copyright (c) 1996 Andries Brouwer (aeb@cwi.nl)
+.\" and copyright 2010 (c) Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of
+.\" this manual under the conditions for verbatim copying, provided that
+.\" the entire resulting derived work is distributed under the terms of
+.\" a permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume.
+.\" no responsibility for errors or omissions, or for damages resulting.
+.\" from the use of the information contained herein.  The author(s) may.
+.\" not have taken the same level of care in the production of this.
+.\" manual, which is licensed free of charge, as they might when working.
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH QUOTACTL 2 2010\-06\-16 Linux "Руководство программиста Linux"
+.SH ИМЯ
+quotactl \- управление дисковыми квотами
+.SH ОБЗОР
+.nf
+\fB#include <sys/quota.h>\fP
+\fB#include <xfs/xqm.h>\fP
+.LP
+\fBint quotactl(int \fP\fIcmd\fP\fB, const char *\fP\fIspecial\fP\fB, int \fP\fIid\fP\fB, caddr_t \fP\fIaddr\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+.LP
+С помощью системы квот можно задать каждому пользователю или группе лимит
+использования дискового пространства. Для пользователя или группы в каждой
+файловой системе можно указать необязательный (soft) и обязательный (hard)
+лимиты. Обязательный лимит не может быть превышен. Необязательный лимит
+превышать можно, но будет выдано соответствующее предостережение. Более
+того, пользователь не может превышать необязательный лимит более одной
+недели (по умолчанию): по истечении этого времени необязательный лимит будет
+считаться обязательным.
+
+Управление квотами выполняется с помощью вызова \fBquotactl\fP(). В аргументе
+\fIcmd\fP задаётся команда, которая должна быть применена для пользовательского
+или группового идентификатора, указанного в \fIid\fP. Для инициализации
+значения аргумента \fIcmd\fP используйте макрос \fIQCMD(subcmd, type)\fP. Значение
+\fItype\fP может быть \fBUSRQUOTA\fP (для пользовательских квот) или \fBGRPQUOTA\fP
+(для групповых квот). Значение \fIsubcmd\fP описано ниже.
+
+Аргумент \fIspecial\fP представляет собой указатель на строку, завершающуюся
+null и содержащую путь к блочному устройству (смонтированному) с файловой
+системой, на которую накладывается квота.
+
+Аргумент \fIaddr\fP представляет собой адрес необязательной, зависящей от
+команды, структуры данных, которые копируются в или из
+системы. Интерпретация \fIaddr\fP указана ниже (для каждой команды).
+
+Значением \fIsubcmd\fP может быть одно из:
+.TP  8
+\fBQ_QUOTAON\fP
+Включает учёт квот. В аргументе \fIid\fP задаётся используемый
+идентификационный номер формата квот. В настоящее время поддерживается три
+формата квот:
+.RS
+.TP  13
+\fBQFMT_VFS_OLD\fP
+Самая первая версия формата квот.
+.TP 
+\fBQFMT_VFS_V0\fP
+Стандартный формат квот VFS v0, позволяет работать с  32\-битными UID и GID и
+ограничениями по квотам до 2^42 байт и 2^32 inode.
+.TP 
+\fBQFMT_VFS_V1\fP
+Данный формат квот позволяет работать с 32\-битными UID и GID и ограничениями
+по квотам до 2^64 байт и 2^64 inode.
+.RE
+.IP
+Аргумент \fIaddr\fP представляет собой указатель на путь к файлу, в котором
+содержатся квоты файловой системы. Файл квот должен существовать; обычно он
+создаётся с помощью программы \fBquotacheck\fP(8). Данная операция требует
+дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP  8
+\fBQ_QUOTAOFF\fP
+Выключает учёт квот. Аргументы \fIaddr\fP и \fIid\fP игнорируются. Данная операция
+требует дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_GETQUOTA\fP
+Возвращает данные по лимитам и текущее значение использованного пространства
+для пользователя или группы с заданным \fIid\fP. Аргумент \fIaddr\fP является
+указателем на структуру \fIdqblk\fP, определённую в \fI<sys/quota.h>\fP
+следующим образом:
+.in +4n
+.nf
+
+/* uint64_t имеет тип unsigned 64\-bit integer;
+   uint32_t имеет тип unsigned 32\-bit integer */
+
+struct dqblk {          /* Определение, действующее с Linux 2.4.22 */
+    uint64_t dqb_bhardlimit;   /* абсолютный лимит на выделяемые
+                                  блоки дисковых квот */
+    uint64_t dqb_bsoftlimit;   /* предпочтительный лимит на выделяемые
+                                  блоки дисковых квот */
+    uint64_t dqb_curspace;     /* текущее количество блоков квот */
+    uint64_t dqb_ihardlimit;   /* максимальное количество
+                                  выделенных inode */
+    uint64_t dqb_isoftlimit;   /* предпочтительных лимит по inode */
+    uint64_t dqb_curinodes;    /* текущее количество
+                                  выделенных inode */
+    uint64_t dqb_btime;        /* временной лимит по превышению
+                                  использования диска */
+    uint64_t dqb_itime;        /* временной лимит по превышению
+                                  файлов */
+    uint32_t dqb_valid;        /* битовая маска констант QIF_* */
+};
+
+/* Флаги в dqb_valid указывают, какие поля в
+   структуре dqblk являются рабочими. */
+
+#define QIF_BLIMITS   1
+#define QIF_SPACE     2
+#define QIF_ILIMITS   4
+#define QIF_INODES    8
+#define QIF_BTIME     16
+#define QIF_ITIME     32
+#define QIF_LIMITS    (QIF_BLIMITS | QIF_ILIMITS)
+#define QIF_USAGE     (QIF_SPACE | QIF_INODES)
+#define QIF_TIMES     (QIF_BTIME | QIF_ITIME)
+#define QIF_ALL       (QIF_LIMITS | QIF_USAGE | QIF_TIMES)
+
+.fi
+.in
+Поле \fIdqb_valid\fP представляет собой битовую маску, показывающую какие поля
+в структуре \fIdqblk\fP являются рабочими. В настоящее время ядро заполняется
+все поля структуры \fIdqblk\fP и маркирует их как рабочие в поле
+\fIdqb_valid\fP. Непривилегированные пользователи могут получить данные только
+по своим квотам; привилегированный пользователь (имеющий мандат
+\fBCAP_SYS_ADMIN\fP) может получить данные по квотам любого пользователя.
+.TP 
+\fBQ_SETQUOTA\fP
+Устанавливает квоты для пользователя или группы с указанным \fIid\fP, используя
+информацию из структуры \fIdqblk\fP, на которую указывает \fIaddr\fP. Полем
+\fIdqb_valid\fP в структуре \fIdqblk\fP определяется какие элементы структуры
+установлены вызывающим. Эта операция заменяет предоставляемые прежде
+операции работы с квотами \fBQ_SETQLIM\fP и \fBQ_SETUSE\fP. Эта операция требует
+дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_GETINFO\fP
+Возвращает информацию (например, льготное время (grace times)) о
+quotafile. Аргумент \fIaddr\fP должен содержать указатель на структуру
+\fIdqinfo\fP. Эта структура определена в \fI<sys/quota.h>\fP следующим
+образом:
+.in +4n
+.nf
+
+/* uint64_t имеет тип unsigned 64\-bit integer;
+   uint32_t имеет тип unsigned 32\-bit integer */
+
+struct dqinfo {         /* начиная с ядра 2.4.22 */
+    uint64_t dqi_bgrace;    /* время, перед тем как необязательный предел
+                               для блока станет обязательным */
+
+    uint64_t dqi_igrace;    /* время, перед тем как необязательный предел
+                               для inode станет обязательным */
+    uint32_t dqi_flags;     /* флаги quotafile
+                               (DQF_*) */
+    uint32_t dqi_valid;
+};
+
+/* биты из dqi_flags */
+
+/* формат квот QFMT_VFS_OLD */
+
+#define V1_DQF_RSQUASH	1   /* включён режим сброса прав root (root squash) */
+
+/* в других форматах квот биты dqi_flags не определены */
+
+/* флаги в dqi_valid, которые показывают какие поля в
+   структуре dqinfo рабочие. */
+
+# define IIF_BGRACE	1
+# define IIF_IGRACE	2
+# define IIF_FLAGS	4
+# define IIF_ALL	(IIF_BGRACE | IIF_IGRACE | IIF_FLAGS)
+
+.fi
+.in
+Значение поля \fIdqi_valid\fP в структуре \fIdqinfo\fP указывает на рабочие
+элементы. В настоящее время ядро заполняет все элементы структуры \fIdqinfo\fP
+и помечает их как рабочие в поле \fIdqi_valid\fP. Аргумент \fIid\fP игнорируется.
+.TP 
+\fBQ_SETINFO\fP
+Задаёт информацию о quotafile. Значение аргумента \fIaddr\fP должно быть
+указателем на структуру \fIdqinfo\fP. Полем \fIdqi_valid\fP в структуре \fIdqinfo\fP
+определяется, какие элементы структуры установлены вызывающим. Эта операция
+заменяет операции \fBQ_SETGRACE\fP и \fBQ_SETFLAGS\fP из предоставляемых прежде
+операций работы с квотами. Аргумент \fIid\fP игнорируется. Эта операция требует
+дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_GETFMT\fP
+Возвращает формат квоты, используемый в указанной файловой системе. В
+аргументе \fIaddr\fP должен содержаться указатель на 4\-байтовый буфер, в
+который будет записан номер формата.
+.TP 
+\fBQ_SYNC\fP
+Обновляет дисковую копию используемых квот в файловой системе. Если значение
+\fIspecial\fP равно NULL, то действующие квоты будут синхронизированы на всех
+файловых системах. Аргументы \fIaddr\fP и \fIid\fP игнорируются.
+.TP 
+\fBQ_GETSTATS\fP
+.\" Q_GETSTATS was removed in kernel 2.4.22.
+Возвращает статистику и другую общую информацию о подсистеме квот. Аргумент
+\fIaddr\fP должен содержать указатель на структуру \fIdqstats\fP, в которую нужно
+сохранить данные. Эта структура определена в \fI<sys/quota.h>.\fP
+Аргументы \fIspecial\fP и \fIid\fP игнорируются. Эта операция устарела и не
+поддерживается новыми ядрами. Информацию можно получить из файлов в
+\fI/proc/sys/fs/quota/\fP.
+.PP
+Для файловых систем XFS, использующих XFS Quota Manager (XQM), приведённые
+выше команды не выполняются, а используются следующие команды:
+.TP  8
+\fBQ_XQUOTAON\fP
+Включает квоты для файловой системы XFS. XFS позволяет включать/выключать
+применение квот с ведением учёта. Поэтому для XFS в \fIaddr\fP ожидается
+указатель на \fIunsigned int\fP, который представляет собой или флаги
+\fBXFS_QUOTA_UDQ_ACCT\fP и/или \fBXFS_QUOTA_UDQ_ENFD\fP (для пользовательской
+квоты), или \fBXFS_QUOTA_GDQ_ACCT\fP и/или \fBXFS_QUOTA_GDQ_ENFD\fP (для квот на
+группу), определённые в \fI<xfs/xqm.h>\fP. Эта операция требует
+дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_XQUOTAOFF\fP
+Выключает квоты для файловой системы XFS. Как в \fBQ_QUOTAON\fP, для файловых
+систем XFS ожидается указатель на \fIunsigned int\fP, в котором задаётся что
+нужно отключить: учёт или применение квот. Эта операция требует
+дополнительных прав (\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_XGETQUOTA\fP
+Возвращает дисковые квоты и текущее использование для пользователя с
+указанным \fIid\fP. В \fIaddr\fP содержится указатель на структуру
+\fIfs_disk_quota\fP (определена в \fI<xfs/xqm.h>\fP). Непривилегированные
+пользователи могут получить данные только по своим квотам; привилегированный
+пользователь (с \fBCAP_SYS_ADMIN\fP) может получить информацию о квотах любого
+пользователя.
+.TP 
+\fBQ_XSETQLIM\fP
+Устанавливает дисковую квоту для пользователя с указанным \fIid\fP. В аргументе
+\fIaddr\fP задаётся указатель на структуру \fIfs_disk_quota\fP (определена в
+\fI<xfs/xqm.h>\fP). Эта операция требует дополнительных прав
+(\fBCAP_SYS_ADMIN\fP).
+.TP 
+\fBQ_XGETQSTAT\fP
+Возвращает структуру \fIfs_quota_stat\fP, в которой содержится информация о
+квотах, которая доступна только для файловой системы XFS. Она полезна для
+определения пространства, использованного для хранения информации о квотах,
+а также для получения состояния включенных/отключенных квот в заданной
+локальной файловой системе XFS.
+.TP 
+\fBQ_XQUOTARM\fP
+Освобождает дисковое пространство, занятое под квоты. Квоты должны быть
+выключены.
+.PP
+Для XFS нет эквивалента команде \fBQ_SYNC\fP, так как \fBsync\fP(1) записывает
+информацию о квотах на диск (вместе с другими метаданными файловой системы).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+.LP
+При успешном выполнении \fBquotactl\fP() возвращается 0; при ошибке
+возвращается \-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Неверное значение \fIaddr\fP или \fIspecial\fP.
+.TP 
+\fBEINVAL\fP
+Неверное значение \fIcmd\fP или \fItype\fP.
+.TP 
+\fBENOENT\fP
+Файл, указанный в \fIspecial\fP или \fIaddr\fP, не существует.
+.TP 
+\fBENOSYS\fP
+Ядро собрано с выключенным параметром \fBCONFIG_QUOTA\fP.
+.TP 
+\fBENOTBLK\fP
+Значение \fIspecial\fP не указывает на блочное устройство.
+.TP 
+\fBEPERM\fP
+Вызывающий не имеет необходимых прав (\fBCAP_SYS_ADMIN\fP) для выполнения
+указанной операции.
+.TP 
+\fBESRCH\fP
+Не найдена дисковая квота для заданного пользователя. Квоты выключены в
+файловой системе.
+.LP
+Если значение \fIcmd\fP равно \fBQ_SETQUOTA\fP, то \fBquotactl\fP() также может
+присвоить \fIerrno\fP следующее:
+.TP 
+\fBERANGE\fP
+Заданный лимит вне диапазона допустимого форматом квот.
+.LP
+Если значение \fIcmd\fP равно \fBQ_QUOTAON\fP, то \fBquotactl\fP() также может
+присвоить \fIerrno\fP следующее:
+.TP 
+\fBEACCES\fP
+Файл квот, указанный в \fIaddr\fP, существует, но не является обычным файлом;
+или файл квот, указанный в \fIaddr\fP, существует, но находится не на файловой
+системе, указанной в \fIspecial\fP.
+.TP 
+\fBEBUSY\fP
+Попытка выполнить \fBQ_QUOTAON\fP, но уже выполняется другой запуск
+\fBQ_QUOTAON\fP.
+.TP 
+\fBEINVAL\fP
+Файл квот повреждён.
+.TP 
+\fBESRCH\fP
+Заданный формат квот не найден.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBquota\fP(1), \fBgetrlimit\fP(2), \fBquotacheck\fP(8), \fBquotaon\fP(8)

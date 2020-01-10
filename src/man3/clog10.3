@@ -1,0 +1,36 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CLOG10 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+clog10, clog10f, clog10l \- вычисление десятичного логарифма комплексного
+числа
+.SH ОБЗОР
+\fB#define _GNU_SOURCE\fP /* смотрите feature_test_macros(7) */
+.br
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex clog10(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex clog10f(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex clog10l(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Вызов \fIclog10(z)\fP эквивалентен \fIclog(z)/log(10)\fP. Есть другие функции,
+выполняющие эту задачу для типов \fIfloat\fP и \fIlong double\fP.
+
+Заметим, что \fIz\fP, близкое к нулю, вызовет переполнение.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данная функция является расширением GNU. Она зарезервирована для будущего
+использования в C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBcexp\fP(3), \fBclog\fP(3), \fBclog2\fP(3), \fBcomplex\fP(7)

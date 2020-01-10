@@ -1,0 +1,49 @@
+.\" Copyright (c) 2003 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH WCSTOIMAX 3 2003\-11\-01 "" "Руководство программиста Linux"
+.SH ИМЯ
+wcstoimax, wcstoumax \- преобразует широкосимвольную строку в целое число
+.SH ОБЗОР
+.nf
+\fB#include <stddef.h>\fP
+.br
+\fB#include <inttypes.h>\fP
+.sp
+\fBintmax_t wcstoimax(const wchar_t *\fP\fInptr\fP\fB, wchar_t **\fP\fIendptr\fP\fB, int \fP\fIbase\fP\fB);\fP
+.br
+\fBuintmax_t wcstoumax(const wchar_t *\fP\fInptr\fP\fB, wchar_t **\fP\fIendptr\fP\fB, int \fP\fIbase\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Данные функции подобны \fBwcstol\fP(3) и \fBwcstoul\fP(3), за исключением того,
+что возвращают значение типа \fIintmax_t\fP и \fIuintmax_t\fP, соответственно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.\" FIXME . the pages referred to by the following xrefs are not yet written
+\fBimaxabs\fP(3), \fBimaxdiv\fP(3), \fBstrtoimax\fP(3), \fBstrtoumax\fP(3),
+\fBwcstol\fP(3), \fBwcstoul\fP(3)

@@ -1,0 +1,56 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1995 Michael Chastain (mec@shell.portal.com), 15 April 1995.
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" Modified Tue Oct 22 22:11:53 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SOCKETCALL 2 2007\-06\-28 Linux "Руководство программиста Linux"
+.SH ИМЯ
+socketcall \- системные вызовы сокетов
+.SH ОБЗОР
+\fBint socketcall(int \fP\fIcall\fP\fB, unsigned long *\fP\fIargs\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBsocketcall\fP() \(em это общая точка входа в ядро всех системных вызовов
+сокетов. В аргументе \fIcall\fP задаётся функция сокета, которая будет
+вызвана. Аргумент \fIargs\fP указывает на блок параметров функции, которые
+передаются соответствующему вызову.
+.PP
+Пользовательские программы должны оперировать обычными функциями, имеющими
+стандартные имена. О существовании \fBsocketcall\fP() необходимо знать лишь
+создателям стандартных библиотек и ядра.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция есть только в Linux, и она не должна использоваться в
+переносимых программах.
+.SH ЗАМЕЧАНИЯ
+На некоторых архитектурах, например ia64, нет системного вызова
+\fBsocketcall\fP(); вместо него \fBsocket\fP(2), \fBaccept\fP(2), \fBbind\fP(2) и
+т.д. реализованы в виде отдельных системных вызовов.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBaccept\fP(2), \fBbind\fP(2), \fBconnect\fP(2), \fBgetpeername\fP(2),
+\fBgetsockname\fP(2), \fBgetsockopt\fP(2), \fBlisten\fP(2), \fBrecv\fP(2),
+\fBrecvfrom\fP(2), \fBrecvmsg\fP(2), \fBsend\fP(2), \fBsendmsg\fP(2), \fBsendto\fP(2),
+\fBsetsockopt\fP(2), \fBshutdown\fP(2), \fBsocket\fP(2), \fBsocketpair\fP(2)

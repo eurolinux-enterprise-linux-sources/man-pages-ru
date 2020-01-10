@@ -1,0 +1,33 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CTAN 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+ctan, ctanf, ctanl \- функция вычисления тангенса комплексного числа
+.SH ОБЗОР
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex ctan(double complex \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex ctanf(float complex \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex ctanl(long double complex \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Функция тангенса комплексного числа определяется следующей формулой:
+.nf
+
+    ctan(z) = csin(z) / ccos(z)
+.fi
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBcatan\fP(3), \fBccos\fP(3), \fBcsin\fP(3), \fBcomplex\fP(7)

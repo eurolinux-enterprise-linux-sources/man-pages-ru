@@ -1,0 +1,175 @@
+.\" Copyright (C) 2007, 2010 Michael Kerrisk <mtk.manpages@gmail.com>
+.\" and Copyright (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\" License.
+.\" Modified Sat Jul 24 18:34:44 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Merged readv.[23], 2002-10-17, aeb
+.\" 2007-04-30 mtk, A fairly major rewrite to fix errors and
+.\"     add more details.
+.\" 2010-11-16, mtk, Added documentation of preadv() and pwritev()
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH READV 2 2010\-11\-17 Linux "Руководство программиста Linux"
+.SH ИМЯ
+readv, writev, preadv, pwritev \- чтение или запись данных в несколько
+буферов
+.SH ОБЗОР
+.nf
+\fB#include <sys/uio.h>\fP
+.sp
+\fBssize_t readv(int \fP\fIfd\fP\fB, const struct iovec *\fP\fIiov\fP\fB, int \fP\fIiovcnt\fP\fB);\fP
+.sp
+\fBssize_t writev(int \fP\fIfd\fP\fB, const struct iovec *\fP\fIiov\fP\fB, int \fP\fIiovcnt\fP\fB);\fP
+.sp
+\fBssize_t preadv(int \fP\fIfd\fP\fB, const struct iovec *\fP\fIiov\fP\fB, int \fP\fIiovcnt\fP\fB,\fP
+\fB               off_t \fP\fIoffset\fP\fB);\fP
+.sp
+\fBssize_t pwritev(int \fP\fIfd\fP\fB, const struct iovec *\fP\fIiov\fP\fB, int \fP\fIiovcnt\fP\fB,\fP
+\fB                off_t \fP\fIoffset\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBpreadv\fP(), \fBpwritev\fP(): _BSD_SOURCE
+.SH ОПИСАНИЕ
+Системный вызов \fBreadv\fP() считывает \fIiovcnt\fP буферов из файла, связанного
+с файловым дескриптором \fIfd\fP, в буферы, описываемые \fIiov\fP («разнесённый
+ввод»).
+.PP
+Системный вызов \fBwritev\fP() записывает \fIiovcnt\fP буферов, описанных \fIiov\fP,
+в файл, связанный с файловым дескриптором \fIfd\fP («сборный вывод»).
+.PP
+Указатель \fIiov\fP указывает на массив структур \fIiovec\fP (определён в
+\fI<sys/uio.h>\fP:
+.PP
+.br
+.in +4n
+.nf
+struct iovec {
+    void  *iov_base;    /* начальный адрес */
+    size_t iov_len;     /* количество передаваемых байт */
+};
+.fi
+.in
+.PP
+Системный вызов \fBreadv\fP() работает также как \fBread\fP(2), но считывает
+несколько буферов.
+.PP
+Системный вызов \fBwritev\fP() работает также как \fBwrite\fP(2), но записывает
+несколько буферов.
+.PP
+Буферы выбираются в порядке, в каком они указаны в массиве. Это означает,
+что \fBreadv\fP() сначала полностью заполнит \fIiov\fP[0], и только потом перейдёт
+к \fIiov\fP[1], и так далее. (Если данных недостаточно, то могут быть заполнены
+не все буферы, на которые указывает \fIiov\fP.) Подобным образом \fBwritev\fP()
+запишет сначала всё содержимое \fIiov\fP[0], затем \fIiov\fP[1], и так далее.
+.PP
+Выполняемые вызовами \fBreadv\fP() и \fBwritev\fP() пересылки данных атомарны:
+данные записываются \fBwritev\fP() единичным блоком, который не перемешивается
+с выводом других процессов (см. исключения в \fBpipe\fP(7)); аналогично,
+\fBreadv\fP() гарантированно считывает непрерывный блок данных из файла,
+независимо от операций чтения из других нитей или процессов, которые имеют
+файловые дескрипторы, ссылающиеся на это же открытое файловое описание
+(см. \fBopen\fP(2)).
+.SS "preadv() и pwritev()"
+В системном вызове \fBpreadv\fP() объединены возможности \fBreadv\fP() и
+\fBpread\fP(2). Он выполняет ту же задачу что и \fBreadv\fP(), но имеет четвёртый
+аргумент \fIoffset\fP, задающий файловое смещение, по которому нужно выполнить
+операцию чтения.
+
+В системном вызове \fBpwritev\fP() объединены возможности \fBreadv\fP() и
+\fBpwrite\fP(2). Он выполняет ту же задачу что и \fBwritev\fP(), но имеет
+четвёртый аргумент \fIoffset\fP, задающий файловое смещение, по которому нужно
+выполнить операцию записи.
+
+Файловое смещение не изменяется данными вызовами. Файл, заданный в \fIfd\fP,
+должен позволять изменение смещения.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBreadv\fP() и \fBpreadv\fP() возвращается количество
+считанных байт; вызовы \fBwritev\fP() и \fBpwritev\fP() возвращают количество
+записанных байт. При ошибке возвращается \-1, а значение \fIerrno\fP
+устанавливается соответствующим образом.
+.SH ОШИБКИ
+Вызовы могут возвращать те же ошибки что и \fBread\fP(2) и \fBwrite\fP(2). Кроме
+этого, \fBpreadv\fP() и \fBpwritev\fP() также могут завершаться с ошибками как
+\fBlseek\fP(2). Дополнительно, определены следующие ошибки:
+.TP 
+\fBEINVAL\fP
+Сумма значений \fIiov_len\fP превышает значение \fIssize_t\fP. Или количество
+векторов \fIiovcnt\fP меньше нуля или больше разрешённого максимума.
+.SH ВЕРСИИ
+Вызовы \fBpreadv\fP() и \fBpwritev\fP() впервые появились в Linux 2.6.30;
+поддержка в библиотеке добавлена в glibc 2.10.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" The readv/writev system calls were buggy before Linux 1.3.40.
+.\" (Says release.libc.)
+\fBreadv\fP(), \fBwritev\fP(): 4.4BSD (впервые появились в 4.2BSD),
+POSIX.1\-2001. В Linux libc5 в качестве типа аргумента \fIiovcnt\fP используется
+\fIsize_t\fP, и \fIint\fP в качестве возвращаемого типа.
+
+\fBpreadv\fP(), \fBpwritev\fP(): нет в стандарте, но есть в современных BSD.
+.SH ЗАМЕЧАНИЯ
+.SS "Замечания, касающиеся Linux"
+POSIX.1\-2001 позволяет реализации устанавливать ограничение на количество
+элементов, которые можно передать в \fIiov\fP. Реализация может объявить это
+ограничение в \fBIOV_MAX\fP (в файле \fI<limits.h>\fP) или во время
+выполнения в виде возвращаемого значения \fIsysconf(_SC_IOV_MAX)\fP. В Linux
+данное ограничение, возвращаемое этими механизмами, равно 1024, что равно
+ограничению ядра. Однако обёрточные функции glibc выполняют дополнительные
+действия, если обнаруживается, что используемый системный вызов завершился
+неудачно из\-за превышения этого ограничения. В случае \fBreadv\fP() обёрточная
+функция выделяет временный буфер, достаточный для всех элементов, указанных
+в \fIiov\fP, передаёт этот буфер в вызов \fBread\fP(2), копирует данные из буфера
+в места, указанные в полях \fIiov_base\fP элемента \fIiov\fP, а затем освобождает
+буфер. Обёрточная функция \fBwritev\fP() выполняет аналогичную задачу с помощью
+временного буфера и вызова \fBwrite\fP(2).
+.SH ДЕФЕКТЫ
+Неразумно смешивать вызовы \fBreadv\fP() или \fBwritev\fP(), работающих с
+дескрипторами файлов, вместе с функциями из библиотеки stdio; результат
+непредсказуем и точно не тот, которого вы ожидаете.
+.SH ПРИМЕР
+Следующий пример кода демонстрирует использование \fBwritev\fP():
+
+.in +4n
+.nf
+char *str0 = "hello ";
+char *str1 = "world\en";
+struct iovec iov[2];
+ssize_t nwritten;
+
+iov[0].iov_base = str0;
+iov[0].iov_len = strlen(str0);
+iov[1].iov_base = str1;
+iov[1].iov_len = strlen(str1);
+
+nwritten = writev(STDOUT_FILENO, iov, 2);
+.fi
+.in
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBpread\fP(2), \fBread\fP(2), \fBwrite\fP(2)

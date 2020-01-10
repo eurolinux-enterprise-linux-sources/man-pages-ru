@@ -1,0 +1,77 @@
+.\" Copyright (C) 2003 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH IO_GETEVENTS 2 2012\-05\-08 Linux "Руководство программиста Linux"
+.SH ИМЯ
+io_getevents \- считывает асинхронные события ввода/вывода из очереди
+выполнения
+.SH ОБЗОР
+.nf
+\fB#include <linux/aio_abi.h>\fP       /* определяет необходимые типы */
+\fB#include <linux/time.h>\fP          /* определяет «struct timespec» */
+
+.sp
+\fBint io_getevents(aio_context_t \fP\fIctx_id\fP\fB, long \fP\fImin_nr\fP\fB, long \fP\fInr\fP\fB,\fP
+\fB                 struct io_event *\fP\fIevents\fP\fB, struct timespec *\fP\fItimeout\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+.PP
+Системный вызов \fBio_getevents\fP() пытается считать, по меньшей мере, от
+\fImin_nr\fP до \fInr\fP событий из очереди выполнения контекста AIO, указанном в
+\fIctx_id\fP. В аргументе \fItimeout\fP задаётся время ожидания событий, причём
+если таймер равен NULL, то ожидается не менее \fImin_nr\fP событий. Заметим,
+что \fItimeout\fP относителен и будет обновлён, если не равен NULL и если
+операция блокирующая.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBio_getevents\fP() возвращает количество прочитанных
+событий: 0, если не было доступных событий, или число меньше \fImin_nr\fP, если
+истёк таймер \fItimeout\fP. Описание ошибок возвращаемых при неудачном
+выполнении смотрите в параграфе ЗАМЕЧАНИЯ.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Задан неправильный указатель в \fIevents\fP или \fItimeout\fP.
+.TP 
+\fBEINVAL\fP
+Неверное значение \fIctx_id\fP. Значение \fImin_nr\fP или \fInr\fP лежит за пределами
+диапазона.
+.TP 
+\fBEINTR\fP
+Прерван обработчиком сигнала; смотрите \fBsignal\fP(7).
+.TP 
+\fBENOSYS\fP
+Вызов \fBio_getevents\fP() не реализован для данной архитектуры.
+.SH ВЕРСИИ
+.PP
+Асинхронные системные вызовы ввода\-вывода впервые появились в Linux 2.5.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.PP
+Вызов \fBio_getevents\fP() есть только в Linux, и он не должен использоваться в
+переносимых программах.
+.SH ЗАМЕЧАНИЯ
+.\" http://git.fedorahosted.org/git/?p=libaio.git
+В glibc нет обёрточной функции для данного системного вызова. Вы можете
+вызвать его с помощью \fBsyscall\fP(2). Но лучше воспользоваться обёрточной
+функцией \fBio_getevents\fP() из библиотеки \fIlibaio\fP.
+
+.\" But glibc is confused, since <libaio.h> uses 'io_context_t' to declare
+.\" the system call.
+Заметим, что в обёрточной функции \fIlibaio\fP используется другой тип
+(\fIio_context_t\fP) аргумента \fIctx_id\fP. Также заметим, что \fIlibaio\fP не
+следует соглашениям обычной библиотеки C для возврата ошибок: при ошибке она
+возвращает отрицательный номер ошибки (из списка в разделе ОШИБКИ). Если
+системный вызов вызывается с помощью \fBsyscall\fP(2), то возвращаемое значение
+следует обычным соглашениям для указания на ошибку: возвращается \-1 и в
+\fIerrno\fP записывается (положительное) значение возникшей ошибки.
+.SH "СМОТРИТЕ ТАКЖЕ"
+.PP
+\fBio_cancel\fP(2), \fBio_destroy\fP(2), \fBio_setup\fP(2), \fBio_submit\fP(2),
+\fBaio\fP(7), \fBtime\fP(7)
+.\" .SH AUTHOR
+.\" Kent Yoder.

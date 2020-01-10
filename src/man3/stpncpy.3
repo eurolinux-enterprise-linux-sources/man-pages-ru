@@ -1,0 +1,66 @@
+.\" Copyright (c) Bruno Haible <haible@clisp.cons.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" References consulted:
+.\"   GNU glibc-2 source code and manual
+.\"
+.\" Corrected, aeb, 990824
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH STPNCPY 3 2011\-09\-28 GNU "Руководство программиста Linux"
+.SH ИМЯ
+stpncpy \- копирование строки фиксированной длины с возвращением указателя на
+её конец
+.SH ОБЗОР
+.nf
+\fB#include <string.h>\fP
+.sp
+\fBchar *stpncpy(char *\fP\fIdest\fP\fB, const char *\fP\fIsrc\fP\fB, size_t \fP\fIn\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBstpncpy\fP():
+.PD 0
+.ad l
+.RS 4
+.TP  4
+Начиная с glibc 2.10:
+_XOPEN_SOURCE\ >=\ 700 || _POSIX_C_SOURCE\ >=\ 200809L
+.TP 
+До glibc 2.10:
+_GNU_SOURCE
+.RE
+.ad
+.PD
+.SH ОПИСАНИЕ
+Функция \fBstpncpy\fP() копирует по крайней мере \fIn\fP символов из строки, на
+которую ссылается указатель \fIsrc\fP, включая конечный байт null
+(\(aq\e0\(aq), в массив по указателю \fIdest\fP. В \fIdest\fP будет записано точно
+\fIn\fP символов. Если длина \fIstrlen(src)\fP меньше \fIn\fP, то оставшиеся символы
+в массиве \fIdest\fP будут заполнены байтами null (\(aq\e\(aq). Если длина
+\fIstrlen(src)\fP больше или равна \fIn\fP, то строка, на которую ссылается
+указатель \fIdest\fP, не будет завершаться null.
+.PP
+Строки не должны пересекаться.
+.PP
+Программист должен быть уверен, что в \fIdest\fP достаточно места для по
+крайней мере \fIn\fP символов.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+\fBstpncpy\fP() возвращает указатель на завершающий байт null в \fIdest\fP или,
+если \fIdest\fP не завершается null, \fIdest + n\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция была добавлена в POSIX.1\-2008. До этого она считалась
+расширением GNU.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBstrncpy\fP(3), \fBwcpncpy\fP(3)

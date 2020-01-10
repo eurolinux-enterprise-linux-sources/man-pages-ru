@@ -1,0 +1,89 @@
+.\" Copyright (C) 1995, Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Created   1995-08-06 Thomas K. Dyas <tdyas@eden.rutgers.edu>
+.\" Modified  2000-07-01 aeb
+.\" Modified  2002-07-23 aeb
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SETFSGID 2 2010\-11\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+setfsgid \- устанавливает идентификатор группы для доступа к файловой системе
+.SH ОБЗОР
+\fB#include <unistd.h>\fP /* в glibc используется <sys/fsuid.h>
+*/
+.sp
+\fBint setfsgid(uid_t \fP\fIfsgid\fP\fB);\fP
+.SH ОПИСАНИЕ
+Системный вызов \fBsetfsgid\fP() устанавливает идентификатор группы, который
+используется ядром Linux при проверке доступа к файловой системе. Обычно,
+значение \fIfsgid\fP совпадает с идентификатором эффективной
+группы. Действительно, когда изменяется идентификатор эффективной группы,
+значение \fIfsgid\fP при его установке изменится соответственно.
+
+Вызовы \fBsetfsuid\fP(2) и \fBsetfsgid\fP() обычно используются только в
+программах Linux типа NFS\-сервера, которым требуется изменить идентификатор
+пользователя и группы для доступа к файлам без изменения действительного и
+эффективного идентификаторов пользователя и группы. Изменение обычного
+идентификатора пользователя для программы типа NFS\-сервера \(em это
+нарушение безопасности, приводящее к возможному получению нежелательных
+сигналов от других групп (но читайте далее).
+
+Вызов \fBsetfsgid\fP() выполняется корректно, только если он был вызван
+суперпользователем или если \fIfsgid\fP совпадает с идентификатором
+действительной, эффективной и сохранённой группы или с текущим значением
+\fIfsgid\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается предыдущее значение \fIfsgid\fP. При
+ошибке возвращается текущее значение \fIfsgid\fP.
+.SH ВЕРСИИ
+.\" This system call is present since Linux 1.1.44
+.\" and in libc since libc 4.7.6.
+Данный системный вызов доступен в Linux начиная с версии 1.2.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBsetfsgid\fP() есть только в Linux и не должен использоваться в
+переносимых программах.
+.SH ЗАМЕЧАНИЯ
+Если в glibc определяется, что в аргументе указан неправильный идентификатор
+группы, то возвращается \-1, \fIerrno\fP присваивается значение \fBEINVAL\fP, а
+системный вызов не выполняется.
+.LP
+Заметим, что до появления данного системного вызова, процесс мог отправить
+сигнал процессу с таким же действующим идентификатором пользователя. Сейчас
+обработка прав отправки сигнала происходит немного иначе.
+
+Первоначальная версия системного вызова Linux \fBsetfsgid\fP() поддерживала
+только 16\-битные идентификаторы групп. Позднее в Linux 2.4 был добавлен
+\fBsetfsgid32\fP(), поддерживающий 32\-битные идентификаторы. Обёрточная функция
+glibc \fBsetfsgid\fP() скрывает это различие в версиях ядер.
+.SH ДЕФЕКТЫ
+Вызвавшему процессу не возвращается никаких сообщений об ошибке. По меньшей
+мере, должно возвращаться хотя бы значение  \fBEPERM\fP (если у вызывающего нет
+мандата \fBCAP_SETGID\fP).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBkill\fP(2), \fBsetfsuid\fP(2), \fBcapabilities\fP(7), \fBcredentials\fP(7)

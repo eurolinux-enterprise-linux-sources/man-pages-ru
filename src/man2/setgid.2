@@ -1,0 +1,70 @@
+.\" Copyright (C), 1994, Graeme W. Wilford. (Wilf.)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Fri Jul 29th 12:56:44 BST 1994  Wilf. <G.Wilford@ee.surrey.ac.uk>
+.\" Modified 1997-01-31 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2002-03-09 by aeb
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SETGID 2 2010\-11\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+setgid \- устанавливает идентификатор группы процесса
+.SH ОБЗОР
+\fB#include <sys/types.h>\fP
+.br
+\fB#include <unistd.h>\fP
+.sp
+\fBint setgid(gid_t \fP\fIgid\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBsetgid\fP() устанавливает идентификатор эффективной группы вызвавшего
+процесса. Если функция вызвана суперпользователем, то также устанавливаются
+действительный и сохраненной идентификаторы группы.
+
+В Linux \fBsetgid\fP() реализован так же, как в версии POSIX где есть
+возможность \fB_POSIX_SAVED_IDS\fP. Это позволяет set\-group\-ID\-программам (не
+являющимся программами суперпользователя) сбросить привилегии группы,
+проделать непривилегированную работу и безопасно вернуть исходный
+эффективный идентификатор группы.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEPERM\fP
+У вызвавшего процесса нет прав (не имеет мандата \fBCAP_SETGID\fP) и \fIgid\fP не
+совпадает с эффективным идентификатором группы или сохраненным
+идентификатором группы.
+.SH ЗАМЕЧАНИЯ
+Первоначальная версия системного вызова \fBsetgid\fP() в Linux поддерживала
+только 16\-битные идентификаторы групп. Позднее в Linux 2.4 был добавлен
+вызов \fBsetgid32\fP(), поддерживающий 32\-битные идентификаторы. В glibc
+обёрточная функция \fBgsetgid\fP() работает одинаково вне зависимости от версий
+ядра.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1\-2001.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgetgid\fP(2), \fBsetegid\fP(2), \fBsetregid\fP(2), \fBcapabilities\fP(7),
+\fBcredentials\fP(7)

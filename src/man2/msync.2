@@ -1,0 +1,82 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1996 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH MSYNC 2 2008\-04\-22 Linux "Руководство программиста Linux"
+.SH ИМЯ
+msync \- синхронизирует содержимое файла с его отображением в памяти
+.SH ОБЗОР
+\fB#include <sys/mman.h>\fP
+.sp
+\fBint msync(void *\fP\fIaddr\fP\fB, size_t \fP\fIlength\fP\fB, int \fP\fIflags\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBmsync\fP() сбрасывает изменения файла, который отображён в память с помощью
+\fBmmap\fP(2), обратно на диск. Без использования этого вызова нет никакой
+гарантии, что изменения будут записаны в файл до вызова \fBmunmap\fP(2). Если
+быть точнее, то на диск записывается часть файла, начинающаяся в памяти с
+адреса \fIaddr\fP длиной \fIlength\fP.
+
+Аргумент \fIflags\fP может состоять из комбинации битов \fBMS_ASYNC\fP, \fBMS_SYNC\fP
+и \fBMS_INVALIDATE\fP, но не \fBMS_ASYNC\fP и \fBMS_SYNC\fP одновременно. Флаг
+\fBMS_ASYNC\fP указывает, что обновление должно быть запланировано, и вызов
+завершается сразу. \fBMS_SYNC\fP указывает запланировать обновление и ждать его
+завершения. \fBMS_INVALIDATE\fP указывает считать недействительными другие
+отображения того же файла (для того, чтобы они могли обновиться до
+достоверных значений, которые запишутся).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEBUSY\fP
+В \fIflags\fP указан \fBMS_INVALIDATE\fP, но на указанный адресный диапазон есть
+блокировка в памяти.
+.TP 
+\fBEINVAL\fP
+Значение \fIaddr\fP не кратно PAGESIZE; в \fIflags\fP установлен любой другой бит,
+отличный от \fBMS_ASYNC\fP | \fBMS_INVALIDATE\fP | \fBMS_SYNC\fP; в \fIflags\fP
+установлены сразу \fBMS_SYNC\fP и \fBMS_ASYNC\fP.
+.TP 
+\fBENOMEM\fP
+Указанная память (или её часть) не была отображена.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001.
+
+Этот вызов появился в Linux 1.3.21, и в нём использовалось \fBEFAULT\fP вместо
+\fBENOMEM\fP. В Linux 2.4.19 это было изменено на значение POSIX \fBENOMEM\fP.
+.SH ДОСТУПНОСТЬ
+.\" POSIX.1-2001: It shall be defined to -1 or 0 or 200112L.
+.\" -1: unavailable, 0: ask using sysconf().
+.\" glibc defines them to 1.
+В системах POSIX, в которых доступен \fBmsync\fP(), значения
+\fB_POSIX_MAPPED_FILES\fP и \fB_POSIX_SYNCHRONIZED_IO\fP, определённые в
+\fI<unistd.h>\fP, больше нуля. (См. также \fBsysconf\fP(3).)
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBmmap\fP(2)
+.br
+B.O. Gallmeister, POSIX.4, O'Reilly, стр. 128\-129 и 389\-391.

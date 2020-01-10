@@ -1,0 +1,208 @@
+.\" Copyright (C) 2003 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 2003-08-17 by Walter Harms
+.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH STATFS 2 2010\-11\-21 Linux "Руководство программиста Linux"
+.SH ИМЯ
+statfs, fstatfs \- получить статистику по файловой системе
+.SH ОБЗОР
+\fB#include <sys/vfs.h> \fP/* или <sys/statfs.h> */
+.sp
+\fBint statfs(const char *\fP\fIpath\fP\fB, struct statfs *\fP\fIbuf\fP\fB);\fP
+.br
+\fBint fstatfs(int \fP\fIfd\fP\fB, struct statfs *\fP\fIbuf\fP\fB);\fP
+.SH ОПИСАНИЕ
+Функция \fBstatfs\fP() возвращает информацию о смонтированной файловой
+системе. В аргументе \fIpath\fP указывается путь к любому файлу, расположенному
+в смонтированной файловой системе. Аргумент \fIbuf\fP представляет собой
+указатель на структуру \fIstatfs\fP, определённую примерно следующим образом:
+
+.in +4n
+.nf
+#if __WORDSIZE == 32		/* размер слова в системе */
+# define __SWORD_TYPE		int
+#else /* __WORDSIZE == 64 */
+# define __SWORD_TYPE		long int
+#endif
+
+struct statfs {
+    __SWORD_TYPE f_type;    /* тип файловой системы (см. далее) */
+    __SWORD_TYPE f_bsize;   /* оптимальный размер блока передачи */
+    fsblkcnt_t   f_blocks;  /* общее количество блоков в ФС */
+    fsblkcnt_t   f_bfree;   /* свободных блоков в ФС */
+    fsblkcnt_t   f_bavail;  /* свободных блоков, доступных
+                               обычному пользователю */
+    fsfilcnt_t   f_files;   /* общее количество файловых нод в ФС */
+    fsfilcnt_t   f_ffree;   /* свободных файловых нод в ФС */
+    fsid_t       f_fsid;    /* ID файловой системы */
+    __SWORD_TYPE f_namelen; /* максимальная длина имени файла */
+    __SWORD_TYPE f_frsize;  /* размер фрагмента (начиная с Linux 2.6) */
+    __SWORD_TYPE f_spare[5];
+};
+
+Типы файловых систем:
+
+   ADFS_SUPER_MAGIC      0xadf5
+   AFFS_SUPER_MAGIC      0xADFF
+   BEFS_SUPER_MAGIC      0x42465331
+   BFS_MAGIC             0x1BADFACE
+   CIFS_MAGIC_NUMBER     0xFF534D42
+   CODA_SUPER_MAGIC      0x73757245
+   COH_SUPER_MAGIC       0x012FF7B7
+   CRAMFS_MAGIC          0x28cd3d45
+   DEVFS_SUPER_MAGIC     0x1373
+   EFS_SUPER_MAGIC       0x00414A53
+   EXT_SUPER_MAGIC       0x137D
+   EXT2_OLD_SUPER_MAGIC  0xEF51
+   EXT2_SUPER_MAGIC      0xEF53
+   EXT3_SUPER_MAGIC      0xEF53
+   EXT4_SUPER_MAGIC      0xEF53
+   HFS_SUPER_MAGIC       0x4244
+   HPFS_SUPER_MAGIC      0xF995E849
+   HUGETLBFS_MAGIC       0x958458f6
+   ISOFS_SUPER_MAGIC     0x9660
+   JFFS2_SUPER_MAGIC     0x72b6
+   JFS_SUPER_MAGIC       0x3153464a
+   MINIX_SUPER_MAGIC     0x137F /* ориг. minix */
+   MINIX_SUPER_MAGIC2    0x138F /* 30 символов minix */
+   MINIX2_SUPER_MAGIC    0x2468 /* minix V2 */
+   MINIX2_SUPER_MAGIC2   0x2478 /* minix V2, имена 30 символов */
+   MSDOS_SUPER_MAGIC     0x4d44
+   NCP_SUPER_MAGIC       0x564c
+   NFS_SUPER_MAGIC       0x6969
+   NTFS_SB_MAGIC         0x5346544e
+   OPENPROM_SUPER_MAGIC  0x9fa1
+   PROC_SUPER_MAGIC      0x9fa0
+   QNX4_SUPER_MAGIC      0x002f
+   REISERFS_SUPER_MAGIC  0x52654973
+   ROMFS_MAGIC           0x7275
+   SMB_SUPER_MAGIC       0x517B
+   SYSV2_SUPER_MAGIC     0x012FF7B6
+   SYSV4_SUPER_MAGIC     0x012FF7B5
+   TMPFS_MAGIC           0x01021994
+   UDF_SUPER_MAGIC       0x15013346
+   UFS_MAGIC             0x00011954
+   USBDEVICE_SUPER_MAGIC 0x9fa2
+   VXFS_SUPER_MAGIC      0xa501FCF5
+   XENIX_SUPER_MAGIC     0x012FF7B4
+   XFS_SUPER_MAGIC       0x58465342
+   _XIAFS_SUPER_MAGIC    0x012FD16D
+.fi
+.in
+.PP
+Значение \fIf_fsid\fP до конца не определено (но смотрите далее).
+.PP
+Если поле отсутствует в файловой системе, то его значение устанавливается в
+0. Вызов \fBfstatfs\fP() возвращает ту же информацию об открытом файле, на
+который ссылается дескриптор \fIfd\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEACCES\fP
+(\fBstatfs\fP()) В одном из каталогов префикса пути \fIpath\fP не разрешён поиск
+(см. также \fBpath_resolution\fP(7)).
+.TP 
+\fBEBADF\fP
+(\fBfstatfs\fP()) \fIfd\fP не является корректным открытым дескриптором файла.
+.TP 
+\fBEFAULT\fP
+Аргумент \fIbuf\fP или \fIpath\fP указывает на неправильный адрес.
+.TP 
+\fBEINTR\fP
+Данный вызов был прерван сигналом.
+.TP 
+\fBEIO\fP
+При чтении файловой системы произошла ошибка ввода\-вывода.
+.TP 
+\fBELOOP\fP
+(\fBstatfs\fP()) Было обнаружено слишком много символьных ссылок при трансляции
+\fIpath\fP.
+.TP 
+\fBENAMETOOLONG\fP
+(\fBstatfs\fP()) Слишком длинное значение аргумента \fIpath\fP.
+.TP 
+\fBENOENT\fP
+(\fBstatfs\fP()) Файл, на который ссылается \fIpath\fP, не существует.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOSYS\fP
+Файловая система не поддерживает данный вызов.
+.TP 
+\fBENOTDIR\fP
+(\fBstatfs\fP()) Компонент в префиксе пути \fIpath\fP не является каталогом.
+.TP 
+\fBEOVERFLOW\fP
+Некоторые значения слишком велики, чтобы быть представленными в возвращаемой
+структуре.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Есть только в Linux. Вызов \fBstatfs\fP() основан на подобном из 4.4BSD (но они
+используют разные структуры).
+.SH ЗАМЕЧАНИЯ
+Первые версии системных вызовов Linux \fBstatfs\fP() и \fBfstatfs\fP()
+разрабатывались без учёта огромных размеров файлов. В последствии, в Linux
+2.6 были добавлены системные вызовы \fBstatfs64\fP() и \fBfstatfs64\fP(), в
+которых используется новая структура, \fIstatfs64\fP. Новая структура содержит
+те же поля что и первоначальная структура \fIstatfs\fP, но размеры некоторых
+полей были увеличены для учёта огромных размеров файлов. Обёрточные функции
+в glibc \fBstatfs\fP() и \fBfstatfs\fP() прозрачно скрывают это различие ядер.
+
+В одних системах есть только файл \fI<sys/vfs.h>\fP, в других также
+есть файл \fI<sys/statfs.h>\fP, при чём первый включает
+последний. Поэтому, вероятно, лучше включать первый.
+
+В LSB библиотечные вызовы \fBstatfs\fP() и \fBfstatfs\fP() помечены как
+устаревшие, вместе них предлагается использовать \fBstatvfs\fP(2) и
+\fBfstatvfs\fP(2).
+.SS "Поле f_fsid"
+В Solaris, Irix и POSIX имеется системный вызов \fBstatvfs\fP(2), который
+возвращает \fIstruct statvfs\fP (определена в \fI<sys/statvfs.h>\fP), и в
+ней содержится поле \fIunsigned long\fP \fIf_fsid\fP. В Linux, SunOS, HP\-UX,
+4.4BSD имеется системный вызов \fBstatfs\fP(), который возвращает \fIstruct
+statfs\fP (определена в \fI<sys/vfs.h>\fP), и в ней содержится \fIfsid_t\fP
+\fIf_fsid\fP, где тип \fIfsid_t\fP определён как \fIstruct { int val[2]; }\fP. Того
+же придерживается FreeBSD, за исключением того, что в ней используется
+включаемый файл \fI<sys/mount.h>\fP.
+
+Общая идея в том, что в \fIf_fsid\fP содержится какая\-то произвольная
+информация, например пара (\fIf_fsid\fP,\fIino\fP) уникально определяющая файл. В
+некоторых операционных системах для этого используется номер устройства
+(один из вариантов) или номер устройства вместе с типом файловой системы. В
+других ОС поле \fIf_fsid\fP доступно только суперпользователю (и равно нулю для
+остальных пользователей), так как это поле используется в файловом указателе
+(filehandle) файловой системы при экспорте NFS, и выдача его значения влияет
+на безопасность.
+.LP
+В некоторых ОС  \fIfsid\fP может использоваться в качестве второго аргумента
+системного вызова \fBsysfs\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBstat\fP(2), \fBstatvfs\fP(2), \fBpath_resolution\fP(7)

@@ -1,0 +1,24 @@
+.\"  Copyright 2005 walter harms (walter.harms@informatik.uni-oldenburg.de)
+.\"  and Copyright 2005 Michael Kerrisk (mtk.manpages@gmail.com).
+.\"  Distributed under the GNU General Public License.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CANONICALIZE_FILE_NAME 3 2005\-07\-14 GNU "Руководство программиста Linux"
+.SH ИМЯ
+canonicalize_file_name \- возвращает канонизированное имя файла
+.SH ОБЗОР
+\fB#define _GNU_SOURCE\fP /* смотрите feature_test_macros(7) */
+.br
+\fB#include <stdlib.h>\fP
+.sp
+\fBchar *canonicalize_file_name(const char *\fP\fIpath\fP\fB);\fP
+.SH ОПИСАНИЕ
+Вызов \fIcanonicalize_file_name(path)\fP эквивалентен вызову \fIrealpath(path,\ NULL)\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция является расширением GNU.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBrealpath\fP(3)

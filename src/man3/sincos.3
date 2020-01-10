@@ -1,0 +1,60 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL, 2002-07-27 Walter Harms
+.\" and Copyright 2008, Linux Foundation, written by Michael Kerrisk
+.\"     <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SINCOS 3 2008\-08\-11 GNU "Руководство программиста Linux"
+.SH ИМЯ
+sincos, sincosf, sincosl \- одновременное вычисление синуса и косинуса
+.SH ОБЗОР
+.nf
+\fB#define _GNU_SOURCE\fP         /* см. feature_test_macros(7) */
+\fB#include <math.h>\fP
+.sp
+\fBvoid sincos(double \fP\fIx\fP\fB, double *\fP\fIsin\fP\fB, double *\fP\fIcos\fP\fB);\fP
+.br
+\fBvoid sincosf(float \fP\fIx\fP\fB, float *\fP\fIsin\fP\fB, float *\fP\fIcos\fP\fB);\fP
+.br
+\fBvoid sincosl(long double \fP\fIx\fP\fB, long double *\fP\fIsin\fP\fB, long double *\fP\fIcos\fP\fB);\fP
+.fi
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.SH ОПИСАНИЕ
+Некоторым приложениям необходимы значения синуса и косинуса одного и того же
+угла \fIx\fP. Данная функция вычисляет одновременно оба значения и сохраняет
+результаты в \fI*sin\fP и \fI*cos\fP.
+
+Если \fIx\fP имеет значение NaN, будет возвращено NaN для \fI*sin\fP и \fI*cos\fP.
+
+Если \fIx\fP стремится к плюс бесконечности или минус бесконечности, то будет
+сгенерирована ошибка выхода за пределы области, а в качестве результата в
+\fI*sin\fP and \fI*cos\fP будет возвращено NaN.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Эти функции возвращают \fIvoid\fP.
+.SH ОШИБКИ
+Смотрите \fBmath_error\fP(7), чтобы определить, какие ошибки могут возникать
+при вызове этих функций.
+.PP
+Могут возникать следующие ошибки:
+.TP 
+Ошибка области: \fIx\fP стремится к бесконечности
+.\" .I errno
+.\" is set to
+.\" .BR EDOM .
+Возникает исключение неправильной плавающей точки (\fBFE_INVALID\fP).
+.PP
+.\" FIXME . Is it intentional that these functions do not set errno?
+.\" sin() and cos() also don't set errno; bugs have been raised for
+.\" those functions.
+Эти функции не изменяют \fIerrno\fP.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Эта функция является расширением GNU.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcos\fP(3), \fBsin\fP(3), \fBtan\fP(3)

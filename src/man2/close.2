@@ -1,0 +1,106 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt, Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Wed Jul 21 22:40:25 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sat Feb 18 15:27:48 1995 by Michael Haardt
+.\" Modified Sun Apr 14 11:40:50 1996 by Andries Brouwer <aeb@cwi.nl>:
+.\"   corrected description of effect on locks (thanks to
+.\"   Tigran Aivazian <tigran@sco.com>).
+.\" Modified Fri Jan 31 16:21:46 1997 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2000-07-22 by Nicol�s Lichtmaier <nick@debian.org>
+.\"   added note about close(2) not guaranteeing that data is safe on close.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CLOSE 2 2007\-12\-28 Linux "Руководство программиста Linux"
+.SH ИМЯ
+close \- закрывает файловый дескриптор
+.SH ОБЗОР
+.nf
+\fB#include <unistd.h>\fP
+.sp
+\fBint close(int \fP\fIfd\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBclose\fP() закрывает файловый дескриптор, который после этого не
+ссылается ни на один и файл и может быть использован повторно. Все
+блокировки (см. \fBfcntl\fP(2)), связанные с соответствующим файлом и
+принадлежащие процессу, снимаются (независимо от того, какой файловый
+дескриптор был ли использован для установки блокировки).
+.PP
+Если \fIfd\fP является последней копией какого\-либо файлового дескриптора,
+ссылающегося на используемое описание открытого файла, (см. \fBopen\fP(2)), то
+ресурсы, связанные с описанием открытого файла, освобождаются; если
+дескриптор был последней ссылкой на файл, удалённый с помощью \fBunlink\fP(2),
+то файл окончательно удаляется.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении функции \fBclose\fP() возвращается 0. В случае ошибки
+возвращается \-1, а \fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+Значение \fIfd\fP не является допустимым открытым файловым дескриптором.
+.TP 
+\fBEINTR\fP
+Вызов \fBclose\fP() был прерван по сигналу; см. \fBsignal\fP(7).
+.TP 
+\fBEIO\fP
+Произошла ошибка ввода\-вывода.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents an additional ENOLINK error condition.
+SVr4, 4.3BSD, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Не проверять значение, возвращаемое функцией \fBclose\fP() \(em обычная, но от
+этого не менее серьезная ошибка программирования. Вполне возможно, что
+ошибка в предыдущей операции \fBwrite\fP(2) впервые даст о себе знать при
+выполнении завершающего \fBclose\fP(). Отсутствие проверки возвращаемого
+значения при закрытии файла может привести к потере данных. Особенно часто
+это может происходить при использовании NFS и дисковых квот.
+.PP
+Успешное закрытие не гарантирует, что данные успешно записаны на диск,
+потому что ядро откладывает запись. Обычно файловые системы не сбрасывают
+буферы на диск при закрытии потока. Если вам нужно удостовериться, что
+данные физически сохранены на диске, используйте \fBfsync\fP(2). (В этом случае
+всё будет зависеть от оборудования.)
+.PP
+.\" Date: Tue, 4 Sep 2007 13:57:35 +0200
+.\" From: Fredrik Noring <noring@nocrew.org>
+.\" One such race involves signals and ERESTARTSYS. If a file descriptor
+.\" in use by a system call is closed and then reused by e.g. an
+.\" independent open() in some unrelated thread, before the original system
+.\" call has restared after ERESTARTSYS, the original system call will
+.\" later restart with the reused file descriptor. This is most likely a
+.\" serious programming error.
+Вероятно неблагоразумно закрывать дескрипторы файла, в то время как они
+могут использоваться системными вызовами других нитей того же процесса. Так
+как файловый дескриптор может использоваться повторно, есть некоторые
+неясные условия возникновения гонок, которые могут вызвать непреднамеренные
+побочные эффекты.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBfcntl\fP(2), \fBfsync\fP(2), \fBopen\fP(2), \fBshutdown\fP(2), \fBunlink\fP(2),
+\fBfclose\fP(3)

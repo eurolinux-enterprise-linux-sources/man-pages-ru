@@ -1,0 +1,117 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 2010 Intel Corporation
+.\" Author: Andi Kleen
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH KEXEC_LOAD 2 2010\-11\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+kexec_load \- загружает новое ядро для выполнения в будущем
+.SH ОБЗОР
+\fB#include <linux/kexec.h>\fP
+.br
+\fBlong kexec_load(unsigned long \fP\fIentry\fP\fB, unsigned long
+\fP\fInr_segments\fP\fB,\fP
+.br
+\fB struct kexec_segment *\fP\fIsegments\fP\fB, unsigned long \fP\fIflags\fP\fB);\fP
+.SH ОПИСАНИЕ
+Системный вызов \fBkexec_load\fP() загружает новое ядро, которое можно
+запустить позже с помощью \fBreboot\fP(2).
+.PP
+Аргумент \fIflags\fP представляет собой маску, чьи старшие биты управляют
+работой вызова. В \fIflags\fP можно указать следующие значения:
+.TP 
+\fBKEXEC_ON_CRASH\fP (начиная с Linux 2.6.13)
+.\" FIXME figure out how this is really used
+Запускать новое ядро автоматически после «падения» системы.
+.TP 
+\fBKEXEC_PRESERVE_CONTEXT\fP (начиная с Linux 2.7.27)
+Сохранять аппаратное и программное состояния перед выполнением нового
+ядра. Может использоваться для перевода системы в состояние ожидания
+(suspend). Этот флаг доступен только, если ядро было собрано с параметром
+\fBCONFIG_KEXEC_JUMP\fP, и работает только, если значение \fInr_segments\fP больше
+0.
+.PP
+В младших битах \fIflags\fP задаётся архитектура, для которой будет выполняться
+ядро. Константой (через OR) \fBKEXEC_ARCH_DEFAULT\fP задаётся использование
+текущей архитектуры; также есть другие константы, описывающие архитектуры:
+\fBKEXEC_ARCH_386\fP, \fBKEXEC_ARCH_X86_64\fP, \fBKEXEC_ARCH_PPC\fP,
+\fBKEXEC_ARCH_PPC64\fP, \fBKEXEC_ARCH_IA_64\fP, \fBKEXEC_ARCH_ARM\fP,
+\fBKEXEC_ARCH_S390\fP, \fBKEXEC_ARCH_SH\fP, \fBKEXEC_ARCH_MIPS\fP и
+\fBKEXEC_ARCH_MIPS_LE\fP. Архитектура должна быть работоспособна на ЦП системы.
+
+В аргументе \fIentry\fP задаётся физический адрес точки входа в образе ядра. В
+аргументе \fInr_segments\fP задаётся количество сегментов, на которые указывает
+указатель \fIsegments\fP. В аргументе \fIsegments\fP задаётся массив структур
+\fIkexec_segment\fP, который определяет разбивку ядра:
+.in +4n
+.nf
+
+struct kexec_segment {
+    void   *buf;        /* буфер в пользовательском пространстве */
+    size_t  bufsz;      /* размер буфера в пользовательском пространстве */
+    void   *mem;        /* физический адрес ядра */
+    size_t  memsz;      /* размер ядра */
+};
+.fi
+.in
+.PP
+.\" FIXME elaborate on the following:
+Образ ядра, определённый \fIsegments\fP, копируется из вызывающего процесса в
+ранее зарезервированную память.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBkexec_load\fP() возвращается 0. При ошибке
+возвращается \-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+.TP 
+\fBEBUSY\fP
+Уже загружено другое crash\-ядро или crash\-ядро уже используется.
+.TP 
+\fBEINVAL\fP
+.\" KEXEC_SEGMENT_MAX == 16
+Неправильное значение \fIflags\fP; или количество \fInr_segments\fP слишком
+большое
+.TP 
+\fBEPERM\fP
+Вызывающий не имеет мандата \fBCAP_SYS_BOOT\fP.
+.SH ВЕРСИИ
+Системный вызов \fBkexec_load\fP() впервые появился в 2.6.13.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов есть только в Linux.
+.SH ЗАМЕЧАНИЯ
+В настоящее время в glibc нет поддержки вызова \fBkexec_load\fP(). Вызывайте
+его через \fBsyscall\fP(2).
+.PP
+.\" FIXME Andi submitted a patch for this.
+.\" Check if it got accepted later.
+Необходимые для работы константы находятся в файле исходного кода ядра
+\fIlinux/kexec.h\fP, который не экспортируется в glibc. Поэтому данные
+константы должны определяться вручную.
+
+Данный системный вызов доступен только, если ядро было собрано с параметром
+\fBCONFIG_KEXEC\fP.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBreboot\fP(2), \fBsyscall\fP(2)

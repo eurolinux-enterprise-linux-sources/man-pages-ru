@@ -1,0 +1,141 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt (drew@cs.colorado.edu), March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified 1993-07-21 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1994-08-21 by Michael Chastain <mec@shell.portal.com>
+.\" Modified 1996-06-13 by aeb
+.\" Modified 1996-11-06 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 1997-08-21 by Joseph S. Myers <jsm28@cam.ac.uk>
+.\" Modified 2004-06-23 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CHROOT 2 2010\-09\-20 Linux "Руководство программиста Linux"
+.SH ИМЯ
+chroot \- изменить корневой каталог
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBint chroot(const char *\fP\fIpath\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBchroot\fP():
+.ad l
+.RS 4
+.PD 0
+.TP  4
+Начиная с glibc 2.2.2:
+.nf
+_BSD_SOURCE ||
+    (_XOPEN_SOURCE\ >=\ 500 ||
+        _XOPEN_SOURCE\ &&\ _XOPEN_SOURCE_EXTENDED) &&
+    !(_POSIX_C_SOURCE\ >=\ 200112L || _XOPEN_SOURCE\ >=\ 600)
+.TP  4
+.fi
+До glibc 2.2.2: не было
+.PD
+.RE
+.ad b
+.SH ОПИСАНИЕ
+\fBchroot\fP() изменяет корневой каталог вызывающего процесса на тот, что задан
+аргументом \fIpath\fP. Этот каталог будет использоваться для имён файлов,
+начинающихся с \fI/\fP. Корневой каталог наследуется всеми потомками
+вызывающего процесса.
+
+Только привилегированный процесс (Linux: с мандатом \fBCAP_SYS_CHROOT\fP) может
+вызвать \fBchroot\fP().
+
+Этот вызов изменяет только составляющую процесса разрешения имён и больше
+ничего.
+
+Данный вызов не изменяет текущий рабочий каталог, поэтому после вызова
+\(aq\fI.\fP\(aq может оказаться вне дерева, являющегося корнем \(aq\fI/\fP\(aq. В
+частности, суперпользователь может выйти за пределы "тюрьмы chroot"
+выполнив:
+.nf
+
+    mkdir foo; chroot foo; cd ..
+.fi
+
+Данный вызов не закрывает открытые файловые дескрипторы и поэтому через
+такие дескрипторы можно получить доступ к файлам за пределами дерева chroot.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+В зависимости от файловой системы могут быть возвращены другие
+ошибки. Наиболее распространённые ошибки перечислены далее:
+.TP 
+\fBEACCES\fP
+.\" Also search permission is required on the final component,
+.\" maybe just to guarantee that it is a directory?
+Поиск запрещён из\-за одного из частей префикса пути (См. также
+\fBpath_resolution\fP(7).)
+.TP 
+\fBEFAULT\fP
+Аргумент \fIpath\fP указывает за пределы доступного адресного пространства.
+.TP 
+\fBEIO\fP
+Произошла ошибка ввода\-вывода.
+.TP 
+\fBELOOP\fP
+Во время определения \fIpath\fP встретилось слишком много символьных ссылок.
+.TP 
+\fBENAMETOOLONG\fP
+\fIpath\fP слишком длинен.
+.TP 
+\fBENOENT\fP
+Файл не существует.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOTDIR\fP
+Компонент \fIpath\fP не является каталогом.
+.TP 
+\fBEPERM\fP
+У вызвавшего процесса недостаточно прав.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents additional EINTR, ENOLINK and EMULTIHOP error conditions.
+.\" X/OPEN does not document EIO, ENOMEM or EFAULT error conditions.
+SVr4, 4.4BSD, SUSv2 (отмечена как УСТАРЕВШАЯ). Эта функция не входит в
+POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+Дочерний процесс, созданный посредством \fBfork\fP(2), наследует корневой
+каталог родительского процесса. При вызове \fBexecve\fP(2) корневой каталог
+остаётся неизменным.
+
+.\" FIXME . eventually say something about containers,
+.\" virtual servers, etc.?
+В FreeBSD есть более ограничивающий системный вызов \fBjail\fP().
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBchdir\fP(2), \fBpath_resolution\fP(7)

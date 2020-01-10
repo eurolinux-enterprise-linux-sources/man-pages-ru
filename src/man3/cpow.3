@@ -1,0 +1,33 @@
+.\" Copyright 2002 Walter Harms (walter.harms@informatik.uni-oldenburg.de)
+.\" Distributed under GPL
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH CPOW 3 2008\-08\-11 "" "Руководство программиста Linux"
+.SH ИМЯ
+cpow, cpowf, cpowl \- функция возведения комплексного числа в степень
+.SH ОБЗОР
+.nf
+\fB#include <complex.h>\fP
+.sp
+\fBdouble complex cpow(double complex \fP\fIx\fP\fB, complex double \fP\fIz\fP\fB);\fP
+.br
+\fBfloat complex cpowf(float complex \fP\fIx\fP\fB, complex float \fP\fIz\fP\fB);\fP
+.br
+\fBlong double complex cpowl(long double complex \fP\fIx\fP\fB,\fP
+\fB                          complex long double \fP\fIz\fP\fB);\fP
+.sp
+Компонуется при указании параметра \fI\-lm\fP.
+.fi
+.SH ОПИСАНИЕ
+Функция подсчитывает значение \fIx\fP, возведенного в степень \fIz\fP (с
+обрезанием ветви для \fIx\fP вдоль отрицательной действительной оси.
+.SH ВЕРСИИ
+Эти функции впервые появились в glibc 2.1.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcabs\fP(3), \fBpow\fP(3), \fBcomplex\fP(7)

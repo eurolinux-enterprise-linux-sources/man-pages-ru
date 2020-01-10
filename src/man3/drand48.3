@@ -1,0 +1,149 @@
+.\" Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 19:46:03 1993 by Rik Faith (faith@cs.unc.edu)
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH DRAND48 3 2007\-07\-26 "" "Руководство программиста Linux"
+.SH ИМЯ
+drand48, erand48, lrand48, nrand48, mrand48, jrand48, srand48, seed48,
+lcong48 \- генерация равномерно распределённых псевдослучайных чисел
+.SH ОБЗОР
+.nf
+\fB#include <stdlib.h>\fP
+.sp
+\fBdouble drand48(void);\fP
+.sp
+\fBdouble erand48(unsigned short \fP\fIxsubi\fP\fB[3]);\fP
+.sp
+\fBlong int lrand48(void);\fP
+.sp
+\fBlong int nrand48(unsigned short \fP\fIxsubi\fP\fB[3]);\fP
+.sp
+\fBlong int mrand48(void);\fP
+.sp
+\fBlong int jrand48(unsigned short \fP\fIxsubi\fP\fB[3]);\fP
+.sp
+\fBvoid srand48(long int \fP\fIseedval\fP\fB);\fP
+.sp
+\fBunsigned short *seed48(unsigned short \fP\fIseed16v\fP\fB[3]);\fP
+.sp
+\fBvoid lcong48(unsigned short \fP\fIparam\fP\fB[7]);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+.\" .BR drand48 (),
+.\" .BR erand48 (),
+.\" .BR lrand48 (),
+.\" .BR nrand48 (),
+.\" .BR mrand48 (),
+.\" .BR jrand48 (),
+.\" .BR srand48 (),
+.\" .BR seed48 (),
+.\" .BR lcong48 ():
+Для всех вышеуказанных функций: _SVID_SOURCE || _XOPEN_SOURCE
+.ad b
+.SH ОПИСАНИЕ
+Данные функции генерируют псевдослучайные числа при помощи линейного
+конгруэнтного метода и арифметики на основе 48\-битного целого.
+.PP
+Функции \fBdrand48\fP() и \fBerand48\fP() возвращают неотрицательные значения в
+формате плавающей точки с двойной точностью, равномерно распределённые в
+диапазоне [0.0, 1.0).
+.PP
+Функции \fBlrand48\fP() и \fBnrand48\fP() возвращают неотрицательные целые числа
+типа long, равномерно распределённые в диапазоне от 0 до 2^31.
+.PP
+Функции \fBmrand48\fP() и \fBjrand48\fP() возвращают целые числа со знаком типа
+long, равномерно распределённые в диапазоне от \-2^31 до 2^31.
+.PP
+Функции \fBsrand48\fP(), \fBseed48\fP() и \fBlcong48\fP() являются
+функциями\-инициализаторами и должны быть вызваны до использования
+\fBdrand48\fP(), \fBlrand48\fP() или \fBmrand48\fP(). Функциям \fBerand48\fP(),
+\fBnrand48\fP() и \fBjrand48\fP() для первого вызова инициализаторы не требуются.
+.PP
+Все функции работают за счёт генерации последовательности 48\-битных целых
+чисел \fIXi\fP согласно формуле линейного конгруэнтного метода:
+.sp
+.nf
+.RS
+\fBXn+1 = (aXn + c) mod m, где n >= 0\fP
+.RE
+.fi
+.sp
+Параметр \fIm\fP = 2^48, поэтому в вычислениях используются 48\-битные целые
+числа. Если \fBlcong48\fP() не вызывалась, то \fIa\fP и \fIc\fP принимают следующие
+значения:
+.sp
+.nf
+.RS
+\fBa = 0x5DEECE66D\fP
+\fBc = 0xB\fP
+.RE
+.fi
+.sp
+Для получения значения, возвращаемого любой из функций (\fBdrand48\fP(),
+\fBerand48\fP(), \fBlrand48\fP(), \fBnrand48\fP(), \fBmrand48\fP() или \fBjrand48\fP()),
+сначала генерируется следующее 48\-битное \fIXi\fP в последовательности. Затем
+подходящее число бит (согласно типу возвращаемых данных) копируется в
+верхние биты \fIXi\fP и трансформируется во возвращаемое значение.
+.PP
+Функции \fBdrand48\fP(), \fBlrand48\fP() и \fBmrand48\fP() сохраняют последнее
+сгенерированное 48\-битное значение \fIXi\fP во внутреннем буфере. Для функций
+\fBerand48\fP(), \fBnrand48\fP() и \fBjrand48\fP() требуется, чтобы вызывающая
+программа создавала хранилище для последующих значений \fIXi\fP и указывала его
+в аргументе\-массиве \fIxsubi\fP. Функции инициализируются путём помещения
+начального значения \fIXi\fP в массив до их первого вызова.
+.PP
+Функция инициализации \fBsrand48\fP() устанавливает верхние 32 бита \fIXi\fP в
+аргументе \fIseedval\fP. Нижние 16 бит устанавливаются в обязательное значение
+0x330E.
+.PP
+Функция инициализации \fBseed48\fP() устанавливает \fIXi\fP в 48\-битное значение,
+указанное в аргументе\-массиве \fIseed16v\fP. Предыдущее значение \fIXi\fP
+копируется во внутренний буфер, указатель на который возвращается
+\fBseed48\fP().
+.PP
+Функция инициализации \fBlcong48\fP() позволяет пользователю указывать
+первоначальные значения для \fIXi\fP, \fIa\fP и \fIc\fP. Для \fIXi\fP используется
+аргумент массива \fIparam[0\-2]\fP, для \fIa\fP \(em \fIparam[3\-5]\fP, а для \fIc\fP \(em
+\fIparam[6]\fP. После вызова \fBlcong48\fP() следующий вызов \fBsrand48\fP() или
+\fBseed48\fP() восстановит стандартные значения \fIa\fP и \fIc\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+В SVID 3 данные функции были объявлены устаревшими и вместо них следует
+использовать \fBrand\fP(3).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBrand\fP(3), \fBrandom\fP(3)

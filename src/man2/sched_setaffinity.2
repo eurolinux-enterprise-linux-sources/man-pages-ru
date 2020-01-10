@@ -1,0 +1,155 @@
+.\" man2/sched_setaffinity.2 - sched_setaffinity and sched_getaffinity man page
+.\"
+.\" Copyright (C) 2002 Robert Love
+.\" and Copyright (C) 2006 Michael Kerrisk
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" 2002-11-19 Robert Love <rml@tech9.net> - initial version
+.\" 2004-04-20 mtk - fixed description of return value
+.\" 2004-04-22 aeb - added glibc prototype history
+.\" 2005-05-03 mtk - noted that sched_setaffinity may cause thread
+.\"	migration and that CPU affinity is a per-thread attribute.
+.\" 2006-02-03 mtk -- Major rewrite
+.\" 2008-11-12, mtk, removed CPU_*() macro descriptions to a
+.\" separate CPU_SET(3) page.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SCHED_SETAFFINITY 2 2010\-11\-06 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sched_setaffinity, sched_getaffinity \- устанавливает и получает процессорную
+маску увязывания для процесса
+.SH ОБЗОР
+.nf
+\fB#define _GNU_SOURCE\fP             /* Смотрите feature_test_macros(7) */
+\fB#include <sched.h>\fP
+.sp
+\fBint sched_setaffinity(pid_t \fP\fIpid\fP\fB, size_t \fP\fIcpusetsize\fP\fB,\fP
+\fB                      cpu_set_t *\fP\fImask\fP\fB);\fP
+.sp
+\fBint sched_getaffinity(pid_t \fP\fIpid\fP\fB, size_t \fP\fIcpusetsize\fP\fB,\fP
+\fB                      cpu_set_t *\fP\fImask\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+В маске увязывания ЦП задаётся набор процессоров (process's CPU affinity
+mask), на которых может выполняться процесс. В многопроцессорных системах,
+настройка маски увязывания ЦП может улучшить производительность. Например,
+выделение одного процессора определённому процессу (т.е., назначение в маске
+увязывания этому процессу определённого ЦП, и исключение этого ЦП из масок
+увязывания у остальных процессов) позволяет достичь максимальной скорости
+выполнения этого процесса. Ограничение выполнения процесса на одном ЦП также
+позволяет избежать потерь производительности из\-за признания
+недействительными данных в кэше, которое возникает когда процесс прекращает
+выполняться на одном ЦП и продолжает работу на другом ЦП.
+
+Маска увязывания ЦП представляется в виде структуры \fIcpu_set_t\fP, «набором
+процессоров», на которую указывает \fImask\fP. В \fBCPU_SET\fP(3) описаны макросы
+для изменения набора ЦП.
+
+Вызов \fBsched_setaffinity\fP() устанавливает маску увязывания ЦП \fImask\fP для
+процесса, чей ID указан в \fIpid\fP. Если значение \fIpid\fP равно нулю, то
+используется вызывающий процесс. В аргументе \fIcpusetsize\fP задаётся
+количество данных (в байтах), на которые указывает \fImask\fP. Обычно его
+значение указывается как \fIsizeof(cpu_set_t)\fP.
+
+Если процесс, указанный в \fIpid\fP, в данный момент не выполняется на одном из
+ЦП, заданном в \fImask\fP, то этот процесс переносится на один из процессоров,
+назначаемых \fImask\fP.
+
+Вызов \fBsched_getaffinity\fP() записывает в структуру \fIcpu_set_t\fP, на которую
+указывает \fImask\fP, значение маски увязывания ЦП для процесса, чей ID указан
+в \fIpid\fP. В аргументе \fIcpusetsize\fP задаётся размер \fImask\fP (в байтах). Если
+значение \fIpid\fP равно нулю, то возвращается маска вызывающего процесса.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBsched_setaffinity\fP() и \fBsched_getaffinity\fP()
+возвращают 0. В случае ошибки возвращается \-1, а \fIerrno\fP устанавливается в
+соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+Указан некорректный адрес памяти.
+.TP 
+\fBEINVAL\fP
+В маске увязывания ЦП \fImask\fP указаны процессоры, которых физически нет в
+системе, и которые разрешены процессу согласно любым ограничениям, которые
+могут налагаться механизмом «cpuset», описанном в \fBcpuset\fP(7).
+.TP 
+\fBEINVAL\fP
+(\fBsched_getaffinity\fP() и, в ядрах до 2.6.9, \fBsched_setaffinity\fP())
+Значение \fIcpusetsize\fP меньше размера маски увязывания, используемой в ядре.
+.TP 
+\fBEPERM\fP
+(\fBsched_setaffinity\fP()) Вызывающий процесс не имеет достаточно
+прав. Вызывающему требуется иметь эффективный пользовательский ID равный
+реальному пользовательскому ID или эффективному пользовательскому ID
+процесса, указанного в \fIpid\fP, или он должен обладать мандатом
+\fBCAP_SYS_NICE\fP.
+.TP 
+\fBESRCH\fP
+Процесс с идентификатором \fIpid\fP не найден.
+.SH ВЕРСИИ
+Системные вызовы увязывания ЦП появились в ядре Linux версии
+2.5.8. Обёрточные функции появились в glibc 2.3. Первоначально, в интерфейсе
+glibc присутствовал аргумент \fIcpusetsize\fP, имевший тип \fIunsigned int\fP. В
+glibc 2.3.3 аргумент \fIcpusetsize\fP был удалён, но появился вновь в glibc
+2.3.4 с типом \fIsize_t\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данные системные вызовы есть только в Linux.
+.SH ЗАМЕЧАНИЯ
+После вызова \fBsched_setaffinity\fP() набор процессоров, на которых
+действительно будет выполняться процесс, вычисляется пересечением набора из
+аргумента \fImask\fP и набором процессоров, присутствующих в системе. В
+дальнейшем, система может ограничить набор процессоров процесса, если
+задействован механизм «cpuset», описанный в \fBcpuset\fP(7). Эти ограничения на
+действительный набор процессоров, используемых для процесса, без уведомления
+налагаются ядром.
+
+В \fBsched_setscheduler\fP(2) приведено описание схемы планирования Linux.
+.PP
+В действительности, маска увязывания является атрибутом нити, который может
+изменяться независимо для каждой нити в группе нитей. В аргументе \fIpid\fP
+можно передавать значение, возвращаемое вызовом \fBgettid\fP(2). При значении
+\fIpid\fP равным 0 будет установлен атрибут вызывающей нити, а при передаче
+значения, возвращаемого вызовом \fBgetpid\fP(2), устанавливается атрибут
+главной нити группы нитей (при работе с программным интерфейсом POSIX
+используйте функцию \fBpthread_setaffinity_np\fP(3) вместо
+\fBsched_setaffinity\fP()).
+
+Потомок, создаваемый с помощью \fBfork\fP(2), наследует маску увязывания
+ЦП. Маска увязывания сохраняется при вызове \fBexecve\fP(2).
+
+В данной справочной странице описан интерфейс увязывания ЦП, используемый в
+glibc. Реальный интерфейс системных вызов чуть отличается: аргумент \fImask\fP
+имеет тип \fIunsigned long *\fP, отражая факт того, что используемая реализация
+наборов ЦП представляет собой просто битовую маску. При успешном выполнении
+ядерный системный вызов \fBsched_getaffinity\fP() возвращает размер типа данных
+\fIcpumask_t\fP (в байтах), который используется в ядре для представления
+битовой маски процессоров.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclone\fP(2), \fBgetcpu\fP(2), \fBgetpriority\fP(2), \fBgettid\fP(2), \fBnice\fP(2),
+\fBsched_get_priority_max\fP(2), \fBsched_get_priority_min\fP(2),
+\fBsched_getscheduler\fP(2), \fBsched_setscheduler\fP(2), \fBsetpriority\fP(2),
+\fBCPU_SET\fP(3), \fBpthread_setaffinity_np\fP(3), \fBsched_getcpu\fP(3),
+\fBcapabilities\fP(7), \fBcpuset\fP(7)

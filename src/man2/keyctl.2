@@ -1,0 +1,164 @@
+.\"
+.\" Copyright (C) 2006 Red Hat, Inc. All Rights Reserved.
+.\" Written by David Howells (dhowells@redhat.com)
+.\"
+.\" This program is free software; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License
+.\" as published by the Free Software Foundation; either version
+.\" 2 of the License, or (at your option) any later version.
+.\"
+.\" FIXME Document KEYCTL_REJECT (new in 2.6.39)
+.\"		commit fdd1b94581782a2ddf9124414e5b7a5f48ce2f9c
+.\"		Documentation/security/keys.txt
+.\" FIXME Document KEYCTL_INSTANTIATE_IOV (new in 2.6.39)
+.\"		commit ee009e4a0d4555ed522a631bae9896399674f064
+.\"		Documentation/security/keys.txt
+.\" FIXME Document KEYCTL_INVALIDATE (new in 3.5)
+.\"		commit fd75815f727f157a05f4c96b5294a4617c0557da
+.\"		Documentation/security/keys.txt
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH KEYCTL 2 2010\-02\-25 Linux "Вызовы системы управления ключами Linux"
+.SH ИМЯ
+keyctl \- работа с системой управления ключами ядра
+.SH ОБЗОР
+.nf
+\fB#include <keyutils.h>\fP
+.sp
+\fBlong keyctl(int \fP\fIcmd\fP\fB, ...);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBkeyctl\fP() выполняет несколько функций:
+.TP 
+\fBKEYCTL_GET_KEYRING_ID\fP
+Запрашивает идентификатор связки ключей.
+.TP 
+\fBKEYCTL_JOIN_SESSION_KEYRING\fP
+Подсоединяется или запускает именованную сеансовую связку ключей.
+.TP 
+\fBKEYCTL_UPDATE\fP
+Обновляет ключ.
+.TP 
+\fBKEYCTL_REVOKE\fP
+Отзывает ключ.
+.TP 
+\fBKEYCTL_CHOWN\fP
+Назначает владельца ключа.
+.TP 
+\fBKEYCTL_SETPERM\fP
+Назначает права на ключ.
+.TP 
+\fBKEYCTL_DESCRIBE\fP
+Описывает ключ.
+.TP 
+\fBKEYCTL_CLEAR\fP
+Стирает содержимое связки ключей.
+.TP 
+\fBKEYCTL_LINK\fP
+Цепляет ключ в связку ключей.
+.TP 
+\fBKEYCTL_UNLINK\fP
+Отцепляет ключ от связки ключей.
+.TP 
+\fBKEYCTL_SEARCH\fP
+Ищет ключ в связке ключей.
+.TP 
+\fBKEYCTL_READ\fP
+Читает содержимое ключа или связки ключей.
+.TP 
+\fBKEYCTL_INSTANTIATE\fP
+Создаёт (Instantiate) частично сконструированный ключ.
+.TP 
+\fBKEYCTL_NEGATE\fP
+Удаляет (Negate) частично сконструированный ключ.
+.TP 
+\fBKEYCTL_SET_REQKEY_KEYRING\fP
+Назначает связку ключей request\-key по умолчанию.
+.TP 
+\fBKEYCTL_SET_TIMEOUT\fP
+Назначает время ожидания ключа.
+.TP 
+\fBKEYCTL_ASSUME_AUTHORITY\fP
+Допускает полномочие создания ключа.
+.P
+На базе этих операций в \fBlibkeyutils\fP созданы отдельные функции, что
+позволяет проверять типы с помощью компилятора. Обратитесь к разделу
+\fBСмотрите также\fP ниже.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBkeyctl\fP() возвращается серийный номер найденного
+ключа. В случае ошибки возвращается значение \fB\-1\fP, а в errno
+устанавливается код соответствующей ошибки.
+.SH ОШИБКИ
+.TP 
+\fBEACCES\fP
+Операция с ключом не разрешена.
+.TP 
+\fBEDQUOT\fP
+Квота на ключи для данного пользователя была бы превышена, если бы этот ключ
+создался или был бы прицеплен в связку ключей.
+.TP 
+\fBEKEYEXPIRED\fP
+Найден или указан просроченный ключ.
+.TP 
+\fBEKEYREJECTED\fP
+Найден или указан отклонённый (rejected) ключ.
+.TP 
+\fBEKEYREVOKED\fP
+Найден или указан отозванный ключ.
+.TP 
+\fBENOKEY\fP
+Искомый ключ не найден или указан неверный ключ.
+.SH КОМПОНОВКА
+Хотя это и системный вызов Linux, его нет в \fIlibc\fP, но его можно найти в
+\fIlibkeyutils\fP. При сборке программы компоновщику нужно указать параметр
+\fB\-lkeyutils\fP.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBkeyctl\fP(1),
+.br
+\fBadd_key\fP(2),
+.br
+\fBrequest_key\fP(2),
+.br
+\fBkeyctl_get_keyring_ID\fP(3),
+.br
+\fBkeyctl_join_session_keyring\fP(3),
+.br
+\fBkeyctl_update\fP(3),
+.br
+\fBkeyctl_revoke\fP(3),
+.br
+\fBkeyctl_chown\fP(3),
+.br
+\fBkeyctl_setperm\fP(3),
+.br
+\fBkeyctl_describe\fP(3),
+.br
+\fBkeyctl_clear\fP(3),
+.br
+\fBkeyctl_link\fP(3),
+.br
+\fBkeyctl_unlink\fP(3),
+.br
+\fBkeyctl_search\fP(3),
+.br
+\fBkeyctl_read\fP(3),
+.br
+\fBkeyctl_instantiate\fP(3),
+.br
+\fBkeyctl_negate\fP(3),
+.br
+\fBkeyctl_set_reqkey_keyring\fP(3),
+.br
+\fBkeyctl_set_timeout\fP(3),
+.br
+\fBkeyctl_assume_authority\fP(3),
+.br
+\fBkeyctl_describe_alloc\fP(3),
+.br
+\fBkeyctl_read_alloc\fP(3),
+.br
+\fBrequest\-key\fP(8)

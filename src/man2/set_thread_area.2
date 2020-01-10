@@ -1,0 +1,57 @@
+.\" Copyright (C) 2003 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\" Author: Kent Yoder
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SET_THREAD_AREA 2 2008\-11\-27 Linux "Руководство программиста Linux"
+.SH ИМЯ
+set_thread_area \- назначение области локального хранилища нити TLS
+.SH ОБЗОР
+\fB#include <linux/unistd.h>\fP
+.br
+\fB#include <asm/ldt.h>\fP
+.sp
+\fBint set_thread_area(struct user_desc *\fP\fIu_info\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBset_thread_area\fP() устанавливает элемент в массиве области локального
+хранилища текущей нити (TLS, Thread Local Storage). Индекс элемента массива
+TLS, устанавливаемого \fBset_thread_area\fP(), соответствует значению
+\fIu_info\->entry_number\fP, переданного пользователем. Если это значение
+находится в допустимых пределах, то \fBset_thread_area\fP() копирует
+соответствующий описатель, на который указывает \fIu_info\fP, в массив TLS
+нити.
+.PP
+Когда \fBset_thread_area\fP() передаётся \fIentry_number\fP со значением \-1, то
+используется свободный элемент TLS. Если \fBset_thread_area\fP() находит
+свободный элемент TLS, то значение \fIu_info\->entry_number\fP
+устанавливается после возврата для показа того, какой же элемент был
+изменён.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При нормальном завершении работы \fBset_thread_area\fP() возвращает 0 и \-1 в
+случае проблем, а также присваивает \fIerrno\fP соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEINVAL\fP
+\fIu_info\->entry_number\fP вне допустимых границ.
+.TP 
+\fBEFAULT\fP
+\fIu_info\fP является некорректным указателем.
+.TP 
+\fBESRCH\fP
+Невозможно найти свободный элемент TLS.
+.SH ВЕРСИИ
+Вызов \fBset_thread_area\fP() впервые появился в Linux 2.5.29.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+\fBset_thread_area\fP() есть только в Linux, и он не должен использоваться в
+переносимых программах.
+.SH ЗАМЕЧАНИЯ
+В glibc нет обёртки для данного системного вызова; запускайте его с помощью
+\fBsyscall\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBget_thread_area\fP(2)

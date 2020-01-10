@@ -1,0 +1,162 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\"                               1993 Michael Haardt;
+.\"                          1993,1995 Ian Jackson.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sat Jul 24 00:35:52 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Thu Jun  4 12:21:13 1998 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Thu Mar  3 09:49:35 2005 by Michael Haardt <michael@moria.de>
+.\" 2007-03-25, mtk, added various text to DESCRIPTION.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH RENAME 2 2009\-03\-30 Linux "Руководство программиста Linux"
+.SH ИМЯ
+rename \- изменяет имя или расположение файла
+.SH ОБЗОР
+\fB#include <stdio.h>\fP
+.sp
+\fBint rename(const char *\fP\fIoldpath\fP\fB, const char *\fP\fInewpath\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBrename\fP() переименовывает файл и, если требуется, перемещает его из одного
+каталога в другой. Все прочие жёсткие ссылки на файл (созданные с помощью
+\fBlink\fP(2)), не изменяются. Открытые файловые дескрипторы на \fIoldpath\fP
+также не изменяются.
+
+Если \fInewpath\fP уже существует, то он будет атомарно перезаписан (при
+определенных условиях, см. ОШИБКИ ниже) так, что другой процесс, пытающийся
+обратиться к \fInewpath\fP, не сможет определить его временное отсутствие.
+
+Если \fIoldpath\fP и \fInewpath\fP являются жёсткими ссылками на один и тот же
+файл, то \fBrename\fP() ничего не делает и возвращает код успешного завершения.
+
+Если \fInewpath\fP существует, но операция завершается ошибкой, то \fBrename\fP()
+гарантирует, что \fInewpath\fP останется нетронутым.
+
+В \fIoldpath\fP может быть задан каталог. В этом случае каталог в \fInewpath\fP
+должен или не существовать, или каталог должен быть пуст.
+
+Однако, при перезаписи будет временной промежуток, при котором оба значения,
+\fIoldpath\fP и \fInewpath\fP, ссылаются на переименовываемый файл.
+
+Если \fIoldpath\fP является символьной ссылкой, то она переименовывается; если
+\fInewpath\fP является символьной ссылкой, то будет вновь записан файл, на
+который она указывает.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEACCES\fP
+Запись в каталог, содержащий \fIoldpath\fP или \fInewpath\fP, запрещена, или в
+одном из каталогов пути \fIoldpath\fP или \fInewpath\fP нельзя производить поиск,
+или \fIoldpath\fP является каталогом, в который запрещена запись (требует
+обновления элемента \fI..\fP). (Смотрите также \fBpath_resolution\fP(7).)
+.TP 
+\fBEBUSY\fP
+Переименование завершилось неудачно, так как \fIoldpath\fP или \fInewpath\fP
+является каталогом, который используется другим процессом (возможно в
+качестве текущего рабочего каталога или в качестве корневого каталога, или
+он открыт на чтение), или используется системой (например, в качестве точки
+монтирования), и система считает это ошибкой. (Заметим, что нет требования
+возвращать \fBEBUSY\fP в таких случаях — нет ничего неправильного в таком
+переименовании — но разрешается возвращать \fBEBUSY\fP, если система не может
+иначе обработать такие ситуации.)
+.TP 
+\fBEFAULT\fP
+Значения \fIoldpath\fP и \fInewpath\fP указывают за пределы доступного адресного
+пространства.
+.TP 
+\fBEINVAL\fP
+Новый путь содержит префикс старого пути или, в более общем смысле,
+выполняется попытка сделать каталог подкаталогом самого себя.
+.TP 
+\fBEISDIR\fP
+Каталог \fInewpath\fP уже существует, но \fIoldpath\fP не является каталогом.
+.TP 
+\fBELOOP\fP
+Во время определения \fIoldpath\fP или \fInewpath\fP встретилось слишком много
+символьных ссылок.
+.TP 
+\fBEMLINK\fP
+В \fIoldpath\fP уже имеется максимальное количество ссылок, или каталог,
+содержащий \fInewpath\fP, уже имеет максимальное количество ссылок.
+.TP 
+\fBENAMETOOLONG\fP
+Слишком длинное значение аргумента \fIoldpath\fP или \fInewpath\fP.
+.TP 
+\fBENOENT\fP
+Ссылка, на которую ссылается \fIoldpath\fP, не существует; компонент каталога в
+\fInewpath\fP не существует; в \fIoldpath\fP или \fInewpath\fP указана пустая строка.
+.TP 
+\fBENOMEM\fP
+Недостаточное количество памяти ядра.
+.TP 
+\fBENOSPC\fP
+На устройстве, содержащем файл, нет места для создания нового элемента
+каталога.
+.TP 
+\fBENOTDIR\fP
+Компонент, используемый как каталог в \fIoldpath\fP или \fInewpath\fP, в
+действительности не является каталогом. Или \fIoldpath\fP является каталогом и
+существует \fInewpath\fP, который не является каталогом.
+.TP 
+\fBENOTEMPTY\fP или \fBEEXIST\fP
+Значение \fInewpath\fP является непустым каталогом, то есть содержит элементы,
+отличные от "." и "..".
+.TP 
+\fBEPERM\fP или \fBEACCES\fP
+Каталог, содержащийся в \fIoldpath\fP, имеет закрепляющий бит (\fBS_ISVTX\fP) и
+эффективный идентификатор процесса не совпадает с идентификатором
+пользователя удаляемого файла или каталога, его содержащего, и процесс не
+имеет прав (Linux: нет мандата \fBCAP_FOWNER\fP); или \fInewpath\fP является
+существующим файлом и каталог, содержащий его, имеет закрепляющий бит и
+эффективный идентификатор процесса не совпадает с идентификатором
+пользователя замещаемого файла или каталога, его содержащего, и процесс не
+имеет прав (Linux: нет мандата \fBCAP_FOWNER\fP); или файловая система,
+содержащая \fIpathname\fP, не поддерживает переименования запрашиваемого типа.
+.TP 
+\fBEROFS\fP
+Файл расположен в файловой системе, доступной только на чтение.
+.TP 
+\fBEXDEV\fP
+Значения \fIoldpath\fP и \fInewpath\fP находятся в разных файловых
+системах. (Linux позволяет монтирование файловой система сразу в несколько
+точек монтирования, но \fBrename\fP() не работает в различных точках
+монтирования даже, если в обоих смонтирована одинаковая файловая система.)
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+4.3BSD, C89, C99, POSIX.1\-2001.
+.SH ДЕФЕКТЫ
+При работе с файловыми системами NFS нельзя считать, что если операция
+завершилась неудачно, то имя файла не изменилось. Если сервер производит
+операцию переименования, а затем аварийно останавливает свою работу, то
+перепосланный пакет RPC будет вновь обработан при восстановлении работы
+сервера, что вызовет сообщение об ошибке. Приложение в этой ситуации должно
+работать корректно. См. \fBlink\fP(2), где описывается подобная проблема.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBmv\fP(1), \fBchmod\fP(2), \fBlink\fP(2), \fBrenameat\fP(2), \fBsymlink\fP(2),
+\fBunlink\fP(2), \fBpath_resolution\fP(7), \fBsymlink\fP(7)

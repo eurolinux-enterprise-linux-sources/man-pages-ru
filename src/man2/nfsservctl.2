@@ -1,0 +1,60 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This text is in the public domain.
+.\"
+.\" FIXME The description of nfsservctl() on this page
+.\" is woefully thin.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH NFSSERVCTL 2 2012\-03\-05 Linux "Руководство программиста Linux"
+.SH ИМЯ
+nfsservctl \- интерфейс syscall к ядерной службе nfs
+.SH ОБЗОР
+.nf
+\fB#include <linux/nfsd/syscall.h>\fP
+.sp
+\fBlong nfsservctl(int \fP\fIcmd\fP\fB, struct nfsctl_arg *\fP\fIargp\fP\fB,\fP
+\fB                union nfsctl_res *\fP\fIresp\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+\fIЗамечание\fP: Начиная с Linux 3.1, данный системный вызов больше не
+существует.
+
+.nf
+/*
+ * Эти команды понимает nfsctl().
+ */
+#define NFSCTL_SVC          0    /* This is a server process. */
+#define NFSCTL_ADDCLIENT    1    /* Add an NFS client. */
+#define NFSCTL_DELCLIENT    2    /* Remove an NFS client. */
+#define NFSCTL_EXPORT       3    /* export a file system. */
+#define NFSCTL_UNEXPORT     4    /* unexport a file system. */
+#define NFSCTL_UGIDUPDATE   5    /* update a client's UID/GID map. */
+#define NFSCTL_GETFH        6    /* get an fh (used by mountd) */
+
+struct nfsctl_arg {
+    int                       ca_version;     /* защитная мера */
+    union {
+        struct nfsctl_svc     u_svc;
+        struct nfsctl_client  u_client;
+        struct nfsctl_export  u_export;
+        struct nfsctl_uidmap  u_umap;
+        struct nfsctl_fhparm  u_getfh;
+        unsigned int          u_debug;
+    } u;
+}
+
+union nfsctl_res {
+        struct knfs_fh          cr_getfh;
+        unsigned int            cr_debug;
+};
+.fi
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. В случае ошибки возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов существует только в Linux.

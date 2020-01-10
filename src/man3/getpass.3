@@ -1,0 +1,111 @@
+.\" Copyright (c) 2000 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GETPASS 3 2010\-09\-20 Linux "Руководство программиста Linux"
+.SH ИМЯ
+getpass \- запрашивает пароль
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBchar *getpass( const char *\fP\fIprompt\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBgetpass\fP():
+.ad l
+.RS 4
+.PD 0
+.TP  4
+Начиная с glibc 2.2.2:
+.nf
+_BSD_SOURCE ||
+    (_XOPEN_SOURCE\ >=\ 500 ||
+        _XOPEN_SOURCE\ &&\ _XOPEN_SOURCE_EXTENDED) &&
+    !(_POSIX_C_SOURCE\ >=\ 200112L || _XOPEN_SOURCE\ >=\ 600)
+.TP  4
+.fi
+До glibc 2.2.2: не было
+.PD
+.RE
+.ad b
+.SH ОПИСАНИЕ
+Эта функция устарела. Не используйте её.
+.PP
+Функция \fBgetpass\fP() открывает \fI/dev/tty\fP (управляющий терминал процесса),
+выводит строку \fIprompt\fP, выключает показ выводимых символов, читает одну
+строку («пароль»), восстанавливает состояние терминала и закрывает
+\fI/dev/tty\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBgetpass\fP() возвращает указатель на статический буфер, содержащий
+(первые \fBPASS_MAX\fP байтов) пароль без символа новой строки, оканчивающийся
+нулевым байтом («\e0»). Этот буфер может быть перезаписан следующим
+вызовом. При ошибке, состояние терминала восстанавливается, значение
+\fIerrno\fP устанавливается соответствующим образом и возвращается NULL.
+.SH ОШИБКИ
+Эта функция может завершаться с ошибками:
+.TP 
+\fBENXIO\fP
+Процесс не имеет управляющего терминала.
+.SH ФАЙЛЫ
+.\" .SH HISTORY
+.\" A
+.\" .BR getpass ()
+.\" function appeared in Version 7 AT&T UNIX.
+\fI/dev/tty\fP
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Есть в SUSv2, но помечена как УСТАРЕВШАЯ. Удалена из POSIX.1\-2001.
+.SH ЗАМЕЧАНИЯ
+В libc4 и libc5 строка приглашения (prompt) не записывается в \fI/dev/tty\fP, а
+отправляется в поток \fIstderr\fP. Кроме того, если файл \fI/dev/tty\fP не может
+быть открыт, то пароль читается из потока \fIstdin\fP. Статический буфер имеет
+длину 128 байт, т.о. возвращаются только первые 127 символов пароля. Во
+время чтения пароля генерация сигналов (\fBSIGINT\fP, \fBSIGQUIT\fP, \fBSIGSTOP\fP,
+\fBSIGTSTP\fP) отключена и соответствующие символы (обычно control\-C,
+control\-\e, control\-Z и control\-Y) передаются как часть пароля. Начиная с
+libc 5.4.19 также отключена возможность редактирования, т.е. символ
+backspace и подобные ему считаются частью пароля.
+.PP
+В glibc2, если файл \fI/dev/tty\fP не может быть открыт, то строка приглашения
+выводится в поток ошибок \fIstderr\fP, а пароль читается из стандартного потока
+ввода \fIstdin\fP. Ограничения на длину пароля нет и строку можно
+редактировать.
+.PP
+Согласно SUSv2 значение \fBPASS_MAX\fP должно быть определено в
+\fI<limits.h>\fP, если оно меньше 8, и  в любом случае может быть
+получено с помощью \fIsysconf(_SC_PASS_MAX)\fP. Однако, из стандарта POSIX.2
+константы \fBPASS_MAX\fP, \fB_SC_PASS_MAX\fP и функция \fBgetpass\fP() убраны. В
+libc4 и libc5 \fBPASS_MAX\fP и \fB_SC_PASS_MAX\fP никогда не поддерживались. В
+glibc2 учитывается \fB_SC_PASS_MAX\fP и возвращается \fBBUFSIZ\fP (например 8192).
+.SH ДЕФЕКТЫ
+Вызывающий процесс должен как можно скорее обнулить пароль во избежание
+возможности просмотра незашифрованного пароля в адресном пространстве
+процесса.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcrypt\fP(3)

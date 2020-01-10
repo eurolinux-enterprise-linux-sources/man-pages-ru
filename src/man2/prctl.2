@@ -1,0 +1,538 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) 1998 Andries Brouwer (aeb@cwi.nl)
+.\" and Copyright (C) 2002 Michael Kerrisk <mtk.manpages@gmail.com>
+.\" and Copyright Guillem Jover <guillem@hadrons.org>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Thu Nov 11 04:19:42 MET 1999, aeb: added PR_GET_PDEATHSIG
+.\" Modified 27 Jun 02, Michael Kerrisk
+.\" 	Added PR_SET_DUMPABLE, PR_GET_DUMPABLE,
+.\"	PR_SET_KEEPCAPS, PR_GET_KEEPCAPS
+.\" Modified 2006-08-30 Guillem Jover <guillem@hadrons.org>
+.\"	Updated Linux versions where the options where introduced.
+.\"	Added PR_SET_TIMING, PR_GET_TIMING, PR_SET_NAME, PR_GET_NAME,
+.\"	PR_SET_UNALIGN, PR_GET_UNALIGN, PR_SET_FPEMU, PR_GET_FPEMU,
+.\"	PR_SET_FPEXC, PR_GET_FPEXC
+.\" 2008-04-29 Serge Hallyn, Document PR_CAPBSET_READ and PR_CAPBSET_DROP
+.\" 2008-06-13 Erik Bosman, <ejbosman@cs.vu.nl>
+.\"     Document PR_GET_TSC and PR_SET_TSC.
+.\" 2008-06-15 mtk, Document PR_SET_SECCOMP, PR_GET_SECCOMP
+.\" 2009-10-03 Andi Kleen, document PR_MCE_KILL
+.\" 2012-04 Cyrill Gorcunov, Document PR_SET_MM
+.\" 2012-04-25 Michael Kerrisk, Document PR_TASK_PERF_EVENTS_DISABLE and
+.\"				PR_TASK_PERF_EVENTS_ENABLE
+.\"
+.\" FIXME: Document PR_SET_TIMERSLACK and PR_GET_TIMERSLACK (new in 2.6.28)
+.\"		commit 6976675d94042fbd446231d1bd8b7de71a980ada
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH PRCTL 2 2012\-04\-23 Linux "Руководство программиста Linux"
+.SH ИМЯ
+prctl \- операции над процессом
+.SH ОБЗОР
+.nf
+\fB#include <sys/prctl.h>\fP
+.sp
+\fBint prctl(int \fP\fIoption\fP\fB, unsigned long \fP\fIarg2\fP\fB, unsigned long \fP\fIarg3\fP\fB,\fP
+\fB          unsigned long \fP\fIarg4\fP\fB, unsigned long \fP\fIarg5\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Первый аргумент \fBprctl\fP() задаёт тип операции (типы определены в
+\fI<linux/prctl.h>\fP, значения остальных аргументов зависят от
+указываемого типа. Первый аргумент может принимать следующие значения:
+.TP 
+\fBPR_CAPBSET_READ\fP (начиная с Linux 2.6.25)
+Возвращает 1 (как результат функции), если мандат, указанный в \fIarg2\fP, есть
+в списке мандатов вызывающей нити (capability bounding set), или 0, если
+нет. Константы мандатов определены в
+\fI<linux/capability.h>\fP. Значениями списка мандатов определяется,
+может ли процесс получить мандат через установку набора файловых прав при
+последующем вызове \fBexecve\fP(2).
+
+Если мандат, указанный в \fIarg2\fP, некорректен, то вызов завершится с ошибкой
+\fBEINVAL\fP.
+.TP 
+\fBPR_CAPBSET_DROP\fP (начиная с Linux 2.6.25)
+Если вызывающая нить имеет мандат \fBCAP_SETPCAP\fP, то мандат, указанный в
+\fIarg2\fP, удаляется из списка мандатов вызывающей нити. Любой потомок
+вызывающей нити унаследует новый сокращённый список мандатов.
+
+Вызов завершается с ошибками: \fBEPERM\fP, если вызывающая нить не имеет
+мандата \fBCAP_SETPCAP\fP; \fBEINVAL\fP, если в \fIarg2\fP указан недопустимый
+мандат; \fBEINVAL\fP, если файловые мандаты не включены в ядре, в этом случае
+списки мандатов не поддерживаются.
+.TP 
+\fBPR_SET_DUMPABLE\fP (начиная с Linux 2.3.20)
+.\" See http://marc.theaimsgroup.com/?l=linux-kernel&m=115270289030630&w=2
+.\" Subject:    Fix prctl privilege escalation (CVE-2006-2451)
+.\" From:       Marcel Holtmann <marcel () holtmann ! org>
+.\" Date:       2006-07-12 11:12:00
+Устанавливает флаг, определяющий, будет ли создан файл core для этого
+процесса после доставки сигнала, при появлении которого по умолчанию
+создаётся файл core. Обычно, этот флаг устанавливается для процесса по
+умолчанию, но он очищается выполнении программ с set\-UID или set\-GID битами,
+а также разными системными вызовами, изменяющими идентификаторы UID и GID. В
+ядрах до версии 2.6.12 включительно значение \fIarg2\fP должно быть или 0 (для
+процесса невозможен дамп) или 1 (для процесс возможен дамп). В ядрах с
+версии 2.6.13 до 2.6.17 допустимо также значение 2, которое означает, что
+для любого исполняемого файла, для которого обычно дамп невозможен, будет
+выполняться дамп, доступный на чтение только root; для повышения
+безопасности эта возможность была удалена (смотрите также описание
+\fI/proc/sys/fs/suid_dumpable\fP в \fBproc\fP(5)). К процессам, для которых
+сделать дамп невозможно, с помощью \fBptrace\fP(2) \fBPTRACE_ATTACH\fP
+подключиться нельзя.
+.TP 
+\fBPR_GET_DUMPABLE\fP (начиная с Linux 2.3.20)
+.\" Since Linux 2.6.13, the dumpable flag can have the value 2,
+.\" but in 2.6.13 PR_GET_DUMPABLE simply returns 1 if the dumpable
+.\" flags has a nonzero value.  This was fixed in 2.6.14.
+Возвращает (как результат функции) текущее состояние флага дампа вызывающего
+процесса.
+.TP 
+\fBPR_SET_ENDIAN\fP (начиная с Linux 2.6.18, только для PowerPC)
+.\" Respectively 0, 1, 2
+Устанавливает порядок байт вызывающего процесса равным значению \fIarg2\fP,
+которое может быть одним из: \fBPR_ENDIAN_BIG\fP, \fBPR_ENDIAN_LITTLE\fP или
+\fBPR_ENDIAN_PPC_LITTLE\fP (для PowerPC псевдо обратный порядок (pseudo little
+endian)).
+.TP 
+\fBPR_GET_ENDIAN\fP (начиная с Linux 2.6.18, только для PowerPC)
+Записывает значение порядка байт вызывающего процесса по адресу, указанному
+в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_SET_FPEMU\fP (начиная с Linux 2.4.18, 2.5.9, только для ia64)
+Устанавливает значение управляющих эмуляцией плавающей точки бит равным
+значению \fIarg2\fP. Для негласной (silently) эмуляции операций с плавающей
+точкой передайте \fBPR_FPEMU_NOPRINT\fP или \fBPR_FPEMU_SIGFPE\fP, чтобы операции
+с плавающей точкой не эмулировались, а посылался сигнал \fBSIGFPE\fP.
+.TP 
+\fBPR_GET_FPEMU\fP (начиная с Linux 2.4.18, 2.5.9, только для ia64)
+Записывает значение управляющих бит эмуляции плавающей точки по адресу,
+указанному в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_SET_FPEXC\fP (начиная с Linux 2.4.21, 2.5.32, только для PowerPC)
+Устанавливает режим исключений плавающей точки равным \fIarg2\fP. Значение
+\fBPR_FP_EXC_SW_ENABLE\fP включает использование FPEXC для исключений плавающей
+точки, \fBPR_FP_EXC_DIV\fP \(em исключение деления на ноль, \fBPR_FP_EXC_OVF\fP
+\(em исключение переполнения, \fBPR_FP_EXC_UND\fP \(em исключение переполнение
+минимального значения, \fBPR_FP_EXC_RES\fP \(em исключение неточного
+результата, \fBPR_FP_EXC_INV\fP \(em исключение недопустимой операции,
+\fBPR_FP_EXC_DISABLED\fP отключает исключения плавающей точки,
+\fBPR_FP_EXC_NONRECOV\fP включает режим асинхронного невосстанавливаемого
+исключения, \fBPR_FP_EXC_ASYNC\fP включает режим асинхронного
+восстанавливаемого исключения, \fBPR_FP_EXC_PRECISE\fP включает режим
+исключения точности.
+.TP 
+\fBPR_GET_FPEXC\fP (начиная с Linux 2.4.21, 2.5.32, только для PowerPC)
+Записывает значение режима исключений плавающей точки по адресу, указанному
+в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_SET_KEEPCAPS\fP (начиная с Linux 2.2.18)
+Устанавливает флаг нити «оставить мандаты», который определяет, будет ли
+список разрешённых мандатов нити очищен при изменении пользовательского
+идентификатора нити таким образом, что сохранённый, действующий и
+действительный идентификаторы станут ненулевыми, если при этом хотя бы один
+из них ранее был равен нулю. По умолчанию, список разрешённых мандатов
+очищается, когда происходит такое изменение; установка флага «оставить
+мандаты» отменяет очистку. Значение \fIarg2\fP должно быть или 0 (мандаты
+очищаются) или 1 (мандаты сохраняются). (\fIЭффективный\fP список мандатов
+всегда очищается при таких изменениях данных, независимо от значения флага
+«оставить мандаты».) Значение флага «оставить мандаты» будет сброшено в 0
+при последующих вызовах \fBexecve\fP(2).
+.TP 
+\fBPR_GET_KEEPCAPS\fP (начиная с Linux 2.2.18)
+Возвращает (как результат функции) текущее состояние флага «оставить
+мандаты» вызывающего процесса.
+.TP 
+\fBPR_SET_NAME\fP (начиная с Linux 2.6.9)
+.\" TASK_COMM_LEN in include/linux/sched.h
+Устанавливает имя вызывающего процесса, используя значение, на которое
+указывает \fI(char\ *) arg2\fP. Длина имени может быть до 16 байт и имя должно
+завершаться null, если содержит меньшее количество байт.
+.TP 
+\fBPR_GET_NAME\fP (начиная с Linux 2.6.11)
+Записывает имя вызывающего процесса в буфер, указанный в \fI(char\ *)
+arg2\fP. Буфер должен быть не менее 16 байт; полученная строка будет
+завершаться null, если она короче данного размера.
+.TP 
+\fBPR_SET_PDEATHSIG\fP (начиная с Linux 2.1.57)
+Устанавливает значение сигнала, приходящего процессу при завершении работы
+родительского процесса, равным \fIarg2\fP (это значение может быть от 1..maxsig
+или 0 для снятия). Этот сигнал получит вызывающий процесс, когда его
+родитель завершится. Это значение очищается у потомка при выполнении
+\fBfork\fP(2) и (начиная с Linux 2.5.36 / 2.6.23), если выполняется файл с
+установленным битом set\-user_ID или set\-group\-ID.
+.TP 
+\fBPR_GET_PDEATHSIG\fP (начиная с Linux 2.3.15)
+Записывает текущее значение сигнала о завершении работы родительского
+процесса по адресу, указанному в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_SET_SECCOMP\fP (начиная с Linux 2.6.23)
+.\" See http://thread.gmane.org/gmane.linux.kernel/542632
+.\" [PATCH 0 of 2] seccomp updates
+.\" andrea@cpushare.com
+Включает безопасный режим вычислений в вызывающей нити. В имеющейся
+реализации значение \fIarg2\fP должно быть равно 1. После установки безопасного
+режима вычислений в 1, в нити разрешено выполнять только системные вызовы
+\fBread\fP(2), \fBwrite\fP(2), \fB_exit\fP(2) и \fBsigreturn\fP(2). При запуске других
+системных вызовов генерируется сигнал \fBSIGKILL\fP. Безопасный режим
+вычислений полезен для вычислительных приложений, которым может
+потребоваться выполнить недоверительный байт\-код, возможно полученный при
+чтении из канала или сокета. Эта операция доступна только, если в ядре
+включён параметр CONFIG_SECCOMP.
+.TP 
+\fBPR_GET_SECCOMP\fP (начиная с Linux 2.6.23)
+Возвращает значение режима безопасных вычислений вызывающей нити. Не очень
+полезна в имеющейся реализации (значение режима всегда равно 1), но может
+быть полезна в будущем: если вызывающий находится не в режиме безопасных
+вычислений, то возвращается 0; если вызывающий находится в режиме безопасных
+вычислений, то вызов \fBprctl\fP() приведёт к отправке процессу сигнала
+\fBSIGKILL\fP. Эта операция доступна только, если в ядре включён параметр
+CONFIG_SECCOMP.
+.TP 
+\fBPR_SET_SECUREBITS\fP (начиная с Linux 2.6.26)
+Устанавливает значение флагов «securebits» вызывающей нити равным значению
+\fIarg2\fP. Смотрите \fBcapabilities\fP(7).
+.TP 
+\fBPR_GET_SECUREBITS\fP (начиная с Linux 2.6.26)
+Возвращает (как результат функции) флаги «securebits» вызывающей
+нити. Смотрите \fBcapabilities\fP(7).
+.TP 
+\fBPR_SET_TIMING\fP (начиная с Linux 2.6.0\-test4)
+.\" 0
+.\" 1
+.\" PR_TIMING_TIMESTAMP doesn't do anything in 2.6.26-rc8,
+.\" and looking at the patch history, it appears
+.\" that it never did anything.
+Включает использование обычного статистического временного режима выполнения
+процесса (process timing) или точного режима на основе меток времени
+(timestamp\-based process timing), при передаче \fBPR_TIMING_STATISTICAL\fP или
+\fBPR_TIMING_TIMESTAMP\fP в \fIarg2\fP. Действия для \fBPR_TIMING_TIMESTAMP\fP пока
+не реализованы (попытка установить этот режим приведёт к ошибке \fBEINVAL\fP).
+.TP 
+\fBPR_GET_TIMING\fP (начиная с Linux 2.6.0\-test4)
+Возвращает (как результат функции) тип используемого в данный момент
+временного режима выполнения процесса.
+.TP 
+\fBPR_TASK_PERF_EVENTS_DISABLE\fP (начиная с Linux 2.6.31)
+Отключает все счётчики производительности, прикреплённые к вызывающему
+процессу, не учитывая, были ли они созданы этим процессом или каким\-то
+другим. Счётчики производительности, созданные вызывающим процессом для
+других процессов, не отключаются. Подробности о счётчиках производительности
+приведены в файле ядра \fItools/perf/design.txt\fP.
+.IP
+.\" commit 1d1c7ddbfab358445a542715551301b7fc363e28
+Сначала назывался \fBPR_TASK_PERF_COUNTERS_DISABLE\fP; переименован (с тем же
+числовым значением ) в Linux 2.6.32.
+.TP 
+\fBPR_TASK_PERF_EVENTS_ENABLE\fP (начиная с Linux 2.6.31)
+Противоположное действие \fBPR_TASK_PERF_EVENTS_DISABLE\fP; включает счётчики
+производительности, прикреплённые к вызывающему процессу.
+.IP
+.\" commit 1d1c7ddbfab358445a542715551301b7fc363e28
+.\" commit cdd6c482c9ff9c55475ee7392ec8f672eddb7be6
+Сначала назывался \fBPR_TASK_PERF_COUNTERS_ENABLE\fP; переименован в Linux
+2.6.32.
+.TP 
+\fBPR_SET_TSC\fP (начиная с Linux 2.6.26, только для x86)
+Устанавливает состояние флага, определяющего может ли процесс прочитать
+счётчик метки времени (timestamp counter). Значение \fBPR_TSC_ENABLE\fP в
+\fIarg2\fP разрешает чтение, \fBPR_TSC_SIGSEGV\fP включает генерацию \fBSIGSEGV\fP,
+если процесс пытается прочитать счётчик метки времени.
+.TP 
+\fBPR_GET_TSC\fP (начиная с Linux 2.6.26, только для x86)
+Записывает значение флага, определяющего может ли быть прочитан счётчик
+метки времени (timestamp counter), по адресу, указанному в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_SET_UNALIGN\fP
+(только для: ia64, начиная с Linux 2.3.48; parisc, начиная с Linux 2.6.15;
+PowerPC, начиная с Linux 2.6.18; Alpha, начиная с Linux 2.6.22)
+Устанавливает значение битов контроля доступа выравнивания равным значению
+\fIarg2\fP. При значении \fBPR_UNALIGN_NOPRINT\fP пользовательский доступ без
+выравнивания негласно (silently) исправляется, а при \fBPR_UNALIGN_SIGBUS\fP
+генерируется сигнал \fBSIGBUS\fP.
+.TP 
+\fBPR_GET_UNALIGN\fP
+(информацию о версиях и архитектурах смотрите в \fBPR_SET_UNALIGN\fP)
+Записывает значение битов контроля доступа выравнивания по адресу,
+указанному в \fI(int\ *) arg2\fP.
+.TP 
+\fBPR_MCE_KILL\fP (начиная с Linux 2.6.32)
+Устанавливает политику удаления (kill) при обнаружении повреждения памяти
+машинной проверкой для текущей нити. Если значение \fIarg\fP равно
+\fBPR_MCE_KILL_CLEAR\fP, то политика удаления (kill) сбрасывается и
+используется системная установка по умолчанию. (Значение системной установки
+по умолчанию определено в \fI/proc/sys/vm/memory_failure_early_kill\fP;
+смотрите \fBproc\fP(5).) Значение \fIarg2\fP, равное \fBPR_MCE_KILL_SET\fP, указывает
+использовать политику удаления, заданную в нити. В этом случае значение
+\fIarg3\fP определяет политику: \fIраннее удаление\fP (\fBPR_MCE_KILL_EARLY\fP),
+\fIпозднее удаление\fP (\fBPR_MCE_KILL_LATE\fP) или системная установка по
+умолчанию (\fBPR_MCE_KILL_DEFAULT\fP). При раннем удалении нить получает сигнал
+\fBSIGBUS\fP сразу же при аппаратном обнаружении повреждения памяти в её
+адресном пространстве. В режиме позднего удаления процесс будет удалён
+только когда обратится к повреждённой странице. Более подробную информацию о
+сигнале \fBSIGBUS\fP смотрите в \fIsigaction(2)\fP. Политика наследуется
+потомками. Значения остальных неиспользуемых аргументов \fBprctl\fP() должны
+быть равны нулю для совместимости в будущем.
+.TP 
+\fBPR_MCE_KILL_GET\fP (начиная с Linux 2.6.32)
+Возвращает значение политики удаления при машинной проверке для текущего
+процесса. Значения всех неиспользуемых аргументов \fBprctl\fP() должны быть
+равны нулю.
+.TP 
+\fBPR_SET_MM\fP (начиная с Linux 3.3)
+Изменяет определённые поля дескриптора карты памяти ядра вызывающего
+процесса. Обычно, значения этих полей задаются ядром или динамическим
+загрузчиком (подробней см. \fBld.so\fP(8)), и обычные приложения не должны
+использовать эту возможность. Однако, есть случаи (самоизменяющиеся
+программы), где для программы может оказаться полезным изменение своей карты
+памяти. Данная возможность доступна только, если ядро собрано с параметром
+\fBCONFIG_CHECKPOINT_RESTORE\fP. Вызывающий процесс должен иметь мандат
+\fBCAP_SYS_RESOURCE\fP. Значения аргумента \fIarg2\fP описаны далее, а в \fIarg3\fP
+задаётся новое значение.
+.RS
+.TP 
+\fBPR_SET_MM_START_CODE\fP
+Устанавливает адрес памяти, выше которого располагается код программы,
+который может выполняться. Соответствующая область памяти должна быть
+доступна на чтение и выполнение, но не на запись или быть общедоступной
+(подробности смотрите в \fBmprotect\fP(2) и \fBmmap\fP(2)).
+.TP 
+\fBPR_SET_MM_END_CODE\fP
+Устанавливает адрес памяти, ниже которого располагается код программы,
+который может выполняться. Соответствующая область памяти должна быть
+доступна на чтение и выполнение, но не на запись или быть общедоступной.
+.TP 
+\fBPR_SET_MM_START_DATA\fP
+Устанавливает адрес памяти, выше которого располагаются инициализированные и
+не инициализированные (bss) данные. Соответствующая область памяти должна
+быть доступна на чтение и запись, но не на выполнение или быть в общем
+доступе.
+.TP 
+\fBPR_SET_MM_END_DATA\fP
+Устанавливает адрес памяти, ниже которого располагаются инициализированные и
+не инициализированные (bss) данные. Соответствующая область памяти должна
+быть доступна на чтение и запись, но не на выполнение или быть в общем
+доступе.
+.TP 
+\fBPR_SET_MM_START_STACK\fP
+Устанавливает начальный адрес стека. Соответствующая область памяти должна
+быть доступна на чтение и запись.
+.TP 
+\fBPR_SET_MM_START_BRK\fP
+Устанавливает адрес памяти, выше которого можно расширять программную кучу с
+помощью вызова \fBbrk\fP(2). Адрес должен быть больше конечного адреса текущего
+программного сегмента данных. Также, суммарный размер полученной кучи и
+сегмента данных не может превышать ограничитель ресурса \fBRLIMIT_DATA\fP
+(смотрите \fBsetrlimit\fP(2)).
+.TP 
+\fBPR_SET_MM_BRK\fP
+.\" FIXME The following (until ========) is not yet in mainline kernel,
+.\" so commented out for the moment.
+.\" .TP
+.\" .BR PR_SET_MM_ARG_START
+.\" Set the address above which the program command line is placed.
+.\" .TP
+.\" .BR PR_SET_MM_ARG_END
+.\" Set the address below which the program command line is placed.
+.\" .TP
+.\" .BR PR_SET_MM_ENV_START
+.\" Set the address above which the program environment is placed.
+.\" .TP
+.\" .BR PR_SET_MM_ENV_END
+.\" Set the address below which the program environment is placed.
+.\" .IP
+.\" The address passed with
+.\" .BR PR_SET_MM_ARG_START ,
+.\" .BR PR_SET_MM_ARG_END ,
+.\" .BR PR_SET_MM_ENV_START ,
+.\" and
+.\" .BR PR_SET_MM_ENV_END
+.\" should belong to a process stack area.
+.\" Thus, the corresponding memory area must be readable, writable, and
+.\" (depending on the kernel configuration) have the
+.\" .BR MAP_GROWSDOWN
+.\" attribute set (see
+.\" .BR mmap (2)).
+.\" .TP
+.\" .BR PR_SET_MM_AUXV
+.\" Set a new auxiliary vector.
+.\" The
+.\" .I arg3
+.\" argument should provide the address of the vector.
+.\" The
+.\" .I arg4
+.\" is the size of the vector.
+.\" .TP
+.\" .BR PR_SET_MM_EXE_FILE
+.\" Supersede the
+.\" .IR /proc/pid/exe
+.\" symbolic link with a new one pointing to a new executable file
+.\" identified by the file descriptor provided in
+.\" .I arg3
+.\" argument.
+.\" The file descriptor should be obtained with a regular
+.\" .BR open (2)
+.\" call.
+.\" .IP
+.\" To change the symbolic link, one needs to unmap all existing
+.\" executable memory areas, including those created by the kernel itself
+.\" (for example the kernel usually creates at least one executable
+.\" memory area for the ELF
+.\" .IR .text
+.\" section).
+.\" .IP
+.\" The second limitation is that such transitions can be done only once
+.\" in a process life time.
+.\" Any further attempts will be rejected.
+.\" This should help system administrators to monitor unusual
+.\" symbolic-link transitions over all process running in a system.
+.\" ========== END FIXME
+Устанавливает текущее значение \fBbrk\fP(2). Требования к адресу те же, что и в
+параметре \fBPR_SET_MM_START_BRK\fP.
+.RE
+.\"
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении для операций \fBPR_GET_DUMPABLE\fP, \fBPR_GET_KEEPCAPS\fP,
+\fBPR_CAPBSET_READ\fP, \fBPR_GET_TIMING\fP, \fBPR_GET_SECUREBITS\fP,
+\fBPR_MCE_KILL_GET\fP и (если возвращается) \fBPR_GET_SECCOMP\fP возвращаются
+неотрицательные значения, описанные ранее. При успешном выполнении для
+остальных значений \fIoption\fP возвращается 0. При ошибке возвращается \-1, а
+\fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+В \fIarg2\fP указан неправильный адрес.
+.TP 
+\fBEINVAL\fP
+Нераспознанно значение \fIoption\fP.
+.TP 
+\fBEINVAL\fP
+Значение \fIoption\fP равно \fBPR_MCE_KILL\fP, \fBPR_MCE_KILL_GET\fP или
+\fBPR_SET_MM\fP, и неиспользуемые аргументы \fBprctl\fP() не равны нулю.
+.TP 
+\fBEINVAL\fP
+Неверное значение \fIarg2\fP для указанной в \fIoption\fP операции.
+.TP 
+\fBEINVAL\fP
+Значение \fIoption\fP равно \fBPR_SET_SECCOMP\fP или \fBPR_SET_SECCOMP\fP, но в ядре
+не собрано с параметром \fBCONFIG_SECCOMP\fP.
+.TP 
+\fBEINVAL\fP
+Значение \fIoption\fP равно \fBPR_SET_MM\fP и одно из следующего является истиной:
+.RS
+.IP * 3
+Значение \fIarg4\fP или \fIarg5\fP не равно нулю;
+.IP *
+Значение \fIarg3\fP больше \fBTASK_SIZE\fP (ограничение на размер
+пользовательского адресного пространства для этой архитектуры);
+.IP *
+Значение \fIarg2\fP равно \fBPR_SET_MM_START_CODE\fP, \fBPR_SET_MM_END_CODE\fP,
+\fBPR_SET_MM_START_DATA\fP, \fBPR_SET_MM_END_DATA\fP или \fBPR_SET_MM_START_STACK\fP,
+и права на соответствующую область памяти не удовлетворяют требованиям;
+.IP *
+Значение \fIarg2\fP равно \fBPR_SET_MM_START_BRK\fP или \fBPR_SET_MM_BRK\fP, и
+значение \fIarg3\fP меньше или равно концу сегмента данных, или было бы
+превышено ограничение ресурса \fBRLIMIT_DATA\fP.
+.RE
+.TP 
+\fBEPERM\fP
+Значение \fIoption\fP равно \fBPR_SET_SECUREBITS\fP, и вызывающий не имеет мандата
+\fBCAP_SETPCAP\fP, или пытается сбросить «заблокированный» флаг, или пытается
+установить флаг, для которого установлен соответствующий заблокированный
+флаг (смотрите \fBcapabilities\fP(7)).
+.TP 
+\fBEPERM\fP
+Значение \fIoption\fP равно \fBPR_SET_KEEPCAPS\fP, и у вызывающего установлен флаг
+\fBSECURE_KEEP_CAPS_LOCKED\fP (смотрите \fBcapabilities\fP(7)).
+.TP 
+\fBEPERM\fP
+Значение \fIoption\fP равно \fBPR_CAPBSET_DROP\fP, и вызывающий не имеет мандата
+\fBCAP_SETPCAP\fP.
+.TP 
+\fBEPERM\fP
+.\" FIXME The following (until ========) is not yet in mainline kernel,
+.\" so commented out for the moment.
+.\" .TP
+.\" .B EACCES
+.\" .I option
+.\" is
+.\" .BR PR_SET_MM ,
+.\" and
+.\" .I arg3
+.\" is
+.\" .BR PR_SET_MM_EXE_FILE ,
+.\" the file is not executable.
+.\" .TP
+.\" .B EBUSY
+.\" .I option
+.\" is
+.\" .BR PR_SET_MM ,
+.\" .I arg3
+.\" is
+.\" .BR PR_SET_MM_EXE_FILE ,
+.\" and this the second attempt to change the
+.\" .I /proc/pid/exe
+.\" symbolic link, which is prohibited.
+.\" .TP
+.\" .B EBADF
+.\" .I option
+.\" is
+.\" .BR PR_SET_MM ,
+.\" .I arg3
+.\" is
+.\" .BR PR_SET_MM_EXE_FILE ,
+.\" and the file descriptor passed in
+.\" .I arg4
+.\" is not valid.
+.\" ========== END FIXME
+.\" The following can't actually happen, because prctl() in
+.\" seccomp mode will cause SIGKILL.
+.\" .TP
+.\" .B EPERM
+.\" .I option
+.\" is
+.\" .BR PR_SET_SECCOMP ,
+.\" and secure computing mode is already 1.
+Значение \fIoption\fP равно \fBPR_SET_MM\fP, и вызывающий не имеет мандата
+\fBCAP_SYS_RESOURCE\fP.
+.SH ВЕРСИИ
+.\" The library interface was added in glibc 2.0.6
+Системный вызов \fBprctl\fP() впервые появился в Linux 2.1.57.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данный вызов существует только в Linux. В IRIX есть системный вызов
+\fBprctl\fP() (также представленный в Linux 2.1.44 как irix_prctl на
+архитектуре MIPS) объявленный как
+.sp
+\fBptrdiff_t prctl(int \fP\fIoption\fP\fB, int \fP\fIarg2\fP\fB, int \fP\fIarg3\fP\fB);\fP
+.sp
+а также операции, позволяющие получить максимальное количество процессов для
+каждого пользователя, максимальное количество процессоров, которое может
+использовать вызывающий процесс; определить, блокирован ли заданный процесс;
+получить или установить максимальный размер стека и т. д.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBsignal\fP(2), \fBcore\fP(5)

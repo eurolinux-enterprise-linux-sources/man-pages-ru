@@ -1,0 +1,120 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 2006, Michael Kerrisk
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH FSTATAT 2 2012\-05\-04 Linux "Руководство программиста Linux"
+.SH ИМЯ
+fstatat \- получает состояние файла, определяемого относительно файлового
+дескриптора каталога
+.SH ОБЗОР
+.nf
+\fB#include <fcntl.h> /* определения констант AT_* */\fP
+\fB#include <sys/stat.h>\fP
+.sp
+\fBint fstatat(int \fP\fIdirfd\fP\fB, const char *\fP\fIpathname\fP\fB, struct stat *\fP\fIbuf\fP\fB,\fP
+\fB            int \fP\fIflags\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBfstatat\fP():
+.PD 0
+.ad l
+.RS 4
+.TP  4
+Начиная с glibc 2.10:
+_XOPEN_SOURCE\ >=\ 700 || _POSIX_C_SOURCE\ >=\ 200809L
+.TP 
+До glibc 2.10:
+_ATFILE_SOURCE
+.RE
+.ad
+.PD
+.SH ОПИСАНИЕ
+Системный вызов \fBfstatat\fP() работает также как системный вызов \fBstat\fP(2),
+за исключением случаев, описанных в данной справочной странице.
+
+Если в \fIpathname\fP задан относительный путь, то он считается относительно
+каталога, на который ссылается файловый дескриптор \fIdirfd\fP (а не
+относительно текущего рабочего каталога вызывающего процесса, как это
+делается в \fBstat\fP(2)).
+
+Если в \fIpathname\fP задан относительный путь и \fIdirfd\fP равно специальному
+значению \fBAT_FDCWD\fP, то \fIpathname\fP рассматривается относительно текущего
+рабочего каталога вызывающего процесса (как \fBstat\fP(2)).
+
+Если в \fIpathname\fP задан абсолютный путь, то \fIdirfd\fP игнорируется.
+
+Значение \fIflags\fP может быть 0, или включать один или более следующих
+флагов:
+.TP 
+\fBAT_NO_AUTOMOUNT\fP (начиная с Linux 2.6.38)
+Не выполнять автоматическое монтирование конечного компонента («basename»)
+\fIpathname\fP, если это каталог, который является точкой монтирования. Это
+позволяет вызывающему получить атрибуты точки монтирования (а не
+расположения, где её предполагалось смонтировать). Этот флаг можно
+использовать в инструментах, сканирующих каталоги, для предотвращения
+массового автоматического монтирования каталогов в их точки
+монтирования. Флаг \fBAT_NO_AUTOMOUNT\fP не учитывается, если к точке уже уже
+была выполнено монтирование.
+.TP 
+\fBAT_SYMLINK_NOFOLLOW\fP
+Если значение \fIpathname\fP является символьной ссылкой, не разыменовывать её,
+а вернуть информацию о самой ссылке, как это делается в \fBlstat\fP(2). (По
+умолчанию, \fBfstatat\fP() разыменовывает символьные ссылки как и \fBstat\fP(2).)
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBfstatat\fP() возвращает 0; при ошибке \(em \-1, а в
+\fIerrno\fP задаётся причина ошибки.
+.SH ОШИБКИ
+В \fBfstatat\fP() могут возникнуть те же ошибки, что и в \fBstat\fP(2). Также, в
+\fBfstatat\fP() могут возникнуть следующие ошибки:
+.TP 
+\fBEBADF\fP
+\fIdirfd\fP не является правильным файловым дескриптором.
+.TP 
+\fBEINVAL\fP
+Указано неверное значение в \fIflags\fP.
+.TP 
+\fBENOTDIR\fP
+Значение \fIpathname\fP содержит относительный путь и \fIdirfd\fP содержит
+файловый дескриптор, указывающий на файл, а не на каталог.
+.SH ВЕРСИИ
+Вызов \fBfstatat\fP() был добавлен в ядро Linux версии 2.6.16; поддержка в
+glibc доступна с версии 2.4.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2008. Подобный системный вызов есть в Solaris.
+.SH ЗАМЕЧАНИЯ
+Смотрите в \fBopenat\fP(2) объяснение необходимости \fBfstatat\fP().
+
+Нижележащий системный вызов, используемый обёрточной функцией \fBfstatat\fP() в
+glibc, на самом деле вызывает \fBfstatat64\fP().
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBopenat\fP(2), \fBstat\fP(2), \fBpath_resolution\fP(7), \fBsymlink\fP(7)

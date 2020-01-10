@@ -1,0 +1,46 @@
+.\" Copyright (C) 2003 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\" Written by Kent Yoder.
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH GET_THREAD_AREA 2 2008\-11\-27 Linux "Руководство программиста Linux"
+.SH ИМЯ
+get_thread_area \- получение области локального хранилища нити (TLS, Thread
+Local Storage)
+.SH ОБЗОР
+\fB#include <linux/unistd.h>\fP
+.br
+\fB#include <asm/ldt.h>\fP
+.sp
+\fBint get_thread_area(struct user_desc *\fP\fIu_info\fP\fB);\fP
+.SH ОПИСАНИЕ
+\fBget_thread_area\fP() возвращает элемент в текущем массиве локального
+хранилища нити. Индекс записи соответствует значению
+\fIu_info\->entry_number\fP, переданного от пользователя. Если это значение
+находится в допустимых пределах, то \fBget_thread_area\fP() копирует
+соответствующую запись TLS в область, на которую указывает \fIu_info\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+\fBget_thread_area\fP() возвращает 0 при нормальном завершении работы. Иначе
+возвращается \-1, а \fIerrno\fP устанавливается соответствующим образом.
+.SH ОШИБКИ
+.TP 
+\fBEFAULT\fP
+\fIu_info\fP является некорректным указателем.
+.TP 
+\fBEINVAL\fP
+\fIu_info\->entry_number\fP вне допустимых границ.
+.SH ВЕРСИИ
+Впервые, \fBget_thread_area\fP() появилась в Linux 2.5.32.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBget_thread_area\fP() есть только в Linux, и он не должен
+использоваться в переносимых программах.
+.SH ЗАМЕЧАНИЯ
+В glibc нет обёртки для данного системного вызова; запускайте его с помощью
+\fBsyscall\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBmodify_ldt\fP(2), \fBset_thread_area\fP(2)

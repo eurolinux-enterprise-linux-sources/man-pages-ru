@@ -1,0 +1,176 @@
+.\" Copyright (c) 1993 by Thomas Koenig (ig25@rz.uni-karlsruhe.de)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sat Jul 24 17:28:34 1993 by Rik Faith <faith@cs.unc.edu>
+.\" Modified Sun Jun 01 17:16:34 1997 by Jochen Hein
+.\"   <jochen.hein@delphi.central.de>
+.\" Modified Thu Apr 25 00:43:19 2002 by Bruno Haible <bruno@clisp.org>
+.\"
+.\" FIXME Document LOCPATH;
+.\" see http://sourceware.org/bugzilla/show_bug.cgi?id=174
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH LOCALE 7 2008\-12\-05 Linux "Руководство программиста Linux"
+.SH ИМЯ
+locale \- описание поддержки нескольких языков
+.SH ОБЗОР
+.nf
+\fB#include <locale.h>\fP
+.fi
+.SH ОПИСАНИЕ
+Локаль — это сочетание языковых и культурных аспектов. Они включают в себя:
+язык сообщений, различные наборы символов, лексикографические соглашения и
+т.п. Программа должна определять локализацию и действовать согласно её
+установкам в целях достижения взаимосвязи различных культур.
+.PP
+Файл \fI<locale.h>\fP описывает типы данных, функции и макросы,
+необходимые для выполнения этой задачи.
+.PP
+В нём описаны функции: \fBsetlocale\fP(3), устанавливающая текущую локаль и
+\fBlocaleconv\fP(3), которая возвращает информацию о форматировании чисел.
+.PP
+Существуют различные категории локализации, которые программа может
+использовать; они описаны как макросы. Используя их в качестве первого
+аргумента функции \fBsetlocale\fP(3), можно установить значение значение
+категории в желаемую локаль:
+.TP 
+\fBLC_COLLATE\fP
+Эта категория изменяет поведение функций \fBstrcoll\fP(3) и \fBstrxfrm\fP(3),
+которые используются для сравнения строк с учётом местного
+алфавита. Например, немецкая эсцет (sharp s) рассматривается как "ss".
+.TP 
+\fBLC_CTYPE\fP
+Эта категория влияет на поведение функций обработки и классификации
+символов, таких как: \fBisupper\fP(3) и \fBtoupper\fP(3), а также многобайтных
+символьных функций, таких как: \fBmblen\fP(3) или \fBwctomb\fP(3).
+.TP 
+\fBLC_MONETARY\fP
+влияет на информацию, возвращаемую функцией \fBlocaleconv\fP(3) , которая
+описывает способ отображения числа, например, необходимо ли использовать в
+качестве десятичного разделителя точку или запятую. Эта информация
+используется в функции \fBstrfmon\fP(3).
+.TP 
+\fBLC_MESSAGES\fP
+изменяет язык отображаемых сообщений и указывает, как должны выглядеть
+положительный и отрицательный ответы. Библиотека GNU C содержит функции
+\fBgettext\fP(3), \fBngettext\fP(3) и \fBrpmatch\fP(3) для более удобного
+использования этой информации. Семейство функций GNU gettext так же
+учитывает переменную окружения \fBLANGUAGE\fP (содержащую через двоеточие
+список локалей), если указана допустимая категория отличная от \fB"C"\fP.
+.TP 
+\fBLC_NUMERIC\fP
+изменяет информацию, которая используется в семействе функций \fBprintf\fP(3) и
+\fBscanf\fP(3), если необходимо использовать настройки локали. Эта информация
+может быть также прочитана при помощи функции \fBlocaleconv\fP(3).
+.TP 
+\fBLC_TIME\fP
+влияет на поведение функции \fBstrftime\fP(3), которая используется для
+отображения текущего времени в местном формате; например, большая часть
+Европы использует 24\-часовой формат, тогда как в США используют 12\-часовой.
+.TP 
+\fBLC_ALL\fP
+.\" FIXME glibc 2.2.2 added new nonstandard locale categories:
+.\" LC_ADDRESS, LC_IDENTIFICATION, LC_MEASUREMENT, LC_NAME,
+.\" LC_PAPER, LC_TELEPHONE.  These need to be documented.
+Все вышеперечисленное.
+.PP
+Если второй аргумент функции \fBsetlocale\fP(3) равен пустой строке \fB""\fP, то
+локаль по умолчанию будет определяться следующим образом:
+.IP 1.
+Если существует непустая переменная окружения \fBLC_ALL\fP, то используется её
+значение.
+.IP 2.
+Если существует переменная окружения с именем одной из вышеописанных
+категорий и она непустая, то её значение присваивается этой категории.
+.IP 3.
+Если существует непустая переменная окружения \fBLANG\fP, то используется её
+значение.
+.PP
+Информация о локальном форматировании чисел доступна в структуре \fIstruct
+lconv\fP, возвращаемой функцией \fBlocaleconv\fP(3) , которая описана следующим
+образом:
+.in +2n
+.nf
+
+struct lconv {
+
+    /* Информация о числах (не связанная с деньгами) */
+
+    char *decimal_point;     /* Символ разделителя дробной части */
+    char *thousands_sep;     /* Разделитель групп цифр слева от
+                                символа разделителя дробной части */
+    char *grouping; /* Каждый элемент является номером цифры в группе;
+                       элементы c большими номерами находятся левее.
+                       Элемент с значением CHAR_MAX означает, что
+                       группировка завершена. Элемент со значением 0
+                       указывает, что предыдущий элемент используется
+                       для всех групп, находящихся левее. */
+
+    /* В оставшихся полях указывается информация о денежных
+       величинах */
+
+    char *int_curr_symbol;   /* Первые три символа являются символом
+                                валюты, согласно ISO 4217. Четвёртый
+                                символ является разделителем. Пятый
+                                символ равен \(aq\e0\(aq. */
+    char *currency_symbol;   /* Местный символ валюты */
+    char *mon_decimal_point; /* Символ разделителя дробной части */
+    char *mon_thousands_sep; /* Как \fIthousands_sep\fP */
+    char *mon_grouping;      /* Как \fIgrouping\fP */
+    char *positive_sign;     /* Знак положительных значений */
+    char *negative_sign;     /* Знак отрицательных значений */
+    char  int_frac_digits;   /* Представление дробных чисел в
+                                международном формате */
+    char  frac_digits;       /* Представление дробных чисел в локальном
+                                формате */
+    char  p_cs_precedes;     /* 1, если символ валюты указывается перед
+                                положительным значение, 0 — если
+                                следует за ним. */
+    char  p_sep_by_space;    /* 1, если пробел отделяет символ валюты
+                                от положительного значения */
+    char  n_cs_precedes;     /* 1, если символ валюты предшествует
+                                 отрицательному значению,
+                                0, если следует за ним */
+    char  n_sep_by_space;    /* 1, если пробел отделяет символ валюты
+                                от отрицательного значения */
+    /* Позиция положительного или отрицательного знака:
+       0 Скобки окружают количество и символ валюты.
+       1 Знак предшествует количеству и символу валюты.
+       2 Знак следует за количеством и символом валюты.
+       3 Знак непосредственно предшествует символу валюты.
+       4 Знак непосредственно следует за символом валюты. */
+    char  p_sign_posn;
+    char  n_sign_posn;
+};
+.fi
+.in
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001.
+
+Функции GNU gettext определены в LI18NUX2000.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBlocale\fP(1), \fBlocaledef\fP(1), \fBgettext\fP(3), \fBlocaleconv\fP(3),
+\fBngettext\fP(3), \fBnl_langinfo\fP(3), \fBrpmatch\fP(3), \fBsetlocale\fP(3),
+\fBstrcoll\fP(3), \fBstrfmon\fP(3), \fBstrftime\fP(3), \fBstrxfrm\fP(3)

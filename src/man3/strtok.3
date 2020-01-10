@@ -1,0 +1,172 @@
+.\" Copyright (C) 1996 Andries Brouwer (aeb@cwi.nl)
+.\" and Copyright (C) 2005 Michael Kerrisk (mtk.manpages@gmail.com)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Rewritten old page, 960210, aeb@cwi.nl
+.\" Updated, added strtok_r. 2000-02-13 Nicol�s Lichtmaier <nick@debian.org>
+.\" 2005-11-17, mtk: Substantial parts rewritten
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH STRTOK 3 2012\-05\-10 GNU "Руководство программиста Linux"
+.SH ИМЯ
+strtok, strtok_r \- извлечение элементов (токенов) из строки
+.SH ОБЗОР
+.nf
+\fB#include <string.h>\fP
+.sp
+\fBchar *strtok(char *\fP\fIstr\fP\fB, const char *\fP\fIdelim\fP\fB);\fP
+.sp
+\fBchar *strtok_r(char *\fP\fIstr\fP\fB, const char *\fP\fIdelim\fP\fB, char **\fP\fIsaveptr\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+.ad l
+\fBstrtok_r\fP(): _SVID_SOURCE || _BSD_SOURCE || _POSIX_C_SOURCE\ >=\ 1 ||
+_XOPEN_SOURCE || _POSIX_SOURCE
+.ad b
+.SH ОПИСАНИЕ
+Функция \fBstrtok\fP() разделяет строку на последовательность токенов. При
+первом вызове \fBstrtok\fP() анализируемую строку нужно указывать в аргументе
+\fIstr\fP. В каждом последующем вызове, в котором анализируется эта же строка,
+значение \fIstr\fP должно быть NULL.
+
+В аргументе \fIdelim\fP задаётся набор байт, которые считаются разделителями
+токенов в анализируемой строке. Вызывающий может указывать разные строки в
+\fIdelim\fP в последующих вызовах при анализе той же строки.
+
+Каждый вызов \fBstrtok\fP() возвращает указатель на строку, завершающуюся null,
+которая содержит следующий токен. Эта строка не включает
+байт\-разделитель. Если больше токенов нет, то \fBstrtok\fP() возвращает NULL.
+
+Последовательность двух и более смежных байтов\-разделителей в анализируемой
+строке считается одним разделителем. Байты\-разделители в начале или в конце
+строки игнорируются. Другими словами: токены, возвращаемые \fBstrtok\fP(),
+всегда являются непустыми строками.
+
+Функция \fBstrtok_r\fP() является реентерабельной версией \fBstrtok\fP(). Аргумент
+\fIsaveptr\fP является указателем на переменную \fIchar *\fP, которая используется
+внутри \fBstrtok_r\fP() для учёта контекста между последующими вызовами при
+анализе одной и той же строки.
+
+При первом вызове \fBstrtok_r\fP() значение \fIstr\fP должно указывать на
+анализируемую строку, а значение \fIsaveptr\fP игнорируется. При последующих
+вызовах значение \fIstr\fP должно быть NULL, а значение \fIsaveptr\fP не должно
+изменяться с момента предыдущего вызова.
+
+Одновременно могут анализироваться разные строки при нескольких запусках
+\fBstrtok_r\fP() с различными аргументами \fIsaveptr\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функции \fBstrtok\fP() и \fBstrtok_r\fP() возвращают указатель на следующий токен
+или NULL, если больше токенов нет.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.TP 
+\fBstrtok\fP()
+SVr4, POSIX.1\-2001, 4.3BSD, C89, C99.
+.TP 
+\fBstrtok_r\fP()
+POSIX.1\-2001.
+.SH ДЕФЕКТЫ
+Используйте данные функции с осторожностью. Учитывайте, что:
+.IP * 2
+Эти функции изменяют свой первый аргумент.
+.IP *
+Эти функции не могут использоваться со строками\-константами.
+.IP *
+Теряется идентичность байта\-разделителя.
+.IP *
+При анализе функция \fBstrtok\fP() использует статический буфер, поэтому не
+является безопасной для нитей. Используйте \fBstrtok_r\fP() в этом случае.
+.SH ПРИМЕР
+В программе, представленной далее, используются вложенные циклы, которые
+вызывают \fBstrtok_r\fP() для разделения строки на составляющие её токены. В
+первом параметре командной строки задаётся анализируемая строка. Во втором
+параметре задаётся байт(ы)\- разделитель, который используется для деления
+строки на «составные» токены. В третьем параметре указывается байт(ы)\-
+разделитель, который используется для разделения «составных» токенов на
+подтокены.
+.PP
+Пример результата вывода программы:
+.PP
+.in +4n
+.nf
+$\fB ./a.out \(aqa/bbb///cc;xxx:yyy:\(aq \(aq:;\(aq \(aq/\(aq\fP
+1: a/bbb///cc
+         \-\-> a
+         \-\-> bbb
+         \-\-> cc
+2: xxx
+         \-\-> xxx
+3: yyy
+         \-\-> yyy
+.fi
+.in
+.SS "Исходный код программы"
+\&
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int
+main(int argc, char *argv[])
+{
+    char *str1, *str2, *token, *subtoken;
+    char *saveptr1, *saveptr2;
+    int j;
+
+    if (argc != 4) {
+        fprintf(stderr, "Использование: %s string delim subdelim\en",
+                argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    for (j = 1, str1 = argv[1]; ; j++, str1 = NULL) {
+        token = strtok_r(str1, argv[2], &saveptr1);
+        if (token == NULL)
+            break;
+        printf("%d: %s\en", j, token);
+
+        for (str2 = token; ; str2 = NULL) {
+            subtoken = strtok_r(str2, argv[3], &saveptr2);
+            if (subtoken == NULL)
+                break;
+            printf("\t \-\-> %s\en", subtoken);
+        }
+    }
+
+    exit(EXIT_SUCCESS);
+}
+.fi
+.PP
+Ещё один пример программы, использующей \fBstrtok\fP(), можно найти в
+\fBgetaddrinfo_a\fP(3).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBindex\fP(3), \fBmemchr\fP(3), \fBrindex\fP(3), \fBstrchr\fP(3), \fBstring\fP(3),
+\fBstrpbrk\fP(3), \fBstrsep\fP(3), \fBstrspn\fP(3), \fBstrstr\fP(3), \fBwcstok\fP(3)

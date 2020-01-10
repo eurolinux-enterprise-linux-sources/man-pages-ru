@@ -1,0 +1,137 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is Copyright (C) 1992 Drew Eckhardt;
+.\" and Copyright (C) 1993 Michael Haardt, Ian Jackson.
+.\" and Copyright (C) 2005, 2008 Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 1993-07-21, Rik Faith <faith@cs.unc.edu>
+.\" Modified 1994-08-21, Michael Chastain <mec@shell.portal.com>:
+.\"   Fixed typoes.
+.\" Modified 1997-01-31, Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2002-09-28, aeb
+.\" 2009-01-12, mtk, reordered text in DESCRIPTION and added some
+.\"     details for dup2().
+.\" 2008-10-09, mtk: add description of dup3()
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH DUP 2 2012\-02\-14 Linux "Руководство программиста Linux"
+.SH ИМЯ
+dup, dup2, dup3 \- создать дубликат файлового дескриптора
+.SH ОБЗОР
+.nf
+\fB#include <unistd.h>\fP
+.sp
+\fBint dup(int \fP\fIoldfd\fP\fB);\fP
+\fBint dup2(int \fP\fIoldfd\fP\fB, int \fP\fInewfd\fP\fB);\fP
+.sp
+\fB#define _GNU_SOURCE\fP             /* Смотрите feature_test_macros(7) */
+\fB#include <fcntl.h>\fP              /* Определение констант O_* */
+\fB#include <unistd.h>\fP
+.sp
+\fBint dup3(int \fP\fIoldfd\fP\fB, int \fP\fInewfd\fP\fB, int \fP\fIflags\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Эти системные вызовы создают копию файлового дескриптора \fIoldfd\fP.
+
+Для нового дескриптора \fBdup\fP() использует самый маленький свободный номер.
+
+\fBdup2\fP() делает \fInewfd\fP копией \fIoldfd\fP, предварительно закрывая \fInewfd\fP,
+если нужно. Следует отметить, что:
+.IP * 3
+Если \fIoldfd\fP является некорректным файловым дескриптором, то вызов
+завершается с ошибкой, а \fInewfd\fP не закрывается.
+.IP *
+Если \fIoldfd\fP является корректным файловым дескриптором, а номер \fInewfd\fP
+совпадает с \fIoldfd\fP, то \fBdup2\fP() не делает ничего и возвращает значение
+\fInewfd\fP.
+.PP
+После успешного завершения из одного из этих системных вызовов старый и
+новый файловые дескрипторы являются взаимозаменяемыми. Они указывают на одно
+и то же открытое файловое описание (см. \fBopen\fP(2)) и поэтому имеют общее
+файловое смещение и флаги состояния файла; например, если файловое смещение
+изменить с помощью \fBlseek\fP(2) через один из дескрипторов, то смещение
+изменится и для другого.
+
+Эти два дескриптора имеют различные флаги дескриптора файла (флаг
+close\-on\-exec). Флаг close\-on\-exec (\fBFD_CLOEXEC\fP; см. \fBfcntl\fP(2)) у копии
+дескриптора сбрасывается.
+
+\fBdup3\fP() похож на \fBdup2\fP(). Отличия заключаются в следующем:
+.IP * 3
+Вызывающий может принудительно установить флаг close\-on\-exec flag у нового
+файлового дескриптора, указав \fBO_CLOEXEC\fP в \fIflags\fP. Зачем это может быть
+нужно смотрите в \fBopen\fP(2).
+.IP *
+.\" FIXME . To confirm with Al Viro that this was intended, and its rationale
+Если \fIoldfd\fP равно \fInewfd\fP, то \fBdup3\fP() выдает ошибку \fBEINVAL\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха данные системные вызовы возвращают новый дескриптор или \-1,
+если произошла ошибка (в этом случае \fIerrno\fP устанавливается должным
+образом).
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+\fIoldfd\fP не является открытым файловым дескриптором, или же \fInewfd\fP
+находится вне допустимого диапазона файловых дескрипторов.
+.TP 
+\fBEBUSY\fP
+(только в Linux) Может случиться в \fBdup2\fP() или \fBdup3\fP() при возникновении
+состязательности вызовов \fBopen\fP(2) и \fBdup\fP().
+.TP 
+\fBEINTR\fP
+Вызов \fBdup2\fP() или \fBdup3\fP() был прерван каким\-либо сигналом. Смотрите
+\fBsignal\fP(7).
+.TP 
+\fBEINVAL\fP
+.\" FIXME . To confirm with Al Viro that this was intended, and its rationale
+(\fBdup3\fP()) \fIflags\fP содержит некорректное значение. Или \fIoldfd\fP было равно
+\fInewfd\fP.
+.TP 
+\fBEMFILE\fP
+Процесс уже открыл максимальное количество файловых дескрипторов и пытается
+открыть ещё один.
+.SH ВЕРСИИ
+\fBdup3\fP() был добавлен в Linux версии 2.6.27; поддержка в glibc доступна с
+версии 2.9.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+\fBdup\fP(), \fBdup2\fP(): SVr4, 4.3BSD, POSIX.1\-2001.
+
+.\" SVr4 documents additional
+.\" EINTR and ENOLINK error conditions.  POSIX.1 adds EINTR.
+.\" The EBUSY return is Linux-specific.
+\fBdup3\fP() есть только в Linux.
+.SH ЗАМЕЧАНИЯ
+Ошибка, которую возвращает \fBdup2\fP(), отличается от той, что возвращает
+\fBfcntl(\fP..., \fBF_DUPFD\fP, ...\fB)\fP, когда \fInewfd\fP находится вне допустимых
+пределов. На некоторых системах \fBdup2\fP() также иногда возвращает \fBEINVAL\fP
+как \fBF_DUPFD\fP.
+
+Если \fInewfd\fP был открыт, то любые ошибки, которые могли бы случиться во
+время \fBclose\fP(2), теряются. Осторожный программист не будет использовать
+\fBdup2\fP() или \fBdup3\fP() не закрыв сперва \fInewfd\fP.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclose\fP(2), \fBfcntl\fP(2), \fBopen\fP(2)

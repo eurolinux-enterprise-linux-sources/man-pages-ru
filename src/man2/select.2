@@ -1,0 +1,379 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" This manpage is copyright (C) 1992 Drew Eckhardt,
+.\"                 copyright (C) 1995 Michael Shields.
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1995-05-18 by Jim Van Zandt <jrv@vanzandt.mv.com>
+.\" Sun Feb 11 14:07:00 MET 1996  Martin Schulze  <joey@linux.de>
+.\"	* layout slightly modified
+.\"
+.\" Modified Mon Oct 21 23:05:29 EDT 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified Thu Feb 24 01:41:09 CET 2000 by aeb
+.\" Modified Thu Feb  9 22:32:09 CET 2001 by bert hubert <ahu@ds9a.nl>, aeb
+.\" Modified Mon Nov 11 14:35:00 PST 2002 by Ben Woodard <ben@zork.net>
+.\" 2005-03-11, mtk, modified pselect() text (it is now a system
+.\"     call in 2.6.16.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SELECT 2 2012\-05\-02 Linux "Руководство программиста Linux"
+.SH ИМЯ
+select, pselect, FD_CLR, FD_ISSET, FD_SET, FD_ZERO \- многопоточный
+синхронный ввод\-вывод
+.SH ОБЗОР
+.nf
+/* В соответствие с POSIX.1\-2001 */
+.br
+\fB#include <sys/select.h>\fP
+.sp
+/* В соответствие с более ранними стандартами */
+.br
+\fB#include <sys/time.h>\fP
+.br
+\fB#include <sys/types.h>\fP
+.br
+\fB#include <unistd.h>\fP
+.sp
+\fBint select(int \fP\fInfds\fP\fB, fd_set *\fP\fIreadfds\fP\fB, fd_set *\fP\fIwritefds\fP\fB,\fP
+\fB           fd_set *\fP\fIexceptfds\fP\fB, struct timeval *\fP\fItimeout\fP\fB);\fP
+.sp
+\fBvoid FD_CLR(int \fP\fIfd\fP\fB, fd_set *\fP\fIset\fP\fB);\fP
+.br
+\fBint  FD_ISSET(int \fP\fIfd\fP\fB, fd_set *\fP\fIset\fP\fB);\fP
+.br
+\fBvoid FD_SET(int \fP\fIfd\fP\fB, fd_set *\fP\fIset\fP\fB);\fP
+.br
+\fBvoid FD_ZERO(fd_set *\fP\fIset\fP\fB);\fP
+.sp
+\fB#include <sys/select.h>\fP
+.sp
+\fBint pselect(int \fP\fInfds\fP\fB, fd_set *\fP\fIreadfds\fP\fB, fd_set *\fP\fIwritefds\fP\fB,\fP
+\fB            fd_set *\fP\fIexceptfds\fP\fB, const struct timespec *\fP\fItimeout\fP\fB,\fP
+\fB            const sigset_t *\fP\fIsigmask\fP\fB);\fP
+.fi
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBpselect\fP(): _POSIX_C_SOURCE\ >=\ 200112L || _XOPEN_SOURCE\ >=\ 600
+.SH ОПИСАНИЕ
+Вызовы \fBselect\fP() и \fBpselect\fP() позволяют программам отслеживать изменения
+нескольких файловых дескрипторов ожидая, когда один или более файловых
+дескрипторов станут "готовы" для операции ввода\-вывода определённого типа
+(например, ввода). Файловый дескриптор считается готовым, если к нему
+возможно применить соответствующую операцию ввода\-вывода (например,
+\fBread\fP(2)) без блокировки.
+.PP
+Работа \fBselect\fP() и \fBpselect\fP() идентична за исключением трёх моментов:
+.TP 
+(i)
+В вызове \fBselect\fP() время ожидания задаётся в структуре \fIstruct timeval\fP
+(с секундами и микросекундами), а в \fBpselect\fP() используется структура
+\fIstruct timespec\fP (с секундами и наносекундами).
+.TP 
+(ii)
+Вызов \fBselect\fP() может обновить аргумент \fItimeout\fP, который показывает
+сколько времени прошло. Вызов \fBpselect\fP() не изменяет этот аргумент.
+.TP 
+(iii)
+Вызов \fBselect\fP() не имеет аргумента \fIsigmask\fP, и ведёт себя также как
+\fBpselect\fP(), если при вызове было указано значение \fIsigmask\fP равное NULL.
+.PP
+Отслеживаются 3 независимых набора файловых дескрипторов. В тех, что
+перечислены в \fIreadfds\fP, будет отслеживаться появление символов, доступных
+для чтения (говоря более точно, проверяется доступность чтения без
+блокировки; в частности, файловый дескриптор готов для чтения, если он
+указывает на конец файла); дескрипторы, указанные в \fIwritefds\fP, будут
+отслеживаться для возможности записи без блокировки, а указанные в
+\fIexceptfds\fP, будут отслеживаться для обнаружения исключительных
+ситуаций. При возврате из вызова наборы изменяются, показывая какие файловые
+дескрипторы фактически изменили состояние. Значение любого из трёх наборов
+файловых дескрипторов может быть равно NULL, если слежение за определённым
+классом событий над файловыми дескрипторами не требуется.
+.PP
+Для манипуляций наборами существуют четыре макроса: \fBFD_ZERO\fP() очищает
+набор;  \fBFD_SET\fP() добавляет заданный файловый дескриптор к набору;
+\fBFD_CLR\fP() удаляет файловый дескриптор из набора; \fBFD_ISSET\fP() проверяет,
+является ли файловый дескриптор частью набора. Эти макросы полезны после
+возврата из вызова \fBselect\fP().
+.PP
+Значение \fInfds\fP на единицу больше самого большого номера файлового
+дескриптора из всех трёх наборов.
+.PP
+В аргументе \fItimeout\fP задаётся минимальное количество времени, на которое
+заблокируется \fBselect\fP() в ожидании готовности файлового
+дескриптора. Данное значение интервала будет округлено до точности системных
+часов, а из\-за задержки при планировании в ядре блокирующий интервал будет
+немного больше. Если оба поля структуры \fItimeval\fP равны нулю, то
+\fBselect\fP() завершится немедленно (полезно при опросе (polling)). Если
+значение \fItimeout\fP равно NULL (время ожидания не задано), то \fBselect\fP()
+может блокировать работу неопределённо долго.
+.PP
+Значение \fIsigmask\fP является указателем на маску сигналов (смотрите
+\fBsigprocmask\fP(2)); если оно не равно NULL, то сначала \fBpselect\fP() заменяет
+текущую маску сигналов на заданную \fIsigmask\fP, затем выполняет функцию
+"select", после чего восстанавливает первоначальную сигнальную маску.
+.PP
+Кроме различия в точности аргумента \fItimeout\fP вызов \fBpselect\fP()
+.nf
+
+    ready = pselect(nfds, &readfds, &writefds, &exceptfds,
+                    timeout, &sigmask);
+
+.fi
+эквивалентен \fIатомарному\fP выполнению следующих вызовов:
+.nf
+
+    sigset_t origmask;
+
+    sigprocmask(SIG_SETMASK, &sigmask, &origmask);
+    ready = select(nfds, &readfds, &writefds, &exceptfds, timeout);
+    sigprocmask(SIG_SETMASK, &origmask, NULL);
+.fi
+.PP
+Причина необходимости \fBpselect\fP() в том, что если нужно ждать какого\-то
+сигнала или готовности файлового дескриптора, то необходимо атомарное
+тестирование для избежания состязательности. (Предположим, что обработчик
+сигнала устанавливает глобальный флаг и завершается. В этом случае тест
+этого глобального флага после вызова \fBselect\fP() мог бы длиться бесконечно,
+если сигнал прибыл бы сразу после тестирования, но до вызова. В отличие от
+этого, \fBpselect\fP() позволяет сначала заблокировать сигналы, обработать уже
+поступившие и затем вызвать \fBpselect\fP() с желаемым значением \fIsigmask\fP,
+избегая состязательности.)
+.SS "Время ожидания"
+Используемые структуры времени определены в \fI<sys/time.h>\fP и
+выглядят следующим образом:
+
+.in +4n
+.nf
+struct timeval {
+    long    tv_sec;         /* секунды */
+    long    tv_usec;        /* микросекунды */
+};
+.fi
+.in
+
+и
+
+.in +4n
+.nf
+struct timespec {
+    long    tv_sec;         /* секунды */
+    long    tv_nsec;        /* наносекунды */
+};
+.fi
+.in
+
+(Однако, смотрите ниже про версию POSIX 1003.1\-2001.)
+.PP
+Иногда \fBselect\fP() вызывается с пустыми наборами (всеми тремя), \fInfds\fP
+равным нулю и непустым \fItimeout\fP для переносимой реализации перехода в
+режим ожидания (sleep) на периоды с точностью менее секунды.
+.PP
+.\" .PP - it is rumored that:
+.\" On BSD, when a timeout occurs, the file descriptor bits are not changed.
+.\" - it is certainly true that:
+.\" Linux follows SUSv2 and sets the bit masks to zero upon a timeout.
+В Linux вызов \fBselect\fP() изменяет \fItimeout\fP для отражения времени,
+проведённого не в режиме ожидания; большая часть других реализаций этого не
+делает (согласно POSIX.1\-2001 допускается любой из этих вариантов). Это
+вызывает проблемы как при переносе кода Linux, читающего \fItimeout\fP, на
+другие операционные системы, так и при переносе на Linux кода, использующего
+\fIstruct timeval\fP для многократного вызова \fBselect\fP() в цикле без его
+переинициализации. Во избежание этого следует считать, что значение
+\fItimeout\fP не определено после возврата из \fBselect\fP().
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном завершении \fBselect\fP() и \fBpselect\fP() возвращают количество
+файловых дескрипторов, находящихся в наборах ( то есть, общее количество
+бит, установленных в \fIreadfds\fP, \fIwritefds\fP, \fIexceptfds\fP) при чём это
+количество может быть равным нулю, если время ожидания истекло, а
+интересующие события так и не произошли. При ошибке возвращается значение
+\-1, а переменной \fIerrno\fP присваивается соответствующий номер ошибки; наборы
+и значение \fItimeout\fP становятся неопределенными, поэтому при ошибке нельзя
+полагаться на их значение.
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+В одном из наборов находится неверный файловый дескриптор. (Возможно
+файловый дескриптор уже закрыт, или при работе с ним произошла ошибка.)
+.TP 
+\fBEINTR\fP
+При выполнении поступил сигнал; см. \fBsignal\fP(7).
+.TP 
+\fBEINVAL\fP
+Значение \fInfds\fP отрицательно или значение \fItimeout\fP некорректно.
+.TP 
+\fBENOMEM\fP
+Не удалось выделить память для внутренних таблиц.
+.SH ВЕРСИИ
+Вызов \fBpselect\fP() был добавлен в ядро Linux версии 2.6.16. До этого
+\fBpselect\fP() эмулировался в glibc (но, см. ДЕФЕКТЫ).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Вызов \fBselect\fP() соответствует POSIX.1\-2001 и 4.4BSD (впервые \fBselect\fP()
+появился в 4.2BSD).  Обычно перенос выполняется с не\-BSD систем и на них,
+если они поддерживают уровень BSD\-сокетов (включая варианты System
+V). Однако, заметим, что вариант System V, обычно, устанавливает значение
+переменной timeout перед выходом, а вариант BSD \- нет.
+.PP
+Вызов \fBpselect\fP() определён в стандарте POSIX.1g и в POSIX 1004.1\-2001.
+.SH ЗАМЕЧАНИЯ
+\fIfd_set\fP представляет собой буфер фиксированного размера. Выполнение
+\fBFD_CLR\fP() или \fBFD_SET\fP() с отрицательным значением \fIfd\fP, равным или
+большим чем \fBFD_SETSIZE\fP, приводит к неопределённому поведению. Более того,
+согласно POSIX \fIfd\fP должен быть корректным файловым дескриптором.
+
+Что касается задействованных типов, классическим вариантом является
+структура \fItimeval\fP с двумя полями типа \fIlong\fP (как показано ниже),
+которая определена в \fI<sys/time.h>\fP. В POSIX.1\-2001:
+
+.in +4n
+.nf
+struct timeval {
+    time_t         tv_sec;     /* секунды */
+    suseconds_t    tv_usec;    /* микросекунды */
+};
+.fi
+.in
+
+где структура определена в \fI<sys/select.h>\fP, а типы данных
+\fItime_t\fP и \fIsuseconds_t\fP определены в \fI<sys/types.h>\fP.
+.LP
+Что касается прототипов, классическим вариантом является объявление
+\fBselect\fP() в \fI<time.h>\fP. Согласно POSIX.1\-2001 объявления
+\fBselect\fP() и \fBpselect\fP() должны включаться в \fI<sys/select.h>\fP.
+
+В libc4 и libc5 нет заголовочного файла \fI<sys/select.h>\fP; в glibc
+2.0 и более поздних он есть. В glibc 2.0 прототип \fBpselect\fP() ошибочно
+определен всегда. В glibc 2.1 до версии 2.2.1 \fBpselect\fP() определён при
+определённом \fB_GNU_SOURCE\fP. Требования, которые необходимы для работы с
+glibc начиная с версии 2.2.2, показаны в разделе ОБЗОР.
+.SS "Замечания, касающиеся Linux"
+Интерфейс \fBpselect\fP(), описанный в этой странице, реализован в glibc. Для
+этого используется системный вызов \fBpselect6\fP(). Поведение данного
+системного вызова несколько отличается от обёрточной функции glibc.
+
+В Linux системный вызов \fBpselect6\fP() изменяет содержимое своего аргумента
+\fItimeout\fP. Однако, обёрточная функция glibc скрывает это поведение
+используя локальную переменную для аргумента timeout при передаче в
+системный вызов. Таким образом, функция \fBpselect\fP() в glibc не изменяет
+свой аргумент \fItimeout\fP; это поведение требуется в POSIX.1\-2001.
+
+Последний аргумент системного вызова \fBpselect6\fP() не является указателем
+\fIsigset_t\ *\fP, он представляет собой структуру в виде:
+.in +4
+.nf
+
+struct {
+    const sigset_t *ss;     /* указатель на набор сигналов */
+    size_t          ss_len; /* размер (в байтах) объекта, на который
+                               указывает «ss» */
+};
+
+.fi
+.in
+Это позволяет системному вызову получить и указатель на набор сигналов, так
+как в большинстве архитектур системным вызовам можно передать максимум 6
+аргументов.
+.SH ДЕФЕКТЫ
+Glibc 2.0 предоставляет версию \fBpselect\fP(), которая не принимает аргумент
+\fIsigmask\fP.
+
+Начиная с версии 2.1, glibc предоставляет эмуляцию \fBpselect\fP(), которая
+реализована с помощью \fBsigprocmask\fP(2) и \fBselect\fP(). Эта реализация
+остаётся уязвимой к той самой состязательности, для устранения которой и был
+разработан \fBpselect\fP(). В современных версии glibc используется
+(бессостязательный) системный вызов \fBpselect\fP(), если он предоставляется
+ядром.
+
+В системах без \fBpselect\fP(), надёжного (и более переносимого) перехвата
+сигнала можно достичь с помощью трюка с каналом в самого себя. В этом методе
+обработчик сигнала пишет байт в канал, чей второй конец отслеживается
+\fBselect\fP() в основной программе (чтобы избежать возможной блокировки при
+записи в канал, который может быть заполнен, или при чтении из канала,
+который может быть пуст, нужно использовать неблокирующий ввод/вывод).
+
+.\" Stevens discusses a case where accept can block after select
+.\" returns successfully because of an intervening RST from the client.
+.\" Maybe the kernel should have returned EIO in such a situation?
+В Linux, вызов \fBselect\fP() может сообщать о файловом дескрипторе сокета как
+о «готовом для чтения», хотя при последующем чтении произойдёт
+блокировка. Это может случиться, например, когда данные прибыли, но при
+анализе их контрольная сумма не совпала и они были отброшены. Также могут
+быть другие обстоятельства, при которых файловый дескриптор ошибочно
+считается готовым. Поэтому, возможно безопасней будет использовать для
+сокетов \fBO_NONBLOCK\fP, которые не должны блокироваться.
+
+В Linux, вызов \fBselect\fP() также изменяет \fItimeout\fP, если он прерван
+обработчиком сигнала (т.е., возвращается ошибка \fBEINTR\fP). Согласно
+POSIX.1\-2001 это не разрешено. В Linux системный вызов \fBpselect\fP()
+действует также, но обёртка glibc скрывает это поведение копируя перед
+вызовом \fItimeout\fP в локальную переменную и передавая её в системный вызов.
+.SH ПРИМЕР
+.nf
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+int
+main(void)
+{
+    fd_set rfds;
+    struct timeval tv;
+    int retval;
+
+    /* Следить, когда в stdin (fd 0) что\-нибудь появится. */
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+
+    /* Ждать не больше пяти секунд. */
+    tv.tv_sec = 5;
+    tv.tv_usec = 0;
+
+    retval = select(1, &rfds, NULL, NULL, &tv);
+    /* Больше не полагаться на значение tv! */
+
+    if (retval == \-1)
+        perror("select()");
+    else if (retval)
+        printf("Есть данные.\en");
+        /* FD_ISSET(0, &rfds) will be true. */
+    else
+        printf("Данные не появились в течение пяти секунд.\en");
+
+    exit(EXIT_SUCCESS);
+}
+.fi
+.SH "СМОТРИТЕ ТАКЖЕ"
+Обсуждение и примеры смотрите в \fBselect_tut\fP(2).
+.LP
+Неявно связанные темы описаны в \fBaccept\fP(2), \fBconnect\fP(2), \fBpoll\fP(2),
+\fBread\fP(2), \fBrecv\fP(2), \fBsend\fP(2), \fBsigprocmask\fP(2), \fBwrite\fP(2),
+\fBepoll\fP(7), \fBtime\fP(7)

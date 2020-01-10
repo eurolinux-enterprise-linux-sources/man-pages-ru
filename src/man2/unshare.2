@@ -1,0 +1,172 @@
+.\" Copyright (C) 2006, Janak Desai <janak@us.ibm.com>
+.\" and Copyright (C) 2006, Michael Kerrisk <mtk.manpages@gmail.com>
+.\" Licensed under the GPL
+.\"
+.\" Patch Justification:
+.\" unshare system call is needed to implement, using PAM,
+.\" per-security_context and/or per-user namespace to provide
+.\" polyinstantiated directories. Using unshare and bind mounts, a
+.\" PAM module can create private namespace with appropriate
+.\" directories(based on user's security context) bind mounted on
+.\" public directories such as /tmp, thus providing an instance of
+.\" /tmp that is based on user's security context. Without the
+.\" unshare system call, namespace separation can only be achieved
+.\" by clone, which would require porting and maintaining all commands
+.\" such as login, and su, that establish a user session.
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH UNSHARE 2 2010\-10\-30 Linux "Руководство программиста Linux"
+.SH ИМЯ
+unshare \- отделяет части процесса контекста выполнения
+.SH ОБЗОР
+.nf
+.\" Actually _BSD_SOURCE || _SVID_SOURCE
+.\" FIXME See http://sources.redhat.com/bugzilla/show_bug.cgi?id=4749
+\fB#define _GNU_SOURCE\fP             /* Смотрите feature_test_macros(7) */
+\fB#include <sched.h>\fP
+.sp
+\fBint unshare(int \fP\fIflags\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBunshare\fP() позволяет процессу отделить части своего контекста
+выполнения, которые используются совместно с другими процессами. Часть
+контекста выполнения, например пространство имён монтирования, неявно
+делается общей при создании нового процесса с помощью \fBfork\fP(2) или
+\fBvfork\fP(2), в то время как другие части, такие как виртуальная память,
+могут стать общими по явному запросу при создании процесса с помощью
+\fBclone\fP(2).
+
+Основное предназначение \fBunshare\fP() \(em позволить процессу контролировать
+свой общий контекст выполнения без создания нового процесса.
+
+Значение аргумента \fIflags\fP представляет собой битовую маску, в которой
+указывается какие части контекста выполнения должны перестать быть
+общими. Значение составляется из нескольких следующих констант (через OR):
+.TP 
+\fBCLONE_FILES\fP
+Обратный эффект флагу \fBCLONE_FILES\fP для \fBclone\fP(2). Отделяет таблицу
+файловых дескрипторов таким образом, что вызывающий процесс больше не имеет
+общих файловых дескрипторов с другими процессами.
+.TP 
+\fBCLONE_FS\fP
+Обратный эффект флагу \fBCLONE_FS\fP для \fBclone\fP(2). Отделяет атрибуты
+файловой системы таким образом, что вызывающий процесс больше не имеет общих
+атрибутов корневого каталога, текущего каталога и umask с другими процессами
+(\fBchroot\fP(2), \fBchdir\fP(2) или \fBumask\fP(2)).
+.TP 
+\fBCLONE_NEWIPC\fP (начиная с Linux 2.6.19)
+Этот флаг имеет действие подобное флагу \fBCLONE_NEWIPC\fP для
+\fBclone\fP(2). Отделяет пространство имён System V IPC таким образом, что
+вызывающий процесс будет иметь свою личную копию пространства имён System V
+IPC, неиспользуемую другими процессами. Задание данного флага автоматически
+устанавливает флаг \fBCLONE_SYSVSEM\fP. Для использования \fBCLONE_NEWIPC\fP
+требуется мандат \fBCAP_SYS_ADMIN\fP.
+.TP 
+\fBCLONE_NEWNET\fP (начиная с Linux 2.6.24)
+Этот флаг имеет действие подобное флагу \fBCLONE_NEWNET\fP для
+\fBclone\fP(2). Отделяет сетевое пространство имён таким образом, что
+вызывающий процесс будет иметь свою личную копию сетевого пространства имён,
+неиспользуемую другими процессами. Для использования \fBCLONE_NEWNET\fP
+требуется мандат \fBCAP_SYS_ADMIN\fP.
+.TP 
+\fBCLONE_NEWNS\fP
+.\" These flag name are inconsistent:
+.\" CLONE_NEWNS does the same thing in clone(), but CLONE_VM,
+.\" CLONE_FS, and CLONE_FILES reverse the action of the clone()
+.\" flags of the same name.
+Этот флаг имеет действие подобное флагу \fBCLONE_NEWNS\fP для
+\fBclone\fP(2). Отделяет пространство имён монтирования таким образом, что
+вызывающий процесс будет иметь свою личную копию данного пространства имён,
+неиспользуемую другими процессами. Задание данного флага автоматически
+устанавливает флаг \fBCLONE_FS\fP. Для использования \fBCLONE_NEWNS\fP требуется
+мандат \fBCAP_SYS_ADMIN\fP.
+.TP 
+\fBCLONE_SYSVSEM\fP (начиная с Linux 2.6.26)
+Обратный эффект флагу \fBCLONE_SYSVSEM\fP для \fBclone\fP(2). Отделяет семафоры
+System V таким образом, что вызывающий процесс будет иметь свою личную
+копию, неиспользуемую другими процессами. Для использования \fBCLONE_SYSVSEM\fP
+требуется мандат \fBCAP_SYS_ADMIN\fP.
+.TP 
+\fBCLONE_NEWUTS\fP (начиная с Linux 2.6.19)
+.\" As at 2.6.16, the following forced implications also apply,
+.\" although the relevant flags are not yet implemented.
+.\" If CLONE_THREAD is set force CLONE_VM.
+.\" If CLONE_VM is set, force CLONE_SIGHAND.
+.\" CLONE_NEWNSIf CLONE_SIGHAND is set and signals are also being shared
+.\" (i.e., current->signal->count > 1), force CLONE_THREAD.
+.\"
+.\" FIXME . CLONE_VM is not (yet, as at 2.6.16) implemented.
+.\" .TP
+.\" .B CLONE_VM
+.\" Reverse the effect of the
+.\" .BR clone (2)
+.\" .B CLONE_VM
+.\" flag.
+.\" .RB ( CLONE_VM
+.\" is also implicitly set by
+.\" .BR vfork (2),
+.\" and can be reversed using this
+.\" .BR unshare ()
+.\" flag.)
+.\" Unshare virtual memory, so that the calling process no
+.\" longer shares its virtual address space with any other process.
+Этот флаг имеет действие подобное флагу \fBCLONE_NEWUTS\fP для
+\fBclone\fP(2). Отделяет пространство имён UTS IPC таким образом, что
+вызывающий процесс будет иметь свою личную копию пространства имён UTS,
+неиспользуемую другими процессами. Для использования \fBCLONE_NEWUTS\fP
+требуется мандат \fBCAP_SYS_ADMIN\fP.
+.PP
+Если значение \fIflags\fP равно нулю, то \fBunshare\fP() ничего не делает, то есть
+в контексте выполнения вызывающего процесса ничего не изменяется.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается 0. При ошибке возвращается \-1, а
+\fIerrno\fP присваивается значение ошибки.
+.SH ОШИБКИ
+.TP 
+\fBEINVAL\fP
+В значении \fIflags\fP установлен недопустимый бит.
+.TP 
+\fBENOMEM\fP
+Не удалось выделить достаточно памяти для копирования части контекста
+вызывающего, которая должна быть отделена.
+.TP 
+\fBEPERM\fP
+Вызывающий процесс не имеет требуемых привилегий для этой операции.
+.SH ВЕРСИИ
+Системный вызов \fBunshare\fP() был добавлен в ядро Linux версии 2.6.16.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Системный вызов \fBunshare\fP() есть только в Linux.
+.SH ЗАМЕЧАНИЯ
+.\" However, we can do unshare(CLONE_SIGHAND) if CLONE_SIGHAND
+.\" was not specified when doing clone(); i.e., unsharing
+.\" signal handlers is permitted if we are not actually
+.\" sharing signal handlers.   mtk
+.\" FIXME . check future kernel versions (e.g., 2.6.17)
+.\" to see if CLONE_VM gets implemented.
+.\" However, as at 2.6.16, we can do unshare(CLONE_VM) if CLONE_VM
+.\" was not specified when doing clone(); i.e., unsharing
+.\" virtual memory is permitted if we are not actually
+.\" sharing virtual memory.   mtk
+.\"
+.\"9) Future Work
+.\"--------------
+.\"The current implementation of unshare does not allow unsharing of
+.\"signals and signal handlers. Signals are complex to begin with and
+.\"to unshare signals and/or signal handlers of a currently running
+.\"process is even more complex. If in the future there is a specific
+.\"need to allow unsharing of signals and/or signal handlers, it can
+.\"be incrementally added to unshare without affecting legacy
+.\"applications using unshare.
+.\"
+Не все атрибуты процесса, которые могут использоваться совместно при
+создании нового процесса с помощью \fBclone\fP(2), могут быть отделены с
+помощью \fBunshare\fP(). В частности, начиная с ядра 2.6.16 в \fBunshare\fP() не
+реализована поддержка флагов, которые были имели обратное действие
+\fBCLONE_SIGHAND\fP, \fBCLONE_SYSVSEM\fP, \fBCLONE_THREAD\fP или \fBCLONE_VM\fP. Эти
+возможности могут быть добавлены позднее, если потребуется.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBclone\fP(2), \fBfork\fP(2), \fBvfork\fP(2), Documentation/unshare.txt

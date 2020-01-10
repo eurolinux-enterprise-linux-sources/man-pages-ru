@@ -1,0 +1,90 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (C) Tom Bjorkholm & Markus Kuhn, 1996
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" The GNU General Public License's references to "object code"
+.\" and "executables" are to be interpreted as the output of any
+.\" document formatting or typesetting system, including
+.\" intermediate and printed output.
+.\"
+.\" This manual is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public
+.\" License along with this manual; if not, write to the Free
+.\" Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111,
+.\" USA.
+.\"
+.\" 1996-04-01 Tom Bjorkholm <tomb@mydata.se>
+.\"            First version written
+.\" 1996-04-10 Markus Kuhn <mskuhn@cip.informatik.uni-erlangen.de>
+.\"            revision
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SCHED_GET_PRIORITY_MAX 2 2006\-03\-23 Linux "Руководство программиста Linux"
+.SH ИМЯ
+sched_get_priority_max, sched_get_priority_min \- возвращают статический
+диапазон приоритетов
+.SH ОБЗОР
+\fB#include <sched.h>\fP
+.sp
+\fBint sched_get_priority_max(int \fP\fIpolicy\fP\fB);\fP
+.sp
+\fBint sched_get_priority_min(int \fP\fIpolicy\fP\fB);\fP
+.SH ОПИСАНИЕ
+Вызов \fBsched_get_priority_max\fP() возвращает максимальное значение
+приоритета, которое может использоваться с алгоритмом планирования,
+указанного в \fIpolicy\fP. Вызов \fBsched_get_priority_min\fP() возвращает
+минимальное значение приоритета, которое может использоваться с алгоритмом
+планирования, указанного в \fIpolicy\fP. Поддерживаемые значения для \fIpolicy\fP:
+\fBSCHED_FIFO\fP, \fBSCHED_RR\fP, \fBSCHED_OTHER\fP, и \fBSCHED_BATCH\fP. Подробней об
+этих политиках смотрите в \fBsched_setscheduler\fP(2).
+
+Процессы с большим числовым значением приоритета планируются к выполнению
+раньше процессов с меньшим числовым значением приоритета. То есть значение,
+возвращаемое \fBsched_get_priority_max\fP(), будет больше значения,
+возвращаемого \fBsched_get_priority_min\fP().
+
+В Linux допускаются значения статических приоритетов в диапазоне от 1 до 99
+для \fBSCHED_FIFO\fP и \fBSCHED_RR\fP и приоритет 0 для \fBSCHED_OTHER\fP и
+\fBSCHED_BATCH\fP. Диапазоны планируемых приоритетов для различных политик
+назначить нельзя.
+
+В разных системах POSIX диапазон планируемых приоритетов может различаться,
+то есть переносимое приложение должно использовать диапазон виртуальных
+приоритетов и отображать его в интервал, получаемый с помощью
+\fBsched_get_priority_max\fP() и \fBsched_get_priority_min\fP(). POSIX.1\-2001
+требует диапазон не менее 32 значений между максимальным и минимальным
+значениями для \fBSCHED_FIFO\fP и \fBSCHED_RR\fP.
+
+В системах POSIX, имеющих \fBsched_get_priority_max\fP() и
+\fBsched_get_priority_min\fP(), определено значение для
+\fB_POSIX_PRIORITY_SCHEDULING\fP в \fI<unistd.h>\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBsched_get_priority_max\fP() и
+\fBsched_get_priority_min\fP() возвращают максимальное/минимальное значение
+приоритета для указанной политики планирования. В случае ошибки возвращается
+\-1, а \fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEINVAL\fP
+Аргумент \fIpolicy\fP не содержит допустимого значения политики планирования.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+POSIX.1\-2001.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBsched_getaffinity\fP(2), \fBsched_getparam\fP(2), \fBsched_getscheduler\fP(2),
+\fBsched_setaffinity\fP(2), \fBsched_setparam\fP(2), \fBsched_setscheduler\fP(2)
+.PP
+\fIProgramming for the real world \- POSIX.4\fP by Bill O. Gallmeister, O'Reilly
+& Associates, Inc., ISBN 1\-56592\-074\-0

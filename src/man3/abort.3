@@ -1,0 +1,64 @@
+.\" Copyright 2007 (C) Michael Kerrisk <mtk.manpages@gmail.com>
+.\" some parts Copyright 1993 David Metcalfe (david@prism.demon.co.uk)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" References consulted:
+.\"     Linux libc source code
+.\"     Lewine's _POSIX Programmer's Guide_ (O'Reilly & Associates, 1991)
+.\"     386BSD man pages
+.\" Modified Sat Jul 24 21:46:21 1993 by Rik Faith (faith@cs.unc.edu)
+.\" Modified Fri Aug  4 10:51:53 2000 - patch from Joseph S. Myers
+.\" 2007-12-15, mtk, Mostly rewritten
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH ABORT 3 2007\-12\-15 GNU "Руководство программиста Linux"
+.SH ИМЯ
+abort \- аварийно завершает процесс
+.SH ОБЗОР
+.nf
+\fB#include <stdlib.h>\fP
+.sp
+\fBvoid abort(void);\fP
+.fi
+.SH ОПИСАНИЕ
+Сначала функция \fBabort\fP() разблокирует сигнал \fBSIGABRT\fP, а затем
+генерирует этот сигнал для вызывающего процесса. Это приводит к аварийному
+завершению процесса, если сигнал \fBSIGABRT\fP не обрабатывается и обработчик
+сигнала не возвращает управление (см. \fBlongjmp\fP(3)).
+.PP
+Если функция \fBabort\fP() приводит к аварийному завершению процесса, то все
+открытые потоки закрываются и сбрасываются (flushed).
+.PP
+Если сигнал \fBSIGABRT\fP игнорируется или обрабатывается обработчиком, который
+возвращает управление, то функция \fBabort\fP() всё равно завершит процесс. Она
+восстанавливает обработчик \fBSIGABRT\fP по умолчанию, а затем генерирует
+сигнал повторно.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBabort\fP() никогда не возвращает управление.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, POSIX.1\-2001, 4.3BSD, C89, C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBgdb\fP(1), \fBsigaction\fP(2), \fBexit\fP(3), \fBlongjmp\fP(3), \fBraise\fP(3)

@@ -1,0 +1,40 @@
+.\" Copyright (c) Bruno Haible <haible@clisp.cons.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" References consulted:
+.\"   GNU glibc-2 source code and manual
+.\"   Dinkumware C library reference http://www.dinkumware.com/
+.\"   OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+.\"   ISO/IEC 9899:1999
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH WCSPBRK 3 1999\-07\-25 GNU "Руководство программиста Linux"
+.SH ИМЯ
+wcspbrk \- ищет широкий символ из набора в широкосимвольной строке
+.SH ОБЗОР
+.nf
+\fB#include <wchar.h>\fP
+.sp
+\fBwchar_t *wcspbrk(const wchar_t *\fP\fIwcs\fP\fB, const wchar_t *\fP\fIaccept\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBwcspbrk\fP() является широкосимвольным аналогом функции
+\fBstrpbrk\fP(3). Она ищет первое появление в широкосимвольной строке, на
+которую указывает \fIwcs\fP, любого символа из широкосимвольной строки, на
+которую указывает \fIaccept\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+Функция \fBwcspbrk\fP() возвращает указатель на первый обнаруженный символ из
+строки \fIaccept\fP в широкосимвольной строке, указанной в \fIwcs\fP. Если в
+\fIwcs\fP нет подобных символов, то возвращается NULL.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBstrpbrk\fP(3), \fBwcschr\fP(3), \fBwcscspn\fP(3)

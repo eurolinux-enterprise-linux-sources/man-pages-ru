@@ -1,0 +1,70 @@
+.\" Copyright (C) 1995 Andries Brouwer (aeb@cwi.nl)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Written 10 June 1995 by Andries Brouwer <aeb@cwi.nl>
+.\" Modified Thu Oct 31 15:16:23 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH LLSEEK 2 2007\-06\-01 Linux "Руководство программиста Linux"
+.SH ИМЯ
+_llseek \- установить позицию чтения/записи в файле
+.SH ОБЗОР
+.nf
+\fB#include <sys/types.h>\fP
+\fB#include <unistd.h>\fP
+.sp
+\fBint _llseek(unsigned int \fP\fIfd\fP\fB, unsigned long \fP\fIoffset_high\fP\fB,\fP
+\fB            unsigned long \fP\fIoffset_low\fP\fB, loff_t *\fP\fIresult\fP\fB,\fP
+\fB            unsigned int \fP\fIwhence\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fB_llseek\fP() устанавливает позицию в файле, который задан в
+параметре \fIfd\fP, в значение \fI(offset_high<<32) | offset_low\fP байт
+относительно начала файла, текущей позиции файле или конца файла, в
+зависимости от того, равен ли параметр \fIwhence\fP одному из значений
+\fBSEEK_SET\fP, \fBSEEK_CUR\fP или \fBSEEK_END\fP, соответственно. Функция возвращает
+результирующую позицию в файле в аргументе \fIresult\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+В случае успеха \fB_llseek\fP() возвращает ноль. При ошибке возвращается \-1, а
+\fIerrno\fP устанавливается таким образом, чтобы указывать на ошибку.
+.SH ОШИБКИ
+.TP 
+\fBEBADF\fP
+\fIfd\fP не является открытым файловым дескриптором.
+.TP 
+\fBEFAULT\fP
+Проблема с копированием результатов в пространство пользователя.
+.TP 
+\fBEINVAL\fP
+Значение \fIwhence\fP неверно.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+Данная функция есть только в Linux и не должна использоваться в программах,
+которые задуманы как переносимые.
+.SH ЗАМЕЧАНИЯ
+В glibc нет обёртки для данного системного вызова; запускайте его с помощью
+\fBsyscall\fP(2).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBlseek\fP(2), \fBlseek64\fP(3)

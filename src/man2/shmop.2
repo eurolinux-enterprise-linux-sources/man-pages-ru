@@ -1,0 +1,184 @@
+.\" Copyright 1993 Giorgio Ciucci (giorgio@crcc.it)
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified Sun Nov 28 17:06:19 1993, Rik Faith (faith@cs.unc.edu)
+.\"          with material from Luigi P. Bai (lpb@softint.com)
+.\" Portions Copyright 1993 Luigi P. Bai
+.\" Modified Tue Oct 22 22:04:23 1996 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified, 5 Jan 2002, Michael Kerrisk <mtk.manpages@gmail.com>
+.\" Modified, 19 Sep 2002, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Added SHM_REMAP flag description
+.\" Modified, 27 May 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"     Added notes on capability requirements
+.\" Modified, 11 Nov 2004, Michael Kerrisk <mtk.manpages@gmail.com>
+.\"	Language and formatting clean-ups
+.\"	Changed wording and placement of sentence regarding attachment
+.\"		of segments marked for destruction
+.\"
+.\" FIXME . Add an example program to this page.
+.\" FIXME Linux 2.6.9 added SHM_EXEC, which should be documented
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH SHMOP 2 2008\-06\-03 Linux "Руководство программиста Linux"
+.SH ИМЯ
+shmat, shmdt \- операции с общей памятью
+.SH ОБЗОР
+.nf
+\fB#include <sys/types.h>\fP
+\fB#include <sys/shm.h>\fP
+
+\fBvoid *shmat(int \fP\fIshmid\fP\fB, const void *\fP\fIshmaddr\fP\fB, int \fP\fIshmflg\fP\fB);\fP
+
+\fBint shmdt(const void *\fP\fIshmaddr\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Вызов \fBshmat\fP() подключает сегмент общей памяти с идентификатором \fIshmid\fP
+к адресному пространству вызывающего процесса. Адрес подключения, указанный
+в \fIshmaddr\fP, учитывается следующим образом:
+.LP
+Если значение \fIshmaddr\fP равно NULL, то система выбирает подходящий
+(неиспользуемый) адрес для подключения сегмента.
+.LP
+Если значение \fIshmaddr\fP не равно NULL, а в \fIshmflg\fP указан флаг
+\fBSHM_RND\fP, то подключение производится по адресу \fIshmaddr\fP, округлённому
+до ближайшего значения кратного \fBSHMLBA\fP. В противном случае \fIshmaddr\fP
+должно быть выровнено по адресу страницы, к которому производится
+подключение.
+.PP
+Если в \fIshmflg\fP указан флаг \fBSHM_RDONLY\fP, то сегмент подключается для
+чтения, и вызывающий процесс должен иметь право на чтение этого
+сегмента. Иначе подключаемый сегмент будет доступен для чтения и записи, и
+для этого у процесса должны быть соответствующие права. Сегментов, доступных
+только на запись, быть не может.
+.PP
+В \fIshmflg\fP может быть указан флаг \fBSHM_REMAP\fP (только в Linux) для
+обозначения того, что отображение сегмента должно замещать любые
+существующие отображения в диапазоне, начиная с \fIshmaddr\fP и до размера
+сегмента (обычно выдается ошибка \fBEINVAL\fP, если в этом диапазоне адресов
+уже есть отображение). В этом случае значение \fIshmaddr\fP не должно быть
+равно NULL.
+.PP
+Значение \fBbrk\fP(2) вызывающего процесса от подключения не изменяется. При
+завершении работы процесса сегмент будет автоматически отсоединён. Один и
+тот же сегмент может быть подключён в адресное пространство процесса
+несколько раз, как только для чтения, так и для чтения\-записи.
+.PP
+При успешном выполнении системный вызов \fBshmat\fP() обновляет поля структуры
+\fIshmid_ds\fP (см. \fBshmctl\fP(2)), связанной с общим сегментом памяти,
+следующим образом:
+.IP
+Полю \fIshm_atime\fP присваивается значение текущего времени.
+.IP
+Значение \fIshm_lpid\fP устанавливается равным идентификатору вызывающего
+процесса.
+.IP
+Значение \fIshm_nattch\fP увеличивается на 1.
+.PP
+Вызов \fBshmdt\fP() отключает сегмент общей памяти, находящийся по адресу
+\fIshmaddr\fP, от адресного пространства вызывающего процесса. Отключаемый
+сегмент должен быть подключён по адресу \fIshmaddr\fP с помощью вызова
+\fBshmat\fP().
+.PP
+При успешном выполнении вызов \fBshmdt\fP() обновляет поля структуры
+\fIshmid_ds\fP, связанной с общим сегментом памяти, следующим образом:
+.IP
+Полю \fIshm_dtime\fP присваивается значение текущего времени.
+.IP
+Значение \fIshm_lpid\fP устанавливается равным идентификатору вызывающего
+процесса.
+.IP
+Значение \fIshm_nattch\fP уменьшается на 1. Если оно становится равным 0 и
+сегмент помечен для удаления, то сегмент удаляется.
+.PP
+При вызове \fBfork\fP(2) потомки наследуют подключённые общие сегменты памяти.
+
+При вызове \fBexecve\fP(2) все подключённые общие сегменты памяти отключаются.
+
+При вызове \fB_exit\fP(2) все подключённые общие сегменты памяти отключаются.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении \fBshmat\fP() возвращается адрес подключённого общего
+сегмента памяти; при ошибке возвращается \fI(void\ *)\ \-1\fP, а в \fIerrno\fP
+содержится код ошибки.
+
+При успешном выполнении \fBshmdt\fP() возвращается 0; при ошибке возвращается
+\-1, а в \fIerrno\fP содержится код ошибки.
+.SH ОШИБКИ
+Значения \fIerrno\fP, устанавливаемые при возникновении ошибок в \fBshmat\fP():
+.TP 
+\fBEACCES\fP
+Вызывающий процесс не имеет прав для подключения заданного типа и не имеет
+мандата \fBCAP_IPC_OWNER\fP.
+.TP 
+\fBEINVAL\fP
+Неправильное значение \fIshmid\fP, не выровненное (по границе страницы и не
+указан \fBSHM_RND\fP) или неправильное значение \fIshmaddr\fP, или невозможно
+подключить сегмент по адресу \fIshmaddr\fP, или был указан \fBSHM_REMAP\fP, но
+\fIshmaddr\fP равно NULL.
+.TP 
+\fBENOMEM\fP
+Невозможно выделить память для дескриптора или страничных таблиц.
+.PP
+Значения \fIerrno\fP, устанавливаемые при возникновении ошибок в \fBshmdt\fP():
+.TP 
+\fBEINVAL\fP
+.\" The following since 2.6.17-rc1:
+По адресу \fIshmaddr\fP подключённый общий сегмент памяти отсутствует; или
+значение \fIshmaddr\fP не выровнено по границе страницы.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+.\" SVr4 documents an additional error condition EMFILE.
+SVr4, POSIX.1\-2001.
+
+В SVID 3 (или, возможно, более ранних версиях)  тип аргумента \fIshmaddr\fP был
+изменён с \fIchar *\fP на \fIconst void *\fP, а тип результата \fBshmat\fP() — с
+\fIchar *\fP на \fIvoid *\fP (в Linux libc4 и libc5 прототипы определены с \fIchar
+*\fP; в glibc2 — \fIvoid *\fP).
+.SH ЗАМЕЧАНИЯ
+Для улучшения переносимости программ при подключении общего сегмента памяти
+рекомендуется использовать \fBshmat\fP() с аргументом \fIshmaddr\fP, установленным
+в NULL. Необходимо учитывать, что сегмент памяти, подключаемый таким
+способом, в разных процессах может подключаться по разным адресам. Поэтому
+все указатели в области общей памяти должны быть не абсолютными, а
+относительными (как правило относительно адреса начала сегмента).
+.PP
+В Linux сегмент общей памяти можно подключить даже если он помечен для
+удаление. Однако в POSIX.1\-2001 об этом ничего не сказано и многие другие
+реализации это не поддерживают.
+.LP
+На работу \fBshmat\fP() влияют следующие системные параметры:
+.TP 
+.\" FIXME A good explanation of the rationale for the existence
+.\" of SHMLBA would be useful here
+\fBSHMLBA\fP
+.\" FIXME That last sentence isn't true for all Linux
+.\" architectures (i.e., SHMLBA != PAGE_SIZE for some architectures)
+.\" -- MTK, Nov 04
+Коэффициент округления нижней границы адреса сегмента. Должен быть выровнен
+со страницей. В настоящее время значение \fBSHMLBA\fP равно \fBPAGE_SIZE\fP.
+.PP
+Реализацией не ограничивается максимальное количество общих сегментов памяти
+на процесс (\fBSHMSEG\fP).
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBbrk\fP(2), \fBmmap\fP(2), \fBshmctl\fP(2), \fBshmget\fP(2), \fBcapabilities\fP(7),
+\fBshm_overview\fP(7), \fBsvipc\fP(7)

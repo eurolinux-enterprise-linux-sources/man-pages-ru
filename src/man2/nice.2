@@ -1,0 +1,85 @@
+.\" Hey Emacs! This file is -*- nroff -*- source.
+.\"
+.\" Copyright (c) 1992 Drew Eckhardt <drew@cs.colorado.edu>, March 28, 1992
+.\"
+.\" Permission is granted to make and distribute verbatim copies of this
+.\" manual provided the copyright notice and this permission notice are
+.\" preserved on all copies.
+.\"
+.\" Permission is granted to copy and distribute modified versions of this
+.\" manual under the conditions for verbatim copying, provided that the
+.\" entire resulting derived work is distributed under the terms of a
+.\" permission notice identical to this one.
+.\"
+.\" Since the Linux kernel and libraries are constantly changing, this
+.\" manual page may be incorrect or out-of-date.  The author(s) assume no
+.\" responsibility for errors or omissions, or for damages resulting from
+.\" the use of the information contained herein.  The author(s) may not
+.\" have taken the same level of care in the production of this manual,
+.\" which is licensed free of charge, as they might when working
+.\" professionally.
+.\"
+.\" Formatted or processed versions of this manual, if unaccompanied by
+.\" the source, must acknowledge the copyright and authors of this work.
+.\"
+.\" Modified by Michael Haardt <michael@moria.de>
+.\" Modified 1993-07-24 by Rik Faith <faith@cs.unc.edu>
+.\" Modified 1996-11-04 by Eric S. Raymond <esr@thyrsus.com>
+.\" Modified 2001-06-04 by aeb
+.\" Modified 2004-05-27 by Michael Kerrisk <mtk.manpages@gmail.com>
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH NICE 2 2007\-07\-26 Linux "Руководство программиста Linux"
+.SH ИМЯ
+nice \- изменяет приоритет процесса
+.SH ОБЗОР
+\fB#include <unistd.h>\fP
+.sp
+\fBint nice(int \fP\fIinc\fP\fB);\fP
+.sp
+.in -4n
+Требования макроса тестирования свойств для glibc
+(см. \fBfeature_test_macros\fP(7)):
+.in
+.sp
+\fBnice\fP(): _BSD_SOURCE || _SVID_SOURCE || _XOPEN_SOURCE
+.SH ОПИСАНИЕ
+\fBnice\fP() добавляет значение аргумента \fIinc\fP к значению относительного
+приоритета (nice) вызывающего процесса (большее значение nice означает
+меньший приоритет). Только суперпользователь может задавать отрицательные
+значения или определять увеличение приоритета. Диапазон значений nice описан
+в \fBgetpriority\fP(2).
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается новое значение nice (но см. ЗАМЕЧАНИЯ
+далее). В случае ошибки возвращается \-1, а \fIerrno\fP устанавливается в
+соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEPERM\fP
+Вызывающий процесс пытается увеличить свой приоритет, указав отрицательное
+значение \fIinc\fP, но не имеет для этого прав. В Linux для этого требуется
+мандат \fBCAP_SYS_NICE\fP. (Но см. обсуждение ограничение ресурса
+\fBRLIMIT_NICE\fP в \fBsetrlimit\fP(2).)
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+SVr4, 4.3BSD, POSIX.1\-2001. Однако, в Linux и (g)libc (до glibc 2.2.4)
+возвращалось нестандартное значение, см. далее. В SVr4 описан дополнительный
+код ошибки \fBEINVAL\fP.
+.SH ЗАМЕЧАНИЯ
+В SUSv2 и POSIX.1\-2001 указано, что \fBnice\fP() должен возвращать новое
+значение nice. Однако, системный вызов Linux и библиотечная функция
+\fBnice\fP() в старых версиях (g)libc (до glibc 2.2.4) возвращают 0 при
+успешном выполнении. Новое значение nice можно определить с помощью
+\fBgetpriority\fP(2).
+
+Начиная с glibc 2.2.4, \fBnice\fP() реализован как библиотечная функция,
+которая вызывает \fBgetpriority\fP(2) для получения нового значения nice для
+возврата. В этой реализации успешное выполнение может законно вернуть
+\-1. Для надёжного обнаружения ошибки, установите переменную \fIerrno\fP в 0
+перед вызовом и проверьте её значение, если \fBnice\fP() вернёт \-1.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBnice\fP(1), \fBrenice\fP(1), \fBfork\fP(2), \fBgetpriority\fP(2), \fBsetpriority\fP(2),
+\fBcapabilities\fP(7)

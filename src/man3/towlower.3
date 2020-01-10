@@ -1,0 +1,44 @@
+.\" Copyright (c) Bruno Haible <haible@clisp.cons.org>
+.\"
+.\" This is free documentation; you can redistribute it and/or
+.\" modify it under the terms of the GNU General Public License as
+.\" published by the Free Software Foundation; either version 2 of
+.\" the License, or (at your option) any later version.
+.\"
+.\" References consulted:
+.\"   GNU glibc-2 source code and manual
+.\"   Dinkumware C library reference http://www.dinkumware.com/
+.\"   OpenGroup's Single UNIX specification http://www.UNIX-systems.org/online.html
+.\"   ISO/IEC 9899:1999
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH TOWLOWER 3 1999\-07\-25 GNU "Руководство программиста Linux"
+.SH ИМЯ
+towlower \- преобразование широкого символа в нижний регистр
+.SH ОБЗОР
+.nf
+\fB#include <wctype.h>\fP
+.sp
+\fBwint_t towlower(wint_t \fP\fIwc\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+Функция \fBtowlower\fP() является аналогом функции \fBtolower\fP(3). Если \fIwc\fP
+является широким символом, он преобразуется в нижний регистр. Символы, не
+имеющие регистра, возвращаются неизменными. Если \fIwc\fP равно \fBWEOF\fP, будет
+возвращено \fBWEOF\fP.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+\fBtowlower\fP() возвращает эквивалент \fIwc\fP в нижнем регистре, либо \fBWEOF\fP,
+если \fIwc\fP равно \fBWEOF\fP.
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+C99.
+.SH ЗАМЕЧАНИЯ
+Поведение \fBtowlower\fP() зависит от категории \fBLC_CTYPE\fP текущей локали.
+.PP
+Эта функция не очень подходит для работы с символами Юникода, так как в
+Юникоде есть три типа регистра: верхний, нижний и заглавный.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBiswlower\fP(3), \fBtowctrans\fP(3), \fBtowupper\fP(3)

@@ -1,0 +1,84 @@
+.\" Copyright (C) 1996 Free Software Foundation, Inc.
+.\" This file is distributed according to the GNU General Public License.
+.\" See the file COPYING in the top level source directory for details.
+.\"
+.\" 2006-02-09, some reformatting by Luc Van Oostenryck; some
+.\" reformatting and rewordings by mtk
+.\"
+.\"*******************************************************************
+.\"
+.\" This file was generated with po4a. Translate the source file.
+.\"
+.\"*******************************************************************
+.TH INIT_MODULE 2 2006\-02\-09 Linux "Руководство программиста Linux"
+.SH ИМЯ
+init_module \- инициализировать элемент загружаемого модуля
+.SH ОБЗОР
+.nf
+\fB#include <linux/module.h>\fP
+.sp
+\fBint init_module(const char *\fP\fIname\fP\fB, struct module *\fP\fIimage\fP\fB);\fP
+.fi
+.SH ОПИСАНИЕ
+\fBinit_module\fP() загружает образ перемещаемого модуля в пространство ядра и
+запускает функцию \fIinit\fP из модуля.
+.PP
+Образ модуля начинается со структуры модуля, за которой следует код и
+данные. Структура модуля:
+.PP
+.in +4n
+.nf
+struct module {
+    unsigned long         size_of_struct;
+    struct module        *next;
+    const char           *name;
+    unsigned long         size;
+    long                  usecount;
+    unsigned long         flags;
+    unsigned int          nsyms;
+    unsigned int          ndeps;
+    struct module_symbol *syms;
+    struct module_ref    *deps;
+    struct module_ref    *refs;
+    int                 (*init)(void);
+    void                (*cleanup)(void);
+    const struct exception_table_entry *ex_table_start;
+    const struct exception_table_entry *ex_table_end;
+#ifdef __alpha__
+    unsigned long gp;
+#endif
+};
+.fi
+.in
+.PP
+Все поля указателей, за исключением \fInext\fP и \fIrefs\fP, указывают в тело
+модуля и будут инициализированы в соответствии с адресным пространством
+ядра, то есть перемещены с остальной частью модуля.
+.PP
+Данный системный вызов требует особых прав.
+.SH "ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ"
+При успешном выполнении возвращается ноль. В случае ошибки возвращается \-1,
+а \fIerrno\fP устанавливается в соответствующее значение.
+.SH ОШИБКИ
+.TP 
+\fBEBUSY\fP
+Процедура инициализации из модуля завершилась неудачно.
+.TP 
+\fBEFAULT\fP
+\fIname\fP или \fIimage\fP вне доступного программного адресного пространства.
+.TP 
+\fBEINVAL\fP
+Какой\-то из слотов \fIimage\fP заполнен неправильно, \fIimage\->name\fP не
+соответствует первоначальному имени модуля, какой\-то элемент
+\fIimage\->deps\fP не соответствует загружаемому модулю, или возникло
+какое\-то подобное расхождение.
+.TP 
+\fBENOENT\fP
+Модуль с таким именем не существует.
+.TP 
+\fBEPERM\fP
+Вызывающий не имеет прав (не имеет мандата \fBCAP_SYS_MODULE\fP).
+.SH "СООТВЕТСТВИЕ СТАНДАРТАМ"
+\fBinit_module\fP() есть только в Linux.
+.SH "СМОТРИТЕ ТАКЖЕ"
+\fBcreate_module\fP(2), \fBdelete_module\fP(2), \fBquery_module\fP(2)

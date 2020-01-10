@@ -2,7 +2,7 @@
 Summary: Russian man pages from the Linux Documentation Project
 Name: man-pages-ru
 Version: 3.41
-Release: 2.20120901%{?dist}
+Release: 3.20120901%{?dist}
 # Multiple man pages are distributed under different licenses.
 License: GPL+ and BSD and MIT and GFDL
 Group: Documentation
@@ -38,6 +38,9 @@ cp -pr ./man? $RPM_BUILD_ROOT%{_mandir}/ru
 %{_mandir}/ru/man*/*
 
 %changelog
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 3.41-3.20120901
+- Mass rebuild 2013-12-27
+
 * Thu Feb 14 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 3.41-2.20120901
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
